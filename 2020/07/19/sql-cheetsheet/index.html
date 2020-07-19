@@ -147,7 +147,7 @@
 </nav>
 
     <div class="banner intro-2" id="background" parallax=true
-         style="background: url('https://w.wallhaven.cc/full/83/wallhaven-83ywmo.jpg') no-repeat center center;
+         style="background: url('https://w.wallhaven.cc/full/p8/wallhaven-p8g3le.jpg') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
@@ -171,7 +171,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      221 字
+      222 字
     </span>
   
 
@@ -222,13 +222,12 @@
             <h1 style="display: none">SQL cheetsheet(MySQL)(to be to be continued)</h1>
             
             <div class="markdown-body" id="post-body">
-              <div class="markdown-body">
-<h1>SQL cheetsheet</h1>
+              <h1>SQL cheetsheet</h1>
 <h2 id="select">select</h2>
 <blockquote>
 <p>In MySQL, every statement must be terminated with a semicolon</p>
 </blockquote>
-<div class="hljs"><pre class="hljs  language-hljs SQL"><span class="hljs-keyword">select</span> * <span class="hljs-comment"><code class="language-hljs SQL"><span class="hljs-keyword">select</span> * <span class="hljs-comment">--(all cols)</span>
+<div class="hljs"><pre><code class="hljs SQL"><span class="hljs-keyword">select</span> * <span class="hljs-comment">--(all cols)</span>
 <span class="hljs-keyword">select</span> colname1,colname2
 <span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span> colname <span class="hljs-comment">-- remove duplicate</span>
 <span class="hljs-keyword">select</span> expression <span class="hljs-keyword">as</span> <span class="hljs-keyword">name</span> <span class="hljs-comment">--using expressions</span>
@@ -258,8 +257,8 @@
 <span class="hljs-comment">--TIME AND DATE</span>
 <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CURRENT_DATE</span>, (<span class="hljs-keyword">YEAR</span>(<span class="hljs-keyword">CURRENT_DATE</span>)­<span class="hljs-keyword">YEAR</span>(date_col)) <span class="hljs-keyword">AS</span> time_diff [<span class="hljs-keyword">FROM</span> <span class="hljs-keyword">table</span>];</code></pre></div>
 <h2 id="WHERE-Conditionals">WHERE Conditionals</h2>
-<div class="hljs"><pre class="hljs  language-hljs SQL"><code class="language-hljs SQL">field1 = value1
-field1 <> value1
+<div class="hljs"><pre><code class="hljs SQL">field1 = value1
+field1 &lt;&gt; value1
 field1 LIKE 'value _ %'
 field1 IS NULL
 field1 IS NOT NULL
@@ -269,7 +268,7 @@ condition1 AND condition2
 condition1 OR condition2
 BETWEEN ... AND ...
 fieldname REGEXP '^a'</code></pre></div>
-</div>
+
             </div>
             <hr>
             <div>
