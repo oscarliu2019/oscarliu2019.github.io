@@ -71,7 +71,7 @@
 
 
 <!--  代码渲染  -->
-<link rel="stylesheet" href="/css/prism_coy.css" />
+<link rel="stylesheet" href="/css/prism_atom-dark.css" />
 <link rel="stylesheet" href="/css/typo.css" />
 <!-- 文章页 -->
 <body class="is-loading">
@@ -147,7 +147,7 @@
                 <h1 id="usage-of-reference-in-template"><a href="#usage-of-reference-in-template" class="headerlink" title="usage of reference in template"></a>usage of reference in template</h1><p>In my opinion,universal reference,reference,move semantics and the perfect forward are the essence of modern cpp.After i chewing over Meyer’s book and C++ primer,i think i can figure out it.So i want to share my experience in this blog.</p>
 <h2 id="the-deduction-for-parameter-and-the-template"><a href="#the-deduction-for-parameter-and-the-template" class="headerlink" title="the deduction for parameter and the template"></a>the deduction for parameter and the template</h2><h3 id="ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference"><a href="#ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference" class="headerlink" title="ParamType is a Reference or Pointer, but not a Universal Reference."></a>ParamType is a Reference or Pointer, but not a Universal Reference.</h3><p>for example:</p>
 <pre class=" language-C++"><code class="language-C++">template<typename T>
-auto f(T&parameter){
+auto f(T& parameter){
     //some code
 }</code></pre>
 <p>For this situation you just need to discard the reference or pointer part and remaining type is the type of T,especially,when the parameter type is const the type for T is no need to be a const any more.Besides,when it comes to low level const for pointers,you can ignore it.</p>
