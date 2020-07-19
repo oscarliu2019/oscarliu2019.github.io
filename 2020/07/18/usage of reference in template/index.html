@@ -149,11 +149,10 @@
 <h2 id="the-deduction-for-parameter-and-the-template">the deduction for parameter and the template</h2>
 <h3 id="ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference">ParamType is a Reference or Pointer, but not a Universal Reference.</h3>
 <p>for example:</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < typename T >
-auto f(T& parameter){
-   //some code
-}
-</code></pre>
+<pre><code>template &lt; typename T &gt;
+auto f(T&amp; parameter){
+    &#x2F;&#x2F;some code
+}</code></pre>
 <p>For this situation you just need to discard the reference or pointer part and remaining type is the type of T,especially,when the parameter type is const the type for T is no need to be a const any more.Besides,when it comes to low level const for pointers,you can ignore it.</p>
 <blockquote>
 <p>We use the term top-level const to indicate that the pointer itself is a const. When a pointer can point to a const object, we refer to that const as a low-level const.</p>
