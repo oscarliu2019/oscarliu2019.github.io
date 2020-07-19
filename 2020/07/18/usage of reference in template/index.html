@@ -144,17 +144,21 @@
             </div>
             <!-- Post -->
             <div class="typo" style="padding: 3rem;">
-                <h1 id="usage-of-reference-in-template"><a href="#usage-of-reference-in-template" class="headerlink" title="usage of reference in template"></a>usage of reference in template</h1><p>In my opinion,universal reference,reference,move semantics and the perfect forward are the essence of modern cpp.After i chewing over Meyer’s book and C++ primer,i think i can figure out it.So i want to share my experience in this blog.</p>
-<h2 id="the-deduction-for-parameter-and-the-template"><a href="#the-deduction-for-parameter-and-the-template" class="headerlink" title="the deduction for parameter and the template"></a>the deduction for parameter and the template</h2><h3 id="ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference"><a href="#ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference" class="headerlink" title="ParamType is a Reference or Pointer, but not a Universal Reference."></a>ParamType is a Reference or Pointer, but not a Universal Reference.</h3><p>for example:</p>
-<pre class=" language-C++"><code class="language-C++">template < typename T >
+                <h1>usage of reference in template</h1>
+<p>In my opinion,universal reference,reference,move semantics and the perfect forward are the essence of modern cpp.After i chewing over Meyer’s book and C++ primer,i think i can figure out <a href="http://it.So" target="_blank" rel="noopener">it.So</a> i want to share my experience in this blog.</p>
+<h2 id="the-deduction-for-parameter-and-the-template">the deduction for parameter and the template</h2>
+<h3 id="ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference">ParamType is a Reference or Pointer, but not a Universal Reference.</h3>
+<p>for example:</p>
+<pre class=" language-language-C++"><code class="language-language-C++">template < typename T >
 auto f(T& parameter){
-    //some code
-}</code></pre>
+   //some code
+}
+</code></pre>
 <p>For this situation you just need to discard the reference or pointer part and remaining type is the type of T,especially,when the parameter type is const the type for T is no need to be a const any more.Besides,when it comes to low level const for pointers,you can ignore it.</p>
 <blockquote>
 <p>We use the term top-level const to indicate that the pointer itself is a const. When a pointer can point to a const object, we refer to that const as a low-level const.</p>
 </blockquote>
-<pre class=" language-C++"><code class="language-C++">auto f(const T* parameter)
+<pre class=" language-language-C++"><code class="language-language-C++">auto f(const T* parameter)
 auto f2(T*parameter)
 const int a=1;
 int b=2;
@@ -162,53 +166,66 @@ int*p1 = &b;
 auto *p2=&a;// when you use auto to deduce the type,the top level const is ignored,and the low level const(if have) is remained 
 f(p1) // T:int,param:const int*
 f(p2) // T int,param:const int*
-f(p2) // T const int,param:const int*</code></pre>
-<h3 id="parameter-is-an-universal-reference"><a href="#parameter-is-an-universal-reference" class="headerlink" title="parameter is an universal reference"></a>parameter is an universal reference</h3><blockquote>
-<p>a universal reference not only occurred in the template but also used in auto.Since the auto rules is similar to the template one<br>a universal reference must have direct type deduction and a format of <code>T&amp;&amp;</code> or <code>arges&amp;&amp;...arge</code></p>
+f(p2) // T const int,param:const int*
+</code></pre>
+<h3 id="parameter-is-an-universal-reference">parameter is an universal reference</h3>
+<blockquote>
+<p>a universal reference not only occurred in the template but also used in auto.Since the auto rules is similar to the template one<br>
+a universal reference must have direct type deduction and a format of <code>T&amp;&amp;</code> or <code>arges&amp;&amp;...arge</code></p>
 </blockquote>
-<p>for example <code>void f(T&amp;&amp;a)</code> is an universal reference.In this case,wo first need to determine the type of T,and apply the rule of reference collapsing to it.and if the passed in parameter is lvalue,than T is a lvalue reference,and the type of parameter is lvalue reference,and if the passed in parameter is rvalue,you can refer to case 1.It wll become to an normal rvalue reference.</p>
+<p>for example <code>void f(T&amp;&amp;a)</code> is an universal <a href="http://reference.In" target="_blank" rel="noopener">reference.In</a> this case,wo first need to determine the type of T,and apply the rule of reference collapsing to it.and if the passed in parameter is lvalue,than T is a lvalue reference,and the type of parameter is lvalue reference,and if the passed in parameter is rvalue,you can refer to case <a href="http://1.It" target="_blank" rel="noopener">1.It</a> wll become to an normal rvalue reference.</p>
 <blockquote>
 <p>the rule of reference collapsing is used when there is a reference to a reference.The rules suggests that only both two reference are rvalue reference,you will get a rvalue reference.Otherwise,you get a lvalue reference.</p>
 </blockquote>
-<h3 id="parameter-is-neither-a-pointer-nor-a-reference-pure-value"><a href="#parameter-is-neither-a-pointer-nor-a-reference-pure-value" class="headerlink" title="parameter is neither a pointer nor a reference(pure value)"></a>parameter is neither a pointer nor a reference(pure value)</h3><p><code>void f(T para)</code>There are two rules to deduce to type of T</p>
+<h3 id="parameter-is-neither-a-pointer-nor-a-reference-pure-value">parameter is neither a pointer nor a reference(pure value)</h3>
+<p><code>void f(T para)</code>There are two rules to deduce to type of T</p>
 <ul>
 <li>if there is a reference,ignore it.</li>
 <li>if there is a const or a violate,ignore it.(because when you call a function by value,it will copy a new variable,and the modification of the new variable will not alter the original one.Thus,you don’t need a const any more)</li>
 </ul>
-<h3 id="parameter-is-an-array"><a href="#parameter-is-an-array" class="headerlink" title="parameter is an array"></a>parameter is an array</h3><ul>
+<h3 id="parameter-is-an-array">parameter is an array</h3>
+<ul>
 <li>when the function is <code>auto f(T para)</code> the array will decay in to a pointer and such syntax is in line with those in C.Since,the C programmer thinks that the expenses of copying an array into the function is very high.</li>
 <li><strong>when the para type of the function is a reference,either lvalue or rvalue,para will become a reference to an array and the form of the type is similar to (element type)&amp;[element number] such as int&amp;[12]</strong></li>
 </ul>
 <p>a ingenious code which determine the size of the array at the compile time</p>
-<pre class=" language-C++"><code class="language-C++">template < typename T,std:size_t N >
+<pre class=" language-language-C++"><code class="language-language-C++">template < typename T,std:size_t N >
 constexpr std::size_t arraysize(T(&)[N])noexcept{
     return N
-}</code></pre>
-<h2 id="move-and-forward"><a href="#move-and-forward" class="headerlink" title="move and forward"></a>move and forward</h2><blockquote>
-<p>First,let me introduce the type traits(from meyer’s book item 9), it is an assortment of templates inside the header <type_traits>. There are dozens of type traits in that header, and not all of them perform type transformations, but the ones that do offer a predictable interface. Given a type T to which you’d like to apply a transformation, the resulting type is <code>std::transformation&lt;T&gt;::type</code>. For example:</p>
-</blockquote>
-<pre class=" language-C++"><code class="language-C++">std::remove_const < T >::type // yields T from const T
-std::remove_reference < T >::type // yields T from T& and T&&
-std::add_lvalue_reference < T >::type // yields T& from T </code></pre>
+}
+</code></pre>
+<h2 id="move-and-forward">move and forward</h2>
 <blockquote>
-<p>After C++14 you can use <code>remove_const_t&lt;T&gt;</code> to instead the above-mentioned<br>these two functions are merely used to cast type.std::move unconditionally casts its argument to an rvalue, while<br>std::forward performs this cast only if a particular condition is fulfilled. That’s it.</p>
+<p>First,let me introduce the type traits(from meyer’s book item 9), it is an assortment of templates inside the header &lt;type_traits&gt;. There are dozens of type traits in that header, and not all of them perform type transformations, but the ones that do offer a predictable interface. Given a type T to which you’d like to apply a transformation, the resulting type is <code>std::transformation&lt;T&gt;::type</code>. For example:</p>
 </blockquote>
-<h3 id="std-move"><a href="#std-move" class="headerlink" title="std::move"></a>std::move</h3><p>the source code of move</p>
-<pre class=" language-C++"><code class="language-C++">template < typename T > // in namespace std
+<pre class=" language-language-C++"><code class="language-language-C++">std::remove_const < T >::type // yields T from const T
+std::remove_reference < T >::type // yields T from T& and T&&
+std::add_lvalue_reference < T >::type // yields T& from T 
+</code></pre>
+<blockquote>
+<p>After C++14 you can use <code>remove_const_t&lt;T&gt;</code> to instead the above-mentioned<br>
+these two functions are merely used to cast type.std::move unconditionally casts its argument to an rvalue, while<br>
+std::forward performs this cast only if a particular condition is fulfilled. That’s it.</p>
+</blockquote>
+<h3 id="std-move">std::move</h3>
+<p>the source code of move</p>
+<pre class=" language-language-C++"><code class="language-language-C++">template < typename T > // in namespace std
 typename remove_reference<T>::type&&
 move(T&& param)
 {
 using ReturnType = // alias declaration;
 typename remove_reference<T>::type&&;
 return static_cast<ReturnType>(param);
-}</code></pre>
+}
+</code></pre>
 <p>you can use <code>remove_reference_t&lt;T&gt;</code> to replace <code>remove_reference&lt;T&gt;::type</code> and use auto to declare the return type after C++ 14 so the code after C++14 will be as followed</p>
-<pre class=" language-C++"><code class="language-C++">template < typename T > // C++14; still in
+<pre class=" language-language-C++"><code class="language-language-C++">template < typename T > // C++14; still in
 decltype(auto) move(T&& param) // namespace std
 {
 using ReturnType = remove_reference_t<T>&&;
 return static_cast<ReturnType>(param);
-}</code></pre>
+}
+</code></pre>
 <blockquote>
 <p>when you use auto to deduce the return type,it will adopt the rules of template deduction,which will ignore the reference so you should use decltype(auto) to instead</p>
 </blockquote>
@@ -220,11 +237,12 @@ return static_cast<ReturnType>(param);
 <blockquote>
 <p>because the <code>std::move</code> only return an rvalue and it doesn’t affect the constness of the variable,so after you use <code>std::move</code> to move a variable,a move constructor or a move operator = should be called to turn over the ownership of the object.But since it is a const,the type of parameter doesn’t fit in,so the compiler have to use the copy assignment since its type is const type&amp;,and ir accept the rvalue,even the const rvalue.</p>
 </blockquote>
-<h3 id="std-forward"><a href="#std-forward" class="headerlink" title="std:forward"></a>std:forward</h3><p><strong>std::forward is a conditional cast: it casts to an rvalue only if its argument was initialized with an rvalue.</strong></p>
+<h3 id="std-forward">std:forward</h3>
+<p><strong>std::forward is a conditional cast: it casts to an rvalue only if its argument was initialized with an rvalue.</strong></p>
 <blockquote>
 <p><code>std::forward</code> are always used for decorator to pass the true parameter,when you need a unconditional rvalue,use move.</p>
 </blockquote>
-<pre class=" language-C++"><code class="language-C++">template < class T >
+<pre class=" language-language-C++"><code class="language-language-C++">template < class T >
 constexpr T&& forward(std::remove_reference_t< T > & arg) noexcept{
     // forward an lvalue as an lvalue
     return (static_cast<T&&>(arg));
@@ -234,9 +252,11 @@ template < class T >
 constexpr T&& forward(std::remove_reference_t< T > && arg) noexcept{
     // forward an rvalue as an rvalue
     return (static_cast<T&&>(arg));
-}</code></pre>
-<h3 id="forward-and-universal-reference"><a href="#forward-and-universal-reference" class="headerlink" title="forward and universal reference"></a>forward and universal reference</h3><p>It will be dangerous to simply use move in the universal reference because when we want to retain the ownership of the original variable and we passed a non-const reference to it,then the original variable will be in an undefined state.for example:</p>
-<pre class=" language-C++"><code class="language-C++">    class test
+}
+</code></pre>
+<h3 id="forward-and-universal-reference">forward and universal reference</h3>
+<p>It will be dangerous to simply use move in the universal reference because when we want to retain the ownership of the original variable and we passed a non-const reference to it,then the original variable will be in an undefined state.for example:</p>
+<pre class=" language-language-C++"><code class="language-language-C++">    class test
     {
     public:
         template < typename T >
@@ -248,28 +268,39 @@ constexpr T&& forward(std::remove_reference_t< T > && arg) noexcept{
         string s = "123";
         test a(s);
         cout << s;
-}</code></pre>
-<p>in this example we can figure out that don’t use move in the rvalue reference,use forward.<br>Moreover,use the overloaded functions which take a lvalue reference and a rvalue reference as the parameter will lose efficiency because the call of constructor and destructor<br>an ingenious code which can only be implemented by universal reference</p>
-<pre class=" language-C++"><code class="language-C++">template < class...  Args >
+}
+</code></pre>
+<p>in this example we can figure out that don’t use move in the rvalue reference,use forward.<br>
+Moreover,use the overloaded functions which take a lvalue reference and a rvalue reference as the parameter will lose efficiency because the call of constructor and destructor<br>
+an ingenious code which can only be implemented by universal reference</p>
+<pre class=" language-language-C++"><code class="language-language-C++">template < class...  Args >
 void forward(Args&&... args) {
     f(std::forward<Args>(args)...);
-}</code></pre>
+}
+</code></pre>
 <p>you can’t overload the function which takes several universal references</p>
-<pre class=" language-C++"><code class="language-C++">template < class T, class... Args > // from C++11
+<pre class=" language-language-C++"><code class="language-language-C++">template < class T, class... Args > // from C++11
 shared_ptr< T > make_shared(Args&&... args); // Standard
 template < class T, class... Args> // from C++14
-unique_ptr< T > make_unique(Args&&... args); // Standard</code></pre>
-<p>so we comes to the conclusion:<br><strong>std::forward is applied to the universal reference parameters when they’re passed to other functions. Which is exactly what you should do</strong></p>
-<h2 id="copy-Elision-and-RVO"><a href="#copy-Elision-and-RVO" class="headerlink" title="copy Elision and RVO"></a>copy Elision and RVO</h2><p>in some cases,the compiler will automatically help us to optimize the return value,which means the return value and lhs will share the same address.the so if we called a move to the return value,it will call a move constructor which will affect the efficiency.so we will summarize some scenario that need the programmer to apply move to the return value.</p>
-<h3 id="URVO-（Unnamed-Return-Value-Optimization"><a href="#URVO-（Unnamed-Return-Value-Optimization" class="headerlink" title="URVO （Unnamed Return Value Optimization)"></a>URVO （Unnamed Return Value Optimization)</h3><p>it means all the return value has the same type and the type is identified with the declaration of the function<br>for example:</p>
-<pre class=" language-C++"><code class="language-C++">// they have the same 'user' type
+unique_ptr< T > make_unique(Args&&... args); // Standard
+</code></pre>
+<p>so we comes to the conclusion:<br>
+<strong>std::forward is applied to the universal reference parameters when they’re passed to other functions. Which is exactly what you should do</strong></p>
+<h2 id="copy-Elision-and-RVO">copy Elision and RVO</h2>
+<p>in some cases,the compiler will automatically help us to optimize the return value,which means the return value and lhs will share the same address.the so if we called a move to the return value,it will call a move constructor which will affect the <a href="http://efficiency.so" target="_blank" rel="noopener">efficiency.so</a> we will summarize some scenario that need the programmer to apply move to the return value.</p>
+<h3 id="URVO-（Unnamed-Return-Value-Optimization">URVO （Unnamed Return Value Optimization)</h3>
+<p>it means all the return value has the same type and the type is identified with the declaration of the function<br>
+for example:</p>
+<pre class=" language-language-C++"><code class="language-language-C++">// they have the same 'user' type
 User create_user(const std::string &username, const std::string &password) {
     if (find(username)) return get_user(username);
     else if (validate(username) == false) return create_invalid_user();
     else return User{username, password};
-}</code></pre>
-<h3 id="NRVO（Named-Return-Value-Optimization）"><a href="#NRVO（Named-Return-Value-Optimization）" class="headerlink" title="NRVO（Named Return Value Optimization）"></a>NRVO（Named Return Value Optimization）</h3><p>it means return the same local variable every time.</p>
-<pre class=" language-C++"><code class="language-C++">User create_user(const std::string &username, const std::string &password) {
+}
+</code></pre>
+<h3 id="NRVO（Named-Return-Value-Optimization）">NRVO（Named Return Value Optimization）</h3>
+<p>it means return the same local variable every time.</p>
+<pre class=" language-language-C++"><code class="language-language-C++">User create_user(const std::string &username, const std::string &password) {
     User user{username, password};
     if (find(username)) {
         user = get_user(username);
@@ -280,22 +311,26 @@ User create_user(const std::string &username, const std::string &password) {
     } else {
         return user;
     }
-}</code></pre>
-<h3 id="situations-you-need-to-apply-move"><a href="#situations-you-need-to-apply-move" class="headerlink" title="situations you need to apply move"></a>situations you need to apply move</h3><p>the most important one is that the return type is a reference rather than a value.Either universal reference or rvalue reference for example</p>
-<pre class=" language-C++"><code class="language-C++">template< typename T >
+}
+</code></pre>
+<h3 id="situations-you-need-to-apply-move">situations you need to apply move</h3>
+<p>the most important one is that the return type is a reference rather than a value.Either universal reference or rvalue reference for example</p>
+<pre class=" language-language-C++"><code class="language-language-C++">template< typename T >
 Fraction // by-value return
 reduceAndCopy(T&& frac) // universal reference param
 {
 frac.reduce();
 return std::forward< T >(frac); // move rvalue into return
-} // value, copy lvalue</code></pre>
+} // value, copy lvalue
+</code></pre>
 <p>or rvalue reference</p>
-<pre class=" language-C++"><code class="language-C++">Matrix // by-value return
+<pre class=" language-language-C++"><code class="language-language-C++">Matrix // by-value return
 operator+(Matrix&& lhs, const Matrix& rhs)
 {
 lhs += rhs;
 return std::move(lhs); // move lhs into
-} // return value</code></pre>
+} // return value
+</code></pre>
 <p>So all in all Never apply <code>std::move</code> or <code>std::forward</code> to local objects if they would otherwise be eligible for the return value optimization.But you should use std::move to the reference type</p>
 
             </div>

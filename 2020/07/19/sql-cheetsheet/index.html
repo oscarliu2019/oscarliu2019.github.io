@@ -144,10 +144,12 @@
             </div>
             <!-- Post -->
             <div class="typo" style="padding: 3rem;">
-                <h1 id="SQL-cheetsheet"><a href="#SQL-cheetsheet" class="headerlink" title="SQL cheetsheet"></a>SQL cheetsheet</h1><h2 id="select"><a href="#select" class="headerlink" title="select"></a>select</h2><blockquote>
+                <h1>SQL cheetsheet</h1>
+<h2 id="select">select</h2>
+<blockquote>
 <p>In MySQL, every statement must be terminated with a semicolon</p>
 </blockquote>
-<pre class=" language-SQL"><code class="language-SQL"> select * --(all cols)
+<pre class=" language-language-SQL"><code class="language-language-SQL"> select * --(all cols)
  select colname1,colname2
  select distinct colname -- remove duplicate
  select expression as name --using expressions
@@ -167,16 +169,18 @@
  SELECT ... FROM t1 LEFT JOIN t2 ON t1.id1 = t2.id2 WHERE condition
  SELECT ... FROM t1 JOIN (t2 JOIN t3 ON ...) ON ...
  SELECT ... FROM t1 JOIN t2 USING(id) WHERE condition
-
+ 
  -- REGEXP（RLIKE|REGEXP）
  SELECT * FROM table WHERE column REGEXP '^(A|B|C)'
  SELECT * FROM table WHERE rec RLIKE "^b$";  
  -- RETURN THE INFORMATION
  DESCRIBE table [column]
-
+ 
  --TIME AND DATE
- SELECT CURRENT_DATE, (YEAR(CURRENT_DATE)­YEAR(date_col)) AS time_diff [FROM table]; </code></pre>
-<h2 id="WHERE-Conditionals"><a href="#WHERE-Conditionals" class="headerlink" title="WHERE Conditionals"></a>WHERE Conditionals</h2><pre class=" language-SQL"><code class="language-SQL"> field1 = value1
+ SELECT CURRENT_DATE, (YEAR(CURRENT_DATE)­YEAR(date_col)) AS time_diff [FROM table]; 
+</code></pre>
+<h2 id="WHERE-Conditionals">WHERE Conditionals</h2>
+<pre class=" language-language-SQL"><code class="language-language-SQL"> field1 = value1
  field1 <> value1
  field1 LIKE 'value _ %'
  field1 IS NULL
@@ -186,7 +190,8 @@
  condition1 AND condition2
  condition1 OR condition2
  BETWEEN ... AND ...
- fieldname REGEXP '^a'</code></pre>
+ fieldname REGEXP '^a'
+</code></pre>
 
             </div>
 
