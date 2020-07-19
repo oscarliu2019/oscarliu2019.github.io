@@ -149,25 +149,12 @@
 <h2 id="the-deduction-for-parameter-and-the-template">the deduction for parameter and the template</h2>
 <h3 id="ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference">ParamType is a Reference or Pointer, but not a Universal Reference.</h3>
 <p>for example:</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < typename T >
-auto f(T& parameter){
-   //some code
-}
-</code></pre>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt; <span class="keyword">typename</span> T &gt;</span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">f</span><span class="params">(T&amp; parameter)</span></span>&#123;</span><br><span class="line">    <span class="comment">//some code</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>For this situation you just need to discard the reference or pointer part and remaining type is the type of T,especially,when the parameter type is const the type for T is no need to be a const any more.Besides,when it comes to low level const for pointers,you can ignore it.</p>
 <blockquote>
 <p>We use the term top-level const to indicate that the pointer itself is a const. When a pointer can point to a const object, we refer to that const as a low-level const.</p>
 </blockquote>
-<pre class=" language-language-C++"><code class="language-language-C++">auto f(const T* parameter)
-auto f2(T*parameter)
-const int a=1;
-int b=2;
-int*p1 = &b;
-auto *p2=&a;// when you use auto to deduce the type,the top level const is ignored,and the low level const(if have) is remained 
-f(p1) // T:int,param:const int*
-f(p2) // T int,param:const int*
-f(p2) // T const int,param:const int*
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">f</span><span class="params">(<span class="keyword">const</span> T* parameter)</span></span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">f2</span><span class="params">(T*parameter)</span></span></span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">int</span> a</span>=<span class="number">1</span>;</span><br><span class="line"><span class="keyword">int</span> b=<span class="number">2</span>;</span><br><span class="line"><span class="keyword">int</span>*p1 = &amp;b;</span><br><span class="line"><span class="keyword">auto</span> *p2=&amp;a;<span class="comment">// when you use auto to deduce the type,the top level const is ignored,and the low level const(if have) is remained </span></span><br><span class="line">f(p1) <span class="comment">// T:int,param:const int*</span></span><br><span class="line">f(p2) <span class="comment">// T int,param:const int*</span></span><br><span class="line">f(p2) <span class="comment">// T const int,param:const int*</span></span><br></pre></td></tr></table></figure>
 <h3 id="parameter-is-an-universal-reference">parameter is an universal reference</h3>
 <blockquote>
 <p>a universal reference not only occurred in the template but also used in auto.Since the auto rules is similar to the template one<br>
@@ -189,19 +176,12 @@ a universal reference must have direct type deduction and a format of <code>T&am
 <li><strong>when the para type of the function is a reference,either lvalue or rvalue,para will become a reference to an array and the form of the type is similar to (element type)&amp;[element number] such as int&amp;[12]</strong></li>
 </ul>
 <p>a ingenious code which determine the size of the array at the compile time</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < typename T,std:size_t N >
-constexpr std::size_t arraysize(T(&)[N])noexcept{
-    return N
-}
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt; <span class="keyword">typename</span> T,<span class="built_in">std</span>:<span class="keyword">size_t</span> N &gt;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="built_in">std</span>::<span class="keyword">size_t</span> <span class="title">arraysize</span><span class="params">(T(&amp;)[N])</span><span class="keyword">noexcept</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> N</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="move-and-forward">move and forward</h2>
 <blockquote>
 <p>First,let me introduce the type traits(from meyer’s book item 9), it is an assortment of templates inside the header &lt;type_traits&gt;. There are dozens of type traits in that header, and not all of them perform type transformations, but the ones that do offer a predictable interface. Given a type T to which you’d like to apply a transformation, the resulting type is <code>std::transformation&lt;T&gt;::type</code>. For example:</p>
 </blockquote>
-<pre class=" language-language-C++"><code class="language-language-C++">std::remove_const < T >::type // yields T from const T
-std::remove_reference < T >::type // yields T from T& and T&&
-std::add_lvalue_reference < T >::type // yields T& from T 
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::remove_const &lt; T &gt;::type <span class="comment">// yields T from const T</span></span><br><span class="line"><span class="built_in">std</span>::remove_reference &lt; T &gt;::type <span class="comment">// yields T from T&amp; and T&amp;&amp;</span></span><br><span class="line"><span class="built_in">std</span>::add_lvalue_reference &lt; T &gt;::type <span class="comment">// yields T&amp; from T</span></span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>After C++14 you can use <code>remove_const_t&lt;T&gt;</code> to instead the above-mentioned<br>
 these two functions are merely used to cast type.std::move unconditionally casts its argument to an rvalue, while<br>
@@ -209,23 +189,9 @@ std::forward performs this cast only if a particular condition is fulfilled. Tha
 </blockquote>
 <h3 id="std-move">std::move</h3>
 <p>the source code of move</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < typename T > // in namespace std
-typename remove_reference<T>::type&&
-move(T&& param)
-{
-using ReturnType = // alias declaration;
-typename remove_reference<T>::type&&;
-return static_cast<ReturnType>(param);
-}
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt; <span class="keyword">typename</span> T &gt; <span class="comment">// in namespace std</span></span><br><span class="line"><span class="keyword">typename</span> remove_reference&lt;T&gt;::type&amp;&amp;</span><br><span class="line"><span class="built_in">move</span>(T&amp;&amp; param)</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">using</span> ReturnType = <span class="comment">// alias declaration;</span></span><br><span class="line"><span class="keyword">typename</span> remove_reference&lt;T&gt;::type&amp;&amp;;</span><br><span class="line"><span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;ReturnType&gt;(param);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>you can use <code>remove_reference_t&lt;T&gt;</code> to replace <code>remove_reference&lt;T&gt;::type</code> and use auto to declare the return type after C++ 14 so the code after C++14 will be as followed</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < typename T > // C++14; still in
-decltype(auto) move(T&& param) // namespace std
-{
-using ReturnType = remove_reference_t<T>&&;
-return static_cast<ReturnType>(param);
-}
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt; <span class="keyword">typename</span> T &gt; <span class="comment">// C++14; still in</span></span><br><span class="line"><span class="function"><span class="keyword">decltype</span>(<span class="keyword">auto</span>) <span class="title">move</span><span class="params">(T&amp;&amp; param)</span> <span class="comment">// namespace std</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="keyword">using</span> ReturnType = <span class="keyword">remove_reference_t</span>&lt;T&gt;&amp;&amp;;</span><br><span class="line"><span class="keyword">return</span> <span class="keyword">static_cast</span>&lt;ReturnType&gt;(param);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>when you use auto to deduce the return type,it will adopt the rules of template deduction,which will ignore the reference so you should use decltype(auto) to instead</p>
 </blockquote>
@@ -242,48 +208,16 @@ return static_cast<ReturnType>(param);
 <blockquote>
 <p><code>std::forward</code> are always used for decorator to pass the true parameter,when you need a unconditional rvalue,use move.</p>
 </blockquote>
-<pre class=" language-language-C++"><code class="language-language-C++">template < class T >
-constexpr T&& forward(std::remove_reference_t< T > & arg) noexcept{
-    // forward an lvalue as an lvalue
-    return (static_cast<T&&>(arg));
-}
-
-template < class T >
-constexpr T&& forward(std::remove_reference_t< T > && arg) noexcept{
-    // forward an rvalue as an rvalue
-    return (static_cast<T&&>(arg));
-}
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt; <span class="class"><span class="keyword">class</span> <span class="title">T</span> &gt;</span></span><br><span class="line"><span class="class"><span class="title">constexpr</span> <span class="title">T</span>&amp;&amp; <span class="title">forward</span>(<span class="title">std</span>:</span>:<span class="keyword">remove_reference_t</span>&lt; T &gt; &amp; arg) <span class="keyword">noexcept</span>&#123;</span><br><span class="line">    <span class="comment">// forward an lvalue as an lvalue</span></span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">static_cast</span>&lt;T&amp;&amp;&gt;(arg));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt; <span class="class"><span class="keyword">class</span> <span class="title">T</span> &gt;</span></span><br><span class="line"><span class="class"><span class="title">constexpr</span> <span class="title">T</span>&amp;&amp; <span class="title">forward</span>(<span class="title">std</span>:</span>:<span class="keyword">remove_reference_t</span>&lt; T &gt; &amp;&amp; arg) <span class="keyword">noexcept</span>&#123;</span><br><span class="line">    <span class="comment">// forward an rvalue as an rvalue</span></span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">static_cast</span>&lt;T&amp;&amp;&gt;(arg));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="forward-and-universal-reference">forward and universal reference</h3>
 <p>It will be dangerous to simply use move in the universal reference because when we want to retain the ownership of the original variable and we passed a non-const reference to it,then the original variable will be in an undefined state.for example:</p>
-<pre class=" language-language-C++"><code class="language-language-C++">    class test
-    {
-    public:
-        template < typename T >
-        test(T&&a):name(move(a)){}
-    private:
-        string name;
-    };
-    int main() {
-        string s = "123";
-        test a(s);
-        cout << s;
-}
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">test</span></span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="keyword">template</span> &lt; <span class="keyword">typename</span> T &gt;</span><br><span class="line">        test(T&amp;&amp;a):name(<span class="built_in">move</span>(a))&#123;&#125;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        <span class="built_in">string</span> name;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="built_in">string</span> s = <span class="string">"123"</span>;</span><br><span class="line">        <span class="function">test <span class="title">a</span><span class="params">(s)</span></span>;</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; s;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>in this example we can figure out that don’t use move in the rvalue reference,use forward.<br>
 Moreover,use the overloaded functions which take a lvalue reference and a rvalue reference as the parameter will lose efficiency because the call of constructor and destructor<br>
 an ingenious code which can only be implemented by universal reference</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < class...  Args >
-void forward(Args&&... args) {
-    f(std::forward<Args>(args)...);
-}
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt; <span class="class"><span class="keyword">class</span>...  <span class="title">Args</span> &gt;</span></span><br><span class="line"><span class="class"><span class="title">void</span> <span class="title">forward</span>(<span class="title">Args</span>&amp;&amp;... <span class="title">args</span>) &#123;</span></span><br><span class="line">    f(<span class="built_in">std</span>::forward&lt;Args&gt;(args)...);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>you can’t overload the function which takes several universal references</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < class T, class... Args > // from C++11
-shared_ptr< T > make_shared(Args&&... args); // Standard
-template < class T, class... Args> // from C++14
-unique_ptr< T > make_unique(Args&&... args); // Standard
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt; <span class="class"><span class="keyword">class</span> <span class="title">T</span>, <span class="title">class</span>... <span class="title">Args</span> &gt; // <span class="title">from</span> <span class="title">C</span>++11</span></span><br><span class="line"><span class="class"><span class="title">shared_ptr</span>&lt; T &gt; <span class="title">make_shared</span>(<span class="title">Args</span>&amp;&amp;... <span class="title">args</span>);</span> <span class="comment">// Standard</span></span><br><span class="line"><span class="keyword">template</span> &lt; <span class="class"><span class="keyword">class</span> <span class="title">T</span>, <span class="title">class</span>... <span class="title">Args</span>&gt; // <span class="title">from</span> <span class="title">C</span>++14</span></span><br><span class="line"><span class="class"><span class="title">unique_ptr</span>&lt; T &gt; <span class="title">make_unique</span>(<span class="title">Args</span>&amp;&amp;... <span class="title">args</span>);</span> <span class="comment">// Standard</span></span><br></pre></td></tr></table></figure>
 <p>so we comes to the conclusion:<br>
 <strong>std::forward is applied to the universal reference parameters when they’re passed to other functions. Which is exactly what you should do</strong></p>
 <h2 id="copy-Elision-and-RVO">copy Elision and RVO</h2>
@@ -291,46 +225,15 @@ unique_ptr< T > make_unique(Args&&... args); // Standard
 <h3 id="URVO-（Unnamed-Return-Value-Optimization">URVO （Unnamed Return Value Optimization)</h3>
 <p>it means all the return value has the same type and the type is identified with the declaration of the function<br>
 for example:</p>
-<pre class=" language-language-C++"><code class="language-language-C++">// they have the same 'user' type
-User create_user(const std::string &username, const std::string &password) {
-    if (find(username)) return get_user(username);
-    else if (validate(username) == false) return create_invalid_user();
-    else return User{username, password};
-}
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// they have the same 'user' type</span></span><br><span class="line"><span class="function">User <span class="title">create_user</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> &amp;username, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> &amp;password)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">find</span>(username)) <span class="keyword">return</span> get_user(username);</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (validate(username) == <span class="literal">false</span>) <span class="keyword">return</span> create_invalid_user();</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> User&#123;username, password&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="NRVO（Named-Return-Value-Optimization）">NRVO（Named Return Value Optimization）</h3>
 <p>it means return the same local variable every time.</p>
-<pre class=" language-language-C++"><code class="language-language-C++">User create_user(const std::string &username, const std::string &password) {
-    User user{username, password};
-    if (find(username)) {
-        user = get_user(username);
-        return user;
-    } else if (user.is_valid() == false) {
-        user = create_invalid_user();
-        return user;
-    } else {
-        return user;
-    }
-}
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">User <span class="title">create_user</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> &amp;username, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> &amp;password)</span> </span>&#123;</span><br><span class="line">    User user&#123;username, password&#125;;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">find</span>(username)) &#123;</span><br><span class="line">        user = get_user(username);</span><br><span class="line">        <span class="keyword">return</span> user;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (user.is_valid() == <span class="literal">false</span>) &#123;</span><br><span class="line">        user = create_invalid_user();</span><br><span class="line">        <span class="keyword">return</span> user;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> user;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="situations-you-need-to-apply-move">situations you need to apply move</h3>
 <p>the most important one is that the return type is a reference rather than a value.Either universal reference or rvalue reference for example</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template< typename T >
-Fraction // by-value return
-reduceAndCopy(T&& frac) // universal reference param
-{
-frac.reduce();
-return std::forward< T >(frac); // move rvalue into return
-} // value, copy lvalue
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt; <span class="keyword">typename</span> T &gt;</span><br><span class="line">Fraction <span class="comment">// by-value return</span></span><br><span class="line">reduceAndCopy(T&amp;&amp; frac) <span class="comment">// universal reference param</span></span><br><span class="line">&#123;</span><br><span class="line">frac.reduce();</span><br><span class="line"><span class="keyword">return</span> <span class="built_in">std</span>::forward&lt; T &gt;(frac); <span class="comment">// move rvalue into return</span></span><br><span class="line">&#125; <span class="comment">// value, copy lvalue</span></span><br></pre></td></tr></table></figure>
 <p>or rvalue reference</p>
-<pre class=" language-language-C++"><code class="language-language-C++">Matrix // by-value return
-operator+(Matrix&& lhs, const Matrix& rhs)
-{
-lhs += rhs;
-return std::move(lhs); // move lhs into
-} // return value
-</code></pre>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Matrix <span class="comment">// by-value return</span></span><br><span class="line"><span class="keyword">operator</span>+(Matrix&amp;&amp; lhs, <span class="keyword">const</span> Matrix&amp; rhs)</span><br><span class="line">&#123;</span><br><span class="line">lhs += rhs;</span><br><span class="line"><span class="keyword">return</span> <span class="built_in">std</span>::<span class="built_in">move</span>(lhs); <span class="comment">// move lhs into</span></span><br><span class="line">&#125; <span class="comment">// return value</span></span><br></pre></td></tr></table></figure>
 <p>So all in all Never apply <code>std::move</code> or <code>std::forward</code> to local objects if they would otherwise be eligible for the return value optimization.But you should use std::move to the reference type</p>
 
             </div>
