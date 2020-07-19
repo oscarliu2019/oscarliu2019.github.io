@@ -1,173 +1,250 @@
-<!DOCTYPE HTML>
-<html>
+
+
+<!DOCTYPE html>
+<html lang="zh-Hans" data-default-color-scheme=&#34;auto&#34;>
+
+
 
 <head>
-	<link rel="bookmark"  type="image/x-icon"  href="/img/logo_miccall.png"/>
-	<link rel="shortcut icon" href="/img/logo_miccall.png">
-	
-			    <title>
-    刘冕涵的个人博客
-    </title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" href="/css/mic_main.css" />
-    <link rel="stylesheet" href="/css/dropdownMenu.css" />
-    <meta name="keywords" content="刘冕涵,oscarliu,oscar,小刘" />
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/../img/logo_miccall.png">
+  <link rel="icon" type="image/png" href="/../img/logo_miccall.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="">
+  <meta name="author" content="Oscar">
+  <meta name="keywords" content="刘冕涵,小刘,oscar,blog,博客">
+  <title>usage of reference in template(reading notes of Meyer&#39;book) - 刘冕涵的个人博客</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
     
-    	<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-	 
-    <noscript>
-        <link rel="stylesheet" href="/css/noscript.css" />
-    </noscript>
-    <style type="text/css">
-        body:before {
-          content: ' ';
-          position: fixed;
-          top: 0;
-          background: url('/img/bg.jpg') center 0 no-repeat;
-          right: 0;
-          bottom: 0;
-          left: 0;
-          background-size: cover; 
-        }
-    </style>
-
-			    
+    <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/monokai-sublime.min.css" />
   
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-        }
-      });
-    </script>
 
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Queue(function() {
-        var all = MathJax.Hub.getAllJax(), i;
-        for (i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-        }
-      });
-    </script>
-    <script async type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
   
 
 
-    <script src="/js/jquery.min.js"></script>
-    <script src="/js/jquery.scrollex.min.js"></script>
-    <script src="/js/jquery.scrolly.min.js"></script>
-    <script src="/js/skel.min.js"></script>
-    <script src="/js/util.js"></script>
-    <script src="/js/main.js"></script>
-	
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_6peoq002giu.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_pjno9b9zyxs.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
 <meta name="generator" content="Hexo 4.2.1"></head>
-    
-		
-<!-- Layouts -->
 
 
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Oscar's blog</strong>&nbsp;</a>
 
-<!--  代码渲染  -->
-<link rel="stylesheet" href="/css/prism_twilight.css" />
-<link rel="stylesheet" href="/css/typo.css" />
-<!-- 文章页 -->
-<body class="is-loading">
-    <!-- Wrapper 外包 s-->
-    <div id="wrapper" class="fade-in">
-        <!-- Intro 头部显示 s -->
-        <!-- Intro 头部显示 e -->
-        <!-- Header 头部logo start -->
-        <header id="header">
-    <a href="/" class="logo">Oscarliu</a>
-</header>
-        <!-- Nav 导航条 start -->
-        <nav id="nav" class="special" >
-            <ul class="menu links" >
-			<!-- Homepage  主页  --> 
-			<li >
-	            <a href="/" rel="nofollow">主页</a>
-	        </li>
-			<!-- categories_name  分类   --> 
-	        
-	        <li class="active">
-	            <a href="#s1">分类</a>
-	                    <ul class="submenu">
-	                        <li>
-	                        <a class="category-link" href="/categories/C/">C++</a></li><li><a class="category-link" href="/categories/SQL/">SQL</a>
-	                    </ul>
-	        </li>
-	        
-	        <!-- archives  归档   --> 
-	        
-	        
-		        <!-- Pages 自定义   -->
-		        
-		        <li>
-		            <a href="/about/" title="about me">
-		                about me
-		            </a>
-		        </li>
-		        
-		        <li>
-		            <a href="/gallery/" title="gallery">
-		                gallery
-		            </a>
-		        </li>
-		        
-		        <li>
-		            <a href="/tag/" title="tag">
-		                tag
-		            </a>
-		        </li>
-		        
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
 
-
-            </ul>
-            <!-- icons 图标   -->
-			<ul class="icons">
-                    
-                    <li>
-                        <a title="github" href="https://github.com/oscarliu2019" target="_blank" rel="noopener">
-                            <i class="icon fa fa-github"></i>
-                        </a>
-                    </li>
-                    
-			</ul>
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
 </nav>
 
-        <div id="main" >
-            <div class ="post_page_title_img" style="height: 25rem;background-image: url(https://w.wallhaven.cc/full/83/wallhaven-83r1z2.png);background-position: center; background-repeat:no-repeat; background-size:cover;-moz-background-size:cover;overflow:hidden;" >
-                <a href="#" style="padding: 4rem 4rem 2rem 4rem ;"><h2 >usage of reference in template(reading notes of Meyer&#39;book)</h2></a>
-            </div>
-            <!-- Post -->
-            <div class="typo" style="padding: 3rem;">
-                <h1>usage of reference in template</h1>
+    <div class="banner intro-2" id="background" parallax=true
+         style="background: url('https://w.wallhaven.cc/full/83/wallhaven-83ywmo.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="container page-header text-center fade-in-up">
+            <span class="h2" id="subtitle">
+              
+            </span>
+
+            
+              
+  <div class="mt-3 post-meta">
+    <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+    <time datetime="2020-07-18 04:33" pubdate>
+      July 18, 2020 am
+    </time>
+  </div>
+
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.6k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      32
+       分钟
+    </span>
+  
+
+  
+  
+    
+      <!-- 不蒜子统计文章PV -->
+      <span id="busuanzi_container_page_pv" style="display: none">
+        <i class="iconfont icon-eye" aria-hidden="true"></i>
+        <span id="busuanzi_value_page_pv"></span> 次
+      </span>
+    
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto" id="post">
+            <!-- SEO header -->
+            <h1 style="display: none">usage of reference in template(reading notes of Meyer&#39;book)</h1>
+            
+            <div class="markdown-body" id="post-body">
+              <div class="markdown-body">
+<h1>usage of reference in template</h1>
 <p>In my opinion,universal reference,reference,move semantics and the perfect forward are the essence of modern cpp.After i chewing over Meyer’s book and C++ primer,i think i can figure out <a href="http://it.So" target="_blank" rel="noopener">it.So</a> i want to share my experience in this blog.</p>
 <h2 id="the-deduction-for-parameter-and-the-template">the deduction for parameter and the template</h2>
 <h3 id="ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference">ParamType is a Reference or Pointer, but not a Universal Reference.</h3>
 <p>for example:</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < typename T >
-auto f(T& parameter){
-   //some code
-}
-</code></pre>
+ <div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-keyword"><code class="language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-keyword">typename</span> T >
+<span class="hljs-function"><span class="hljs-keyword">auto</span> <span class="hljs-title">f</span><span class="hljs-params">(T& parameter)</span></span>&#123;
+    <span class="hljs-comment">//some code</span>
+&#125;</code></pre></div>
 <p>For this situation you just need to discard the reference or pointer part and remaining type is the type of T,especially,when the parameter type is const the type for T is no need to be a const any more.Besides,when it comes to low level const for pointers,you can ignore it.</p>
 <blockquote>
 <p>We use the term top-level const to indicate that the pointer itself is a const. When a pointer can point to a const object, we refer to that const as a low-level const.</p>
 </blockquote>
-<pre class=" language-language-C++"><code class="language-language-C++">auto f(const T* parameter)
-auto f2(T*parameter)
-const int a=1;
-int b=2;
-int*p1 = &b;
-auto *p2=&a;// when you use auto to deduce the type,the top level const is ignored,and the low level const(if have) is remained 
-f(p1) // T:int,param:const int*
-f(p2) // T int,param:const int*
-f(p2) // T const int,param:const int*
-</code></pre>
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-function"><span class="hljs-keyword">auto</span> <span class="hljs-title">f</span><span class="hljs-params">(<span class="hljs-keyword"><code class="language-hljs C++"><span class="hljs-function"><span class="hljs-keyword">auto</span> <span class="hljs-title">f</span><span class="hljs-params">(<span class="hljs-keyword">const</span> T* parameter)</span></span>
+<span class="hljs-function"><span class="hljs-keyword">auto</span> <span class="hljs-title">f2</span><span class="hljs-params">(T*parameter)</span></span>
+<span class="hljs-function"><span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> a</span>=<span class="hljs-number">1</span>;
+<span class="hljs-keyword">int</span> b=<span class="hljs-number">2</span>;
+<span class="hljs-keyword">int</span>*p1 = &b;
+<span class="hljs-keyword">auto</span> *p2=&a;<span class="hljs-comment">// when you use auto to deduce the type,the top level const is ignored,and the low level const(if have) is remained </span>
+f(p1) <span class="hljs-comment">// T:int,param:const int*</span>
+f(p2) <span class="hljs-comment">// T int,param:const int*</span>
+f(p2) <span class="hljs-comment">// T const int,param:const int*</span></code></pre></div>
 <h3 id="parameter-is-an-universal-reference">parameter is an universal reference</h3>
 <blockquote>
 <p>a universal reference not only occurred in the template but also used in auto.Since the auto rules is similar to the template one<br>
@@ -189,19 +266,17 @@ a universal reference must have direct type deduction and a format of <code>T&am
 <li><strong>when the para type of the function is a reference,either lvalue or rvalue,para will become a reference to an array and the form of the type is similar to (element type)&amp;[element number] such as int&amp;[12]</strong></li>
 </ul>
 <p>a ingenious code which determine the size of the array at the compile time</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < typename T,std:size_t N >
-constexpr std::size_t arraysize(T(&)[N])noexcept{
-    return N
-}
-</code></pre>
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-keyword">typename</span> T,<span class="hljs-built_in">std</span>:<span class="hljs-keyword"><code class="language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-keyword">typename</span> T,<span class="hljs-built_in">std</span>:<span class="hljs-keyword">size_t</span> N >
+<span class="hljs-function"><span class="hljs-keyword">constexpr</span> <span class="hljs-built_in">std</span>::<span class="hljs-keyword">size_t</span> <span class="hljs-title">arraysize</span><span class="hljs-params">(T(&)[N])</span><span class="hljs-keyword">noexcept</span></span>&#123;
+    <span class="hljs-keyword">return</span> N
+&#125;</code></pre></div>
 <h2 id="move-and-forward">move and forward</h2>
 <blockquote>
 <p>First,let me introduce the type traits(from meyer’s book item 9), it is an assortment of templates inside the header &lt;type_traits&gt;. There are dozens of type traits in that header, and not all of them perform type transformations, but the ones that do offer a predictable interface. Given a type T to which you’d like to apply a transformation, the resulting type is <code>std::transformation&lt;T&gt;::type</code>. For example:</p>
 </blockquote>
-<pre class=" language-language-C++"><code class="language-language-C++">std::remove_const < T >::type // yields T from const T
-std::remove_reference < T >::type // yields T from T& and T&&
-std::add_lvalue_reference < T >::type // yields T& from T 
-</code></pre>
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-built_in">std</span>::remove_const &lt; T &gt;::type <span class="hljs-comment"><code class="language-hljs C++"><span class="hljs-built_in">std</span>::remove_const &lt; T &gt;::type <span class="hljs-comment">// yields T from const T</span>
+<span class="hljs-built_in">std</span>::remove_reference < T >::type <span class="hljs-comment">// yields T from T& and T&&</span>
+<span class="hljs-built_in">std</span>::add_lvalue_reference < T >::type <span class="hljs-comment">// yields T& from T</span></code></pre></div>
 <blockquote>
 <p>After C++14 you can use <code>remove_const_t&lt;T&gt;</code> to instead the above-mentioned<br>
 these two functions are merely used to cast type.std::move unconditionally casts its argument to an rvalue, while<br>
@@ -209,23 +284,21 @@ std::forward performs this cast only if a particular condition is fulfilled. Tha
 </blockquote>
 <h3 id="std-move">std::move</h3>
 <p>the source code of move</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < typename T > // in namespace std
-typename remove_reference<T>::type&&
-move(T&& param)
-{
-using ReturnType = // alias declaration;
-typename remove_reference<T>::type&&;
-return static_cast<ReturnType>(param);
-}
-</code></pre>
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-keyword">typename</span> T &gt; <span class="hljs-comment"><code class="language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-keyword">typename</span> T &gt; <span class="hljs-comment">// in namespace std</span>
+<span class="hljs-keyword">typename</span> remove_reference<T>::type&&
+<span class="hljs-built_in">move</span>(T&& param)
+&#123;
+<span class="hljs-keyword">using</span> ReturnType = <span class="hljs-comment">// alias declaration;</span>
+<span class="hljs-keyword">typename</span> remove_reference<T>::type&&;
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static_cast</span><ReturnType>(param);
+&#125;</code></pre></div>
 <p>you can use <code>remove_reference_t&lt;T&gt;</code> to replace <code>remove_reference&lt;T&gt;::type</code> and use auto to declare the return type after C++ 14 so the code after C++14 will be as followed</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < typename T > // C++14; still in
-decltype(auto) move(T&& param) // namespace std
-{
-using ReturnType = remove_reference_t<T>&&;
-return static_cast<ReturnType>(param);
-}
-</code></pre>
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-keyword">typename</span> T &gt; <span class="hljs-comment"><code class="language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-keyword">typename</span> T &gt; <span class="hljs-comment">// C++14; still in</span>
+<span class="hljs-function"><span class="hljs-keyword">decltype</span>(<span class="hljs-keyword">auto</span>) <span class="hljs-title">move</span><span class="hljs-params">(T&& param)</span> <span class="hljs-comment">// namespace std</span></span>
+<span class="hljs-function"></span>&#123;
+<span class="hljs-keyword">using</span> ReturnType = <span class="hljs-keyword">remove_reference_t</span><T>&&;
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">static_cast</span><ReturnType>(param);
+&#125;</code></pre></div>
 <blockquote>
 <p>when you use auto to deduce the return type,it will adopt the rules of template deduction,which will ignore the reference so you should use decltype(auto) to instead</p>
 </blockquote>
@@ -242,48 +315,44 @@ return static_cast<ReturnType>(param);
 <blockquote>
 <p><code>std::forward</code> are always used for decorator to pass the true parameter,when you need a unconditional rvalue,use move.</p>
 </blockquote>
-<pre class=" language-language-C++"><code class="language-language-C++">template < class T >
-constexpr T&& forward(std::remove_reference_t< T > & arg) noexcept{
-    // forward an lvalue as an lvalue
-    return (static_cast<T&&>(arg));
-}
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title"><code class="language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span> ></span>
+<span class="hljs-class"><span class="hljs-title">constexpr</span> <span class="hljs-title">T</span>&& <span class="hljs-title">forward</span>(<span class="hljs-title">std</span>:</span>:<span class="hljs-keyword">remove_reference_t</span>< T > & arg) <span class="hljs-keyword">noexcept</span>&#123;
+    <span class="hljs-comment">// forward an lvalue as an lvalue</span>
+    <span class="hljs-keyword">return</span> (<span class="hljs-keyword">static_cast</span><T&&>(arg));
+&#125;
 
-template < class T >
-constexpr T&& forward(std::remove_reference_t< T > && arg) noexcept{
-    // forward an rvalue as an rvalue
-    return (static_cast<T&&>(arg));
-}
-</code></pre>
+<span class="hljs-keyword">template</span> < <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span> ></span>
+<span class="hljs-class"><span class="hljs-title">constexpr</span> <span class="hljs-title">T</span>&& <span class="hljs-title">forward</span>(<span class="hljs-title">std</span>:</span>:<span class="hljs-keyword">remove_reference_t</span>< T > && arg) <span class="hljs-keyword">noexcept</span>&#123;
+    <span class="hljs-comment">// forward an rvalue as an rvalue</span>
+    <span class="hljs-keyword">return</span> (<span class="hljs-keyword">static_cast</span><T&&>(arg));
+&#125;</code></pre></div>
 <h3 id="forward-and-universal-reference">forward and universal reference</h3>
 <p>It will be dangerous to simply use move in the universal reference because when we want to retain the ownership of the original variable and we passed a non-const reference to it,then the original variable will be in an undefined state.for example:</p>
-<pre class=" language-language-C++"><code class="language-language-C++">    class test
-    {
-    public:
-        template < typename T >
-        test(T&&a):name(move(a)){}
-    private:
-        string name;
-    };
-    int main() {
-        string s = "123";
-        test a(s);
-        cout << s;
-}
-</code></pre>
+<div class="hljs"><pre class="hljs  language-hljs C++">    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title"><code class="language-hljs C++">    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">test</span></span>
+<span class="hljs-class">    &#123;</span>
+    <span class="hljs-keyword">public</span>:
+        <span class="hljs-keyword">template</span> < <span class="hljs-keyword">typename</span> T >
+        test(T&&a):name(<span class="hljs-built_in">move</span>(a))&#123;&#125;
+    <span class="hljs-keyword">private</span>:
+        <span class="hljs-built_in">string</span> name;
+    &#125;;
+    <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>&#123;
+        <span class="hljs-built_in">string</span> s = <span class="hljs-string">"123"</span>;
+        <span class="hljs-function">test <span class="hljs-title">a</span><span class="hljs-params">(s)</span></span>;
+        <span class="hljs-built_in">cout</span> << s;
+&#125;</code></pre></div>
 <p>in this example we can figure out that don’t use move in the rvalue reference,use forward.<br>
 Moreover,use the overloaded functions which take a lvalue reference and a rvalue reference as the parameter will lose efficiency because the call of constructor and destructor<br>
 an ingenious code which can only be implemented by universal reference</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < class...  Args >
-void forward(Args&&... args) {
-    f(std::forward<Args>(args)...);
-}
-</code></pre>
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-class"><span class="hljs-keyword">class</span>...  <span class="hljs-title"><code class="language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-class"><span class="hljs-keyword">class</span>...  <span class="hljs-title">Args</span> ></span>
+<span class="hljs-class"><span class="hljs-title">void</span> <span class="hljs-title">forward</span>(<span class="hljs-title">Args</span>&&... <span class="hljs-title">args</span>) &#123;</span>
+    f(<span class="hljs-built_in">std</span>::forward<Args>(args)...);
+&#125;</code></pre></div>
 <p>you can’t overload the function which takes several universal references</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template < class T, class... Args > // from C++11
-shared_ptr< T > make_shared(Args&&... args); // Standard
-template < class T, class... Args> // from C++14
-unique_ptr< T > make_unique(Args&&... args); // Standard
-</code></pre>
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span>, <span class="hljs-title">class</span>... <span class="hljs-title">Args</span> &gt; // <span class="hljs-title">from</span> <span class="hljs-title"><code class="language-hljs C++"><span class="hljs-keyword">template</span> &lt; <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span>, <span class="hljs-title">class</span>... <span class="hljs-title">Args</span> &gt; // <span class="hljs-title">from</span> <span class="hljs-title">C</span>++11</span>
+<span class="hljs-class"><span class="hljs-title">shared_ptr</span>< T > <span class="hljs-title">make_shared</span>(<span class="hljs-title">Args</span>&&... <span class="hljs-title">args</span>);</span> <span class="hljs-comment">// Standard</span>
+<span class="hljs-keyword">template</span> < <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span>, <span class="hljs-title">class</span>... <span class="hljs-title">Args</span>> // <span class="hljs-title">from</span> <span class="hljs-title">C</span>++14</span>
+<span class="hljs-class"><span class="hljs-title">unique_ptr</span>< T > <span class="hljs-title">make_unique</span>(<span class="hljs-title">Args</span>&&... <span class="hljs-title">args</span>);</span> <span class="hljs-comment">// Standard</span></code></pre></div>
 <p>so we comes to the conclusion:<br>
 <strong>std::forward is applied to the universal reference parameters when they’re passed to other functions. Which is exactly what you should do</strong></p>
 <h2 id="copy-Elision-and-RVO">copy Elision and RVO</h2>
@@ -291,150 +360,319 @@ unique_ptr< T > make_unique(Args&&... args); // Standard
 <h3 id="URVO-（Unnamed-Return-Value-Optimization">URVO （Unnamed Return Value Optimization)</h3>
 <p>it means all the return value has the same type and the type is identified with the declaration of the function<br>
 for example:</p>
-<pre class=" language-language-C++"><code class="language-language-C++">// they have the same 'user' type
-User create_user(const std::string &username, const std::string &password) {
-    if (find(username)) return get_user(username);
-    else if (validate(username) == false) return create_invalid_user();
-    else return User{username, password};
-}
-</code></pre>
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-comment"><code class="language-hljs C++"><span class="hljs-comment">// they have the same 'user' type</span>
+<span class="hljs-function">User <span class="hljs-title">create_user</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> &username, <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> &password)</span> </span>&#123;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">find</span>(username)) <span class="hljs-keyword">return</span> get_user(username);
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (validate(username) == <span class="hljs-literal">false</span>) <span class="hljs-keyword">return</span> create_invalid_user();
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> User&#123;username, password&#125;;
+&#125;</code></pre></div>
 <h3 id="NRVO（Named-Return-Value-Optimization）">NRVO（Named Return Value Optimization）</h3>
 <p>it means return the same local variable every time.</p>
-<pre class=" language-language-C++"><code class="language-language-C++">User create_user(const std::string &username, const std::string &password) {
-    User user{username, password};
-    if (find(username)) {
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-function">User <span class="hljs-title">create_user</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> &amp;username, <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in"><code class="language-hljs C++"><span class="hljs-function">User <span class="hljs-title">create_user</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> &amp;username, <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> &password)</span> </span>&#123;
+    User user&#123;username, password&#125;;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">find</span>(username)) &#123;
         user = get_user(username);
-        return user;
-    } else if (user.is_valid() == false) {
+        <span class="hljs-keyword">return</span> user;
+    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (user.is_valid() == <span class="hljs-literal">false</span>) &#123;
         user = create_invalid_user();
-        return user;
-    } else {
-        return user;
-    }
-}
-</code></pre>
+        <span class="hljs-keyword">return</span> user;
+    &#125; <span class="hljs-keyword">else</span> &#123;
+        <span class="hljs-keyword">return</span> user;
+    &#125;
+&#125;</code></pre></div>
 <h3 id="situations-you-need-to-apply-move">situations you need to apply move</h3>
 <p>the most important one is that the return type is a reference rather than a value.Either universal reference or rvalue reference for example</p>
-<pre class=" language-language-C++"><code class="language-language-C++">template< typename T >
-Fraction // by-value return
-reduceAndCopy(T&& frac) // universal reference param
-{
+<div class="hljs"><pre class="hljs  language-hljs C++"><span class="hljs-keyword">template</span>&lt; <span class="hljs-keyword"><code class="language-hljs C++"><span class="hljs-keyword">template</span>&lt; <span class="hljs-keyword">typename</span> T >
+Fraction <span class="hljs-comment">// by-value return</span>
+reduceAndCopy(T&& frac) <span class="hljs-comment">// universal reference param</span>
+&#123;
 frac.reduce();
-return std::forward< T >(frac); // move rvalue into return
-} // value, copy lvalue
-</code></pre>
+<span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::forward< T >(frac); <span class="hljs-comment">// move rvalue into return</span>
+&#125; <span class="hljs-comment">// value, copy lvalue</span></code></pre></div>
 <p>or rvalue reference</p>
-<pre class=" language-language-C++"><code class="language-language-C++">Matrix // by-value return
-operator+(Matrix&& lhs, const Matrix& rhs)
-{
+<div class="hljs"><pre class="hljs  language-hljs C++">Matrix <span class="hljs-comment"><code class="language-hljs C++">Matrix <span class="hljs-comment">// by-value return</span>
+<span class="hljs-keyword">operator</span>+(Matrix&& lhs, <span class="hljs-keyword">const</span> Matrix& rhs)
+&#123;
 lhs += rhs;
-return std::move(lhs); // move lhs into
-} // return value
-</code></pre>
+<span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">move</span>(lhs); <span class="hljs-comment">// move lhs into</span>
+&#125; <span class="hljs-comment">// return value</span></code></pre></div>
 <p>So all in all Never apply <code>std::move</code> or <code>std::forward</code> to local objects if they would otherwise be eligible for the return value optimization.But you should use std::move to the reference type</p>
-
+</div>
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/C/">C++</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/C/">C++</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" target="_blank" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！</p>
+              
+              
+                <div class="post-prevnext row">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/19/sql-cheetsheet/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SQL cheetsheet(MySQL)(to be to be continued)</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
             </div>
 
-            <!-- Post Comments -->
             
-    <!-- 使用 DISQUS_CLICK -->
-<div id="disqus-comment">
-    <div id="disqus_thread"></div>
-
-<!-- add animation -->
-<style>
-	.disqus_click_btn {
-            line-height: 30px;
-            margin: 0;
-            min-width: 50px;
-            padding: 0 14px;
-            display: inline-block;
-            font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-            font-size: 14px;
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 0;
-            overflow: hidden;
-            will-change: box-shadow;
-            transition: box-shadow .2s cubic-bezier(.4, 0, 1, 1), background-color .2s cubic-bezier(.4, 0, .2, 1), color .2s cubic-bezier(.4, 0, .2, 1);
-            outline: 0;
-            cursor: pointer;
-            text-decoration: none;
-            text-align: center;
-            vertical-align: middle;
-            border: 0;
-            background: rgba(158, 158, 158, .2);
-            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
-            color: #fff;
-            background-color: #7EC0EE;
-            text-shadow: 0
-        }
-</style>
-	
-<div class="btn_click_load" id="disqus_bt"> 
-    <button class="disqus_click_btn">点击查看评论</button>
-</div>
-
-<!--
-<script type="text/javascript">
-$('.btn_click_load').click(function() {
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'http-miccall-tech'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function() {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-
-    document.getElementById('disqus_bt').style.display = "none";
-});
-</script>
--->
-<script type="text/javascript">
-    var disqus_config = function () {
-        this.page.url = 'http://yoursite.com/2020/07/18/usage%20of%20reference%20in%20template/';  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = 'http://yoursite.com/2020/07/18/usage%20of%20reference%20in%20template/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-    };
-</script>
-
-<script type="text/javascript">
-    $('.btn_click_load').click(function() {  //click to load comments
-        (function() { // DON'T EDIT BELOW THIS LINE
-            var d = document;
-            var s = d.createElement('script');
-            s.src = '//http-miccall-tech.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', + new Date());
-            (d.head || d.body).appendChild(s);
-        })();
-        $('.btn_click_load').css('display','none');
-    });
-</script>
-</div>
-<style>
-    #disqus-comment{
-        background-color: #eee;
-        padding: 2pc;
-    }
-</style>
-
-
+          </article>
         </div>
-        <!-- Copyright 版权 start -->
-                <div id="copyright">
-            <ul>
-                <li>&copy;Powered By <a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener" style="border-bottom: none;">hexo</a></li>
-                <li>Design: <a href="http://miccall.tech " target="_blank" rel="noopener" style="border-bottom: none;">miccall</a></li>
-            </ul>
-            
-                <span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
-			
-        </div>
+      </div>
     </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div id="tocbot"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
+
+  
+    <a id="scroll-top-button" href="#" role="button">
+      <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+    </a>
+  
+
+  
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener">
+        <span>Fluid</span></a>
+    </div>
+    
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/main.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/lazyload.js" ></script>
+  
+
+
+
+  <script defer src="https://cdn.staticfile.org/clipboard.js/2.0.6/clipboard.min.js" ></script>
+  <script  src="/js/clipboard-use.js" ></script>
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+  <script  src="https://cdn.staticfile.org/tocbot/4.11.1/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var boardCtn = $('#board-ctn');
+      var boardTop = boardCtn.offset().top;
+
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '#post-body',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        collapseDepth: 0,
+        scrollSmooth: true,
+        headingsOffset: -boardTop
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc').css('visibility', 'visible');
+      }
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "usage of reference in template(reading notes of Meyer'book)&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      searchFunc(path, 'local-search-input', 'local-search-result');
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <script>
+    $('#post img:not(.no-zoom img, img[no-zoom]), img[zoom]').each(
+      function () {
+        var element = document.createElement('a');
+        $(element).attr('data-fancybox', 'images');
+        $(element).attr('href', $(this).attr('src'));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </body>
-
-
-
- 	
 </html>
