@@ -147,7 +147,7 @@
                 <h1 id="SQL-cheetsheet"><a href="#SQL-cheetsheet" class="headerlink" title="SQL cheetsheet"></a>SQL cheetsheet</h1><h2 id="select"><a href="#select" class="headerlink" title="select"></a>select</h2><blockquote>
 <p>In MySQL, every statement must be terminated with a semicolon</p>
 </blockquote>
-<pre><code class="SQL"> select * --(all cols)
+<pre class=" language-SQL"><code class="language-SQL"> select * --(all cols)
  select colname1,colname2
  select distinct colname -- remove duplicate
  select expression as name --using expressions
@@ -169,16 +169,16 @@
  SELECT ... FROM t1 JOIN t2 USING(id) WHERE condition
 
  -- REGEXP（RLIKE|REGEXP）
- SELECT * FROM table WHERE column REGEXP &#39;^(A|B|C)&#39;
- SELECT * FROM table WHERE rec RLIKE &quot;^b$&quot;;  
+ SELECT * FROM table WHERE column REGEXP '^(A|B|C)'
+ SELECT * FROM table WHERE rec RLIKE "^b$";  
  -- RETURN THE INFORMATION
  DESCRIBE table [column]
 
  --TIME AND DATE
  SELECT CURRENT_DATE, (YEAR(CURRENT_DATE)­YEAR(date_col)) AS time_diff [FROM table]; </code></pre>
-<h2 id="WHERE-Conditionals"><a href="#WHERE-Conditionals" class="headerlink" title="WHERE Conditionals"></a>WHERE Conditionals</h2><pre><code class="SQL"> field1 = value1
- field1 &lt;&gt; value1
- field1 LIKE &#39;value _ %&#39;
+<h2 id="WHERE-Conditionals"><a href="#WHERE-Conditionals" class="headerlink" title="WHERE Conditionals"></a>WHERE Conditionals</h2><pre class=" language-SQL"><code class="language-SQL"> field1 = value1
+ field1 <> value1
+ field1 LIKE 'value _ %'
  field1 IS NULL
  field1 IS NOT NULL
  field1 IN (value1, value2)
@@ -186,7 +186,7 @@
  condition1 AND condition2
  condition1 OR condition2
  BETWEEN ... AND ...
- fieldname REGEXP &#39;^a&#39;</code></pre>
+ fieldname REGEXP '^a'</code></pre>
 
             </div>
 
