@@ -149,9 +149,50 @@
 <blockquote>
 <p>In MySQL, every statement must be terminated with a semicolon</p>
 </blockquote>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="comment">--(all cols)</span></span><br><span class="line"><span class="keyword">select</span> colname1,colname2</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> colname <span class="comment">-- remove duplicate</span></span><br><span class="line"><span class="keyword">select</span> expression <span class="keyword">as</span> <span class="keyword">name</span> <span class="comment">--using expressions</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="comment">--(all cols)</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> table1, table2, ...</span><br><span class="line"><span class="keyword">SELECT</span> field1, field2, ... <span class="keyword">FROM</span> table1, table2, ...</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> ... <span class="keyword">WHERE</span> condition</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> ... <span class="keyword">WHERE</span> condition <span class="keyword">GROUP</span> <span class="keyword">BY</span> <span class="keyword">field</span></span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> ... <span class="keyword">WHERE</span> condition <span class="keyword">GROUP</span> <span class="keyword">BY</span> <span class="keyword">field</span> <span class="keyword">HAVING</span> condition2</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> ... <span class="keyword">WHERE</span> condition <span class="keyword">ORDER</span> <span class="keyword">BY</span> field1, field2</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> ... <span class="keyword">WHERE</span> condition <span class="keyword">ORDER</span> <span class="keyword">BY</span> field1, field2 <span class="keyword">DESC</span></span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> ... <span class="keyword">WHERE</span> condition <span class="keyword">LIMIT</span> <span class="number">10</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> field1 <span class="keyword">FROM</span> ...</span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> field1, field2 <span class="keyword">FROM</span> ...</span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> colname <span class="comment">-- remove duplicate</span></span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> t1 <span class="keyword">JOIN</span> t2 <span class="keyword">ON</span> t1.id1 = t2.id2 <span class="keyword">WHERE</span> condition</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> t1 <span class="keyword">LEFT</span> <span class="keyword">JOIN</span> t2 <span class="keyword">ON</span> t1.id1 = t2.id2 <span class="keyword">WHERE</span> condition</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> t1 <span class="keyword">JOIN</span> (t2 <span class="keyword">JOIN</span> t3 <span class="keyword">ON</span> ...) <span class="keyword">ON</span> ...</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> t1 <span class="keyword">JOIN</span> t2 <span class="keyword">USING</span>(<span class="keyword">id</span>) <span class="keyword">WHERE</span> condition</span><br><span class="line"></span><br><span class="line"><span class="comment">-- REGEXP（RLIKE|REGEXP）</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> <span class="keyword">column</span> REGEXP <span class="string">'^(A|B|C)'</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> rec <span class="keyword">RLIKE</span> <span class="string">"^b$"</span>;  </span><br><span class="line"><span class="comment">-- RETURN THE INFORMATION</span></span><br><span class="line"><span class="keyword">DESCRIBE</span> <span class="keyword">table</span> [<span class="keyword">column</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment">--TIME AND DATE</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">CURRENT_DATE</span>, (<span class="keyword">YEAR</span>(<span class="keyword">CURRENT_DATE</span>)­<span class="keyword">YEAR</span>(date_col)) <span class="keyword">AS</span> time_diff [<span class="keyword">FROM</span> <span class="keyword">table</span>];</span><br></pre></td></tr></table></figure>
+<pre class=" language-language-SQL"><code class="language-language-SQL"> select * --(all cols)
+ select colname1,colname2
+ select distinct colname -- remove duplicate
+ select expression as name --using expressions
+ SELECT * FROM table --(all cols)
+ SELECT * FROM table1, table2, ...
+ SELECT field1, field2, ... FROM table1, table2, ...
+ SELECT ... FROM ... WHERE condition
+ SELECT ... FROM ... WHERE condition GROUP BY field
+ SELECT ... FROM ... WHERE condition GROUP BY field HAVING condition2
+ SELECT ... FROM ... WHERE condition ORDER BY field1, field2
+ SELECT ... FROM ... WHERE condition ORDER BY field1, field2 DESC
+ SELECT ... FROM ... WHERE condition LIMIT 10
+ SELECT DISTINCT field1 FROM ...
+ SELECT DISTINCT field1, field2 FROM ...
+ SELECT DISTINCT colname -- remove duplicate
+ SELECT ... FROM t1 JOIN t2 ON t1.id1 = t2.id2 WHERE condition
+ SELECT ... FROM t1 LEFT JOIN t2 ON t1.id1 = t2.id2 WHERE condition
+ SELECT ... FROM t1 JOIN (t2 JOIN t3 ON ...) ON ...
+ SELECT ... FROM t1 JOIN t2 USING(id) WHERE condition
+ 
+ -- REGEXP（RLIKE|REGEXP）
+ SELECT * FROM table WHERE column REGEXP '^(A|B|C)'
+ SELECT * FROM table WHERE rec RLIKE "^b$";  
+ -- RETURN THE INFORMATION
+ DESCRIBE table [column]
+ 
+ --TIME AND DATE
+ SELECT CURRENT_DATE, (YEAR(CURRENT_DATE)­YEAR(date_col)) AS time_diff [FROM table]; 
+</code></pre>
 <h2 id="WHERE-Conditionals">WHERE Conditionals</h2>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">field1 = value1</span><br><span class="line">field1 &lt;&gt; value1</span><br><span class="line">field1 LIKE 'value _ %'</span><br><span class="line">field1 IS NULL</span><br><span class="line">field1 IS NOT NULL</span><br><span class="line">field1 IN (value1, value2)</span><br><span class="line">field1 NOT IN (value1, value2)</span><br><span class="line">condition1 AND condition2</span><br><span class="line">condition1 OR condition2</span><br><span class="line">BETWEEN ... AND ...</span><br><span class="line">fieldname REGEXP '^a'</span><br></pre></td></tr></table></figure>
+<pre class=" language-language-SQL"><code class="language-language-SQL"> field1 = value1
+ field1 <> value1
+ field1 LIKE 'value _ %'
+ field1 IS NULL
+ field1 IS NOT NULL
+ field1 IN (value1, value2)
+ field1 NOT IN (value1, value2)
+ condition1 AND condition2
+ condition1 OR condition2
+ BETWEEN ... AND ...
+ fieldname REGEXP '^a'
+</code></pre>
+
             </div>
 
             <!-- Post Comments -->
