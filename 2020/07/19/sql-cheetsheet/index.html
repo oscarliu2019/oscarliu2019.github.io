@@ -71,7 +71,7 @@
 
 
 <!--  代码渲染  -->
-<link rel="stylesheet" href="/css/prism_coy.css" />
+<link rel="stylesheet" href="/css/prism_OKAIDIA.css" />
 <link rel="stylesheet" href="/css/typo.css" />
 <!-- 文章页 -->
 <body class="is-loading">
@@ -147,47 +147,9 @@
                 <h1 id="SQL-cheetsheet"><a href="#SQL-cheetsheet" class="headerlink" title="SQL cheetsheet"></a>SQL cheetsheet</h1><h2 id="select"><a href="#select" class="headerlink" title="select"></a>select</h2><blockquote>
 <p>In MySQL, every statement must be terminated with a semicolon</p>
 </blockquote>
-<pre class=" language-SQL"><code class="language-SQL"> select * --(all cols)
- select colname1,colname2
- select distinct colname -- remove duplicate
- select expression as name --using expressions
- SELECT * FROM table --(all cols)
- SELECT * FROM table1, table2, ...
- SELECT field1, field2, ... FROM table1, table2, ...
- SELECT ... FROM ... WHERE condition
- SELECT ... FROM ... WHERE condition GROUP BY field
- SELECT ... FROM ... WHERE condition GROUP BY field HAVING condition2
- SELECT ... FROM ... WHERE condition ORDER BY field1, field2
- SELECT ... FROM ... WHERE condition ORDER BY field1, field2 DESC
- SELECT ... FROM ... WHERE condition LIMIT 10
- SELECT DISTINCT field1 FROM ...
- SELECT DISTINCT field1, field2 FROM ...
- SELECT DISTINCT colname -- remove duplicate
- SELECT ... FROM t1 JOIN t2 ON t1.id1 = t2.id2 WHERE condition
- SELECT ... FROM t1 LEFT JOIN t2 ON t1.id1 = t2.id2 WHERE condition
- SELECT ... FROM t1 JOIN (t2 JOIN t3 ON ...) ON ...
- SELECT ... FROM t1 JOIN t2 USING(id) WHERE condition
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs SQL"><span class="hljs-keyword">select</span> * <span class="hljs-comment">--(all cols)</span><br><span class="hljs-keyword">select</span> colname1,colname2<br><span class="hljs-keyword">select</span> <span class="hljs-keyword">distinct</span> colname <span class="hljs-comment">-- remove duplicate</span><br><span class="hljs-keyword">select</span> expression <span class="hljs-keyword">as</span> <span class="hljs-keyword">name</span> <span class="hljs-comment">--using expressions</span><br><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-keyword">table</span> <span class="hljs-comment">--(all cols)</span><br><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> table1, table2, ...<br><span class="hljs-keyword">SELECT</span> field1, field2, ... <span class="hljs-keyword">FROM</span> table1, table2, ...<br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> ... <span class="hljs-keyword">WHERE</span> condition<br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> ... <span class="hljs-keyword">WHERE</span> condition <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">field</span><br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> ... <span class="hljs-keyword">WHERE</span> condition <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">field</span> <span class="hljs-keyword">HAVING</span> condition2<br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> ... <span class="hljs-keyword">WHERE</span> condition <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> field1, field2<br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> ... <span class="hljs-keyword">WHERE</span> condition <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> field1, field2 <span class="hljs-keyword">DESC</span><br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> ... <span class="hljs-keyword">WHERE</span> condition <span class="hljs-keyword">LIMIT</span> <span class="hljs-number">10</span><br><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> field1 <span class="hljs-keyword">FROM</span> ...<br><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> field1, field2 <span class="hljs-keyword">FROM</span> ...<br><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> colname <span class="hljs-comment">-- remove duplicate</span><br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> t1 <span class="hljs-keyword">JOIN</span> t2 <span class="hljs-keyword">ON</span> t1.id1 = t2.id2 <span class="hljs-keyword">WHERE</span> condition<br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> t1 <span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> t2 <span class="hljs-keyword">ON</span> t1.id1 = t2.id2 <span class="hljs-keyword">WHERE</span> condition<br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> t1 <span class="hljs-keyword">JOIN</span> (t2 <span class="hljs-keyword">JOIN</span> t3 <span class="hljs-keyword">ON</span> ...) <span class="hljs-keyword">ON</span> ...<br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FROM</span> t1 <span class="hljs-keyword">JOIN</span> t2 <span class="hljs-keyword">USING</span>(<span class="hljs-keyword">id</span>) <span class="hljs-keyword">WHERE</span> condition<br><br><span class="hljs-comment">-- REGEXP（RLIKE|REGEXP）</span><br><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">column</span> REGEXP <span class="hljs-string">'^(A|B|C)'</span><br><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">WHERE</span> rec <span class="hljs-keyword">RLIKE</span> <span class="hljs-string">"^b$"</span>;  <br><span class="hljs-comment">-- RETURN THE INFORMATION</span><br><span class="hljs-keyword">DESCRIBE</span> <span class="hljs-keyword">table</span> [<span class="hljs-keyword">column</span>]<br><br><span class="hljs-comment">--TIME AND DATE</span><br><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">CURRENT_DATE</span>, (<span class="hljs-keyword">YEAR</span>(<span class="hljs-keyword">CURRENT_DATE</span>)­<span class="hljs-keyword">YEAR</span>(date_col)) <span class="hljs-keyword">AS</span> time_diff [<span class="hljs-keyword">FROM</span> <span class="hljs-keyword">table</span>];<br></code></pre></td></tr></table></figure>
 
- -- REGEXP（RLIKE|REGEXP）
- SELECT * FROM table WHERE column REGEXP '^(A|B|C)'
- SELECT * FROM table WHERE rec RLIKE "^b$";  
- -- RETURN THE INFORMATION
- DESCRIBE table [column]
-
- --TIME AND DATE
- SELECT CURRENT_DATE, (YEAR(CURRENT_DATE)­YEAR(date_col)) AS time_diff [FROM table]; </code></pre>
-<h2 id="WHERE-Conditionals"><a href="#WHERE-Conditionals" class="headerlink" title="WHERE Conditionals"></a>WHERE Conditionals</h2><pre class=" language-SQL"><code class="language-SQL"> field1 = value1
- field1 <> value1
- field1 LIKE 'value _ %'
- field1 IS NULL
- field1 IS NOT NULL
- field1 IN (value1, value2)
- field1 NOT IN (value1, value2)
- condition1 AND condition2
- condition1 OR condition2
- BETWEEN ... AND ...
- fieldname REGEXP '^a'</code></pre>
-
+<h2 id="WHERE-Conditionals"><a href="#WHERE-Conditionals" class="headerlink" title="WHERE Conditionals"></a>WHERE Conditionals</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs SQL">field1 = value1<br>field1 &lt;&gt; value1<br>field1 LIKE 'value _ %'<br>field1 IS NULL<br>field1 IS NOT NULL<br>field1 IN (value1, value2)<br>field1 NOT IN (value1, value2)<br>condition1 AND condition2<br>condition1 OR condition2<br>BETWEEN ... AND ...<br>fieldname REGEXP '^a'<br></code></pre></td></tr></table></figure>
             </div>
 
             <!-- Post Comments -->
