@@ -96,7 +96,7 @@
 	            <a href="#s1">分类</a>
 	                    <ul class="submenu">
 	                        <li>
-	                        <a class="category-link" href="/categories/C/">C++</a>
+	                        <a class="category-link" href="/categories/C/">C++</a></li><li><a class="category-link" href="/categories/SQL/">SQL</a>
 	                    </ul>
 	        </li>
 	        
@@ -147,14 +147,23 @@
                 <p>[TOC]</p>
 <h1 id="usage-of-reference-in-template"><a href="#usage-of-reference-in-template" class="headerlink" title="usage of reference in template"></a>usage of reference in template</h1><p>In my opinion,universal reference,reference,move semantics and the perfect forward are the essence of modern cpp.After i chewing over Meyer’s book and C++ primer,i think i can figure out it.So i want to share my experience in this blog.</p>
 <h2 id="the-deduction-for-parameter-and-the-template"><a href="#the-deduction-for-parameter-and-the-template" class="headerlink" title="the deduction for parameter and the template"></a>the deduction for parameter and the template</h2><h3 id="ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference"><a href="#ParamType-is-a-Reference-or-Pointer-but-not-a-Universal-Reference" class="headerlink" title="ParamType is a Reference or Pointer, but not a Universal Reference."></a>ParamType is a Reference or Pointer, but not a Universal Reference.</h3><p>for example:</p>
- <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;<br><span class="hljs-function"><span class="hljs-keyword">auto</span> <span class="hljs-title">f</span><span class="hljs-params">(T&amp;parameter)</span></span>&#123;<br>    <span class="hljs-comment">//some code</span><br>&#125;<br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">template<typename T>
+auto f(T&parameter){
+    //some code
+}</code></pre>
 <p>For this situation you just need to discard the reference or pointer part and remaining type is the type of T,especially,when the parameter type is const the type for T is no need to be a const any more.Besides,when it comes to low level const for pointers,you can ignore it.</p>
 <blockquote>
 <p>We use the term top-level const to indicate that the pointer itself is a const. When a pointer can point to a const object, we refer to that const as a low-level const.</p>
 </blockquote>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-function"><span class="hljs-keyword">auto</span> <span class="hljs-title">f</span><span class="hljs-params">(<span class="hljs-keyword">const</span> T* parameter)</span></span><br><span class="hljs-function"><span class="hljs-keyword">auto</span> <span class="hljs-title">f2</span><span class="hljs-params">(T*parameter)</span></span><br><span class="hljs-function"><span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> a</span>=<span class="hljs-number">1</span>;<br><span class="hljs-keyword">int</span> b=<span class="hljs-number">2</span>;<br><span class="hljs-keyword">int</span>*p1 = &amp;b;<br><span class="hljs-keyword">auto</span> *p2=&amp;a;<span class="hljs-comment">// when you use auto to deduce the type,the top level const is ignored,and the low level const(if have) is remained </span><br>f(p1) <span class="hljs-comment">// T:int,param:const int*</span><br>f(p2) <span class="hljs-comment">// T int,param:const int*</span><br>f(p2) <span class="hljs-comment">// T const int,param:const int*</span><br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">auto f(const T* parameter)
+auto f2(T*parameter)
+const int a=1;
+int b=2;
+int*p1 = &b;
+auto *p2=&a;// when you use auto to deduce the type,the top level const is ignored,and the low level const(if have) is remained 
+f(p1) // T:int,param:const int*
+f(p2) // T int,param:const int*
+f(p2) // T const int,param:const int*</code></pre>
 <h3 id="parameter-is-an-universal-reference"><a href="#parameter-is-an-universal-reference" class="headerlink" title="parameter is an universal reference"></a>parameter is an universal reference</h3><blockquote>
 <p>a universal reference not only occurred in the template but also used in auto.Since the auto rules is similar to the template one<br>a universal reference must have direct type deduction and a format of <code>T&amp;&amp;</code> or <code>arges&amp;&amp;...arge</code></p>
 </blockquote>
@@ -172,22 +181,35 @@
 <li><strong>when the para type of the function is a reference,either lvalue or rvalue,para will become a reference to an array and the form of the type is similar to (element type)&amp;[element number] such as int&amp;[12]</strong></li>
 </ul>
 <p>a ingenious code which determine the size of the array at the compile time</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T,<span class="hljs-built_in">std</span>:<span class="hljs-keyword">size_t</span> N&gt;<br><span class="hljs-function"><span class="hljs-keyword">constexpr</span> <span class="hljs-built_in">std</span>::<span class="hljs-keyword">size_t</span> <span class="hljs-title">arraysize</span><span class="hljs-params">(T(&amp;)[N])</span><span class="hljs-keyword">noexcept</span></span>&#123;<br>    <span class="hljs-keyword">return</span> N<br>&#125;<br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">template<typename T,std:size_t N>
+constexpr std::size_t arraysize(T(&)[N])noexcept{
+    return N
+}</code></pre>
 <h2 id="move-and-forward"><a href="#move-and-forward" class="headerlink" title="move and forward"></a>move and forward</h2><blockquote>
 <p>First,let me introduce the type traits(from meyer’s book item 9), it is an assortment of templates inside the header <type_traits>. There are dozens of type traits in that header, and not all of them perform type transformations, but the ones that do offer a predictable interface. Given a type T to which you’d like to apply a transformation, the resulting type is <code>std::transformation&lt;T&gt;::type</code>. For example:</p>
 </blockquote>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-built_in">std</span>::remove_const&lt;T&gt;::type <span class="hljs-comment">// yields T from const T</span><br><span class="hljs-built_in">std</span>::remove_reference&lt;T&gt;::type <span class="hljs-comment">// yields T from T&amp; and T&amp;&amp;</span><br><span class="hljs-built_in">std</span>::add_lvalue_reference&lt;T&gt;::type <span class="hljs-comment">// yields T&amp; from T</span><br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">std::remove_const<T>::type // yields T from const T
+std::remove_reference<T>::type // yields T from T& and T&&
+std::add_lvalue_reference<T>::type // yields T& from T </code></pre>
 <blockquote>
 <p>After C++14 you can use <code>remove_const_t&lt;T&gt;</code> to instead the above-mentioned<br>these two functions are merely used to cast type.std::move unconditionally casts its argument to an rvalue, while<br>std::forward performs this cast only if a particular condition is fulfilled. That’s it.</p>
 </blockquote>
 <h3 id="std-move"><a href="#std-move" class="headerlink" title="std::move"></a>std::move</h3><p>the source code of move</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt; <span class="hljs-comment">// in namespace std</span><br><span class="hljs-keyword">typename</span> remove_reference&lt;T&gt;::type&amp;&amp;<br><span class="hljs-built_in">move</span>(T&amp;&amp; param)<br>&#123;<br><span class="hljs-keyword">using</span> ReturnType = <span class="hljs-comment">// alias declaration;</span><br><span class="hljs-keyword">typename</span> remove_reference&lt;T&gt;::type&amp;&amp;;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">static_cast</span>&lt;ReturnType&gt;(param);<br>&#125;<br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">template<typename T> // in namespace std
+typename remove_reference<T>::type&&
+move(T&& param)
+{
+using ReturnType = // alias declaration;
+typename remove_reference<T>::type&&;
+return static_cast<ReturnType>(param);
+}</code></pre>
 <p>you can use <code>remove_reference_t&lt;T&gt;</code> to replace <code>remove_reference&lt;T&gt;::type</code> and use auto to declare the return type after C++ 14 so the code after C++14 will be as followed</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt; <span class="hljs-comment">// C++14; still in</span><br><span class="hljs-function"><span class="hljs-keyword">decltype</span>(<span class="hljs-keyword">auto</span>) <span class="hljs-title">move</span><span class="hljs-params">(T&amp;&amp; param)</span> <span class="hljs-comment">// namespace std</span></span><br><span class="hljs-function"></span>&#123;<br><span class="hljs-keyword">using</span> ReturnType = <span class="hljs-keyword">remove_reference_t</span>&lt;T&gt;&amp;&amp;;<br><span class="hljs-keyword">return</span> <span class="hljs-keyword">static_cast</span>&lt;ReturnType&gt;(param);<br>&#125;<br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">template<typename T> // C++14; still in
+decltype(auto) move(T&& param) // namespace std
+{
+using ReturnType = remove_reference_t<T>&&;
+return static_cast<ReturnType>(param);
+}</code></pre>
 <blockquote>
 <p>when you use auto to deduce the return type,it will adopt the rules of template deduction,which will ignore the reference so you should use decltype(auto) to instead</p>
 </blockquote>
@@ -203,31 +225,78 @@
 <blockquote>
 <p><code>std::forward</code> are always used for decorator to pass the true parameter,when you need a unconditional rvalue,use move.</p>
 </blockquote>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span>&gt;</span><br><span class="hljs-class"><span class="hljs-title">constexpr</span> <span class="hljs-title">T</span>&amp;&amp; <span class="hljs-title">forward</span>(<span class="hljs-title">std</span>:</span>:<span class="hljs-keyword">remove_reference_t</span>&lt;T&gt;&amp; arg) <span class="hljs-keyword">noexcept</span>&#123;<br>    <span class="hljs-comment">// forward an lvalue as an lvalue</span><br>    <span class="hljs-keyword">return</span> (<span class="hljs-keyword">static_cast</span>&lt;T&amp;&amp;&gt;(arg));<br>&#125;<br><br><span class="hljs-keyword">template</span>&lt;<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span>&gt;</span><br><span class="hljs-class"><span class="hljs-title">constexpr</span> <span class="hljs-title">T</span>&amp;&amp; <span class="hljs-title">forward</span>(<span class="hljs-title">std</span>:</span>:<span class="hljs-keyword">remove_reference_t</span>&lt;T&gt;&amp;&amp; arg) <span class="hljs-keyword">noexcept</span>&#123;<br>    <span class="hljs-comment">// forward an rvalue as an rvalue</span><br>    <span class="hljs-keyword">return</span> (<span class="hljs-keyword">static_cast</span>&lt;T&amp;&amp;&gt;(arg));<br>&#125;<br></code></pre></td></tr></table></figure>
+<pre class=" language-C++"><code class="language-C++">template<class T>
+constexpr T&& forward(std::remove_reference_t<T>& arg) noexcept{
+    // forward an lvalue as an lvalue
+    return (static_cast<T&&>(arg));
+}
 
+template<class T>
+constexpr T&& forward(std::remove_reference_t<T>&& arg) noexcept{
+    // forward an rvalue as an rvalue
+    return (static_cast<T&&>(arg));
+}</code></pre>
 <h3 id="forward-and-universal-reference"><a href="#forward-and-universal-reference" class="headerlink" title="forward and universal reference"></a>forward and universal reference</h3><p>It will be dangerous to simply use move in the universal reference because when we want to retain the ownership of the original variable and we passed a non-const reference to it,then the original variable will be in an undefined state.for example:</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs C++">    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">test</span></span><br><span class="hljs-class">    &#123;</span><br>    <span class="hljs-keyword">public</span>:<br>        <span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;<br>        test(T&amp;&amp;a):name(<span class="hljs-built_in">move</span>(a))&#123;&#125;<br>    <span class="hljs-keyword">private</span>:<br>        <span class="hljs-built_in">string</span> name;<br>    &#125;;<br>    <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-built_in">string</span> s = <span class="hljs-string">"123"</span>;<br>        <span class="hljs-function">test <span class="hljs-title">a</span><span class="hljs-params">(s)</span></span>;<br>        <span class="hljs-built_in">cout</span> &lt;&lt; s;<br>&#125;<br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">    class test
+    {
+    public:
+        template<typename T>
+        test(T&&a):name(move(a)){}
+    private:
+        string name;
+    };
+    int main() {
+        string s = "123";
+        test a(s);
+        cout << s;
+}</code></pre>
 <p>in this example we can figure out that don’t use move in the rvalue reference,use forward.<br>Moreover,use the overloaded functions which take a lvalue reference and a rvalue reference as the parameter will lose efficiency because the call of constructor and destructor<br>an ingenious code which can only be implemented by universal reference</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-keyword">template</span> &lt;<span class="hljs-class"><span class="hljs-keyword">class</span>... <span class="hljs-title">Args</span>&gt;</span><br><span class="hljs-class"><span class="hljs-title">void</span> <span class="hljs-title">forward</span>(<span class="hljs-title">Args</span>&amp;&amp;... <span class="hljs-title">args</span>) &#123;</span><br>    f(<span class="hljs-built_in">std</span>::forward&lt;Args&gt;(args)...);<br>&#125;<br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">template <class... Args>
+void forward(Args&&... args) {
+    f(std::forward<Args>(args)...);
+}</code></pre>
 <p>you can’t overload the function which takes several universal references</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span>, <span class="hljs-title">class</span>... <span class="hljs-title">Args</span>&gt; // <span class="hljs-title">from</span> <span class="hljs-title">C</span>++11</span><br><span class="hljs-class"><span class="hljs-title">shared_ptr</span>&lt;T&gt; <span class="hljs-title">make_shared</span>(<span class="hljs-title">Args</span>&amp;&amp;... <span class="hljs-title">args</span>);</span> <span class="hljs-comment">// Standard</span><br><span class="hljs-keyword">template</span>&lt;<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span>, <span class="hljs-title">class</span>... <span class="hljs-title">Args</span>&gt; // <span class="hljs-title">from</span> <span class="hljs-title">C</span>++14</span><br><span class="hljs-class"><span class="hljs-title">unique_ptr</span>&lt;T&gt; <span class="hljs-title">make_unique</span>(<span class="hljs-title">Args</span>&amp;&amp;... <span class="hljs-title">args</span>);</span> <span class="hljs-comment">// Standard</span><br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">template<class T, class... Args> // from C++11
+shared_ptr<T> make_shared(Args&&... args); // Standard
+template<class T, class... Args> // from C++14
+unique_ptr<T> make_unique(Args&&... args); // Standard</code></pre>
 <p>so we comes to the conclusion:<br><strong>std::forward is applied to the universal reference parameters when they’re passed to other functions. Which is exactly what you should do</strong></p>
 <h2 id="copy-Elision-and-RVO"><a href="#copy-Elision-and-RVO" class="headerlink" title="copy Elision and RVO"></a>copy Elision and RVO</h2><p>in some cases,the compiler will automatically help us to optimize the return value,which means the return value and lhs will share the same address.the so if we called a move to the return value,it will call a move constructor which will affect the efficiency.so we will summarize some scenario that need the programmer to apply move to the return value.</p>
 <h3 id="URVO-（Unnamed-Return-Value-Optimization"><a href="#URVO-（Unnamed-Return-Value-Optimization" class="headerlink" title="URVO （Unnamed Return Value Optimization)"></a>URVO （Unnamed Return Value Optimization)</h3><p>it means all the return value has the same type and the type is identified with the declaration of the function<br>for example:</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-comment">// they have the same 'user' type</span><br><span class="hljs-function">User <span class="hljs-title">create_user</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> &amp;username, <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> &amp;password)</span> </span>&#123;<br>    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">find</span>(username)) <span class="hljs-keyword">return</span> get_user(username);<br>    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (validate(username) == <span class="hljs-literal">false</span>) <span class="hljs-keyword">return</span> create_invalid_user();<br>    <span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> User&#123;username, password&#125;;<br>&#125;<br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">// they have the same 'user' type
+User create_user(const std::string &username, const std::string &password) {
+    if (find(username)) return get_user(username);
+    else if (validate(username) == false) return create_invalid_user();
+    else return User{username, password};
+}</code></pre>
 <h3 id="NRVO（Named-Return-Value-Optimization）"><a href="#NRVO（Named-Return-Value-Optimization）" class="headerlink" title="NRVO（Named Return Value Optimization）"></a>NRVO（Named Return Value Optimization）</h3><p>it means return the same local variable every time.</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-function">User <span class="hljs-title">create_user</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> &amp;username, <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> &amp;password)</span> </span>&#123;<br>    User user&#123;username, password&#125;;<br>    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">find</span>(username)) &#123;<br>        user = get_user(username);<br>        <span class="hljs-keyword">return</span> user;<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (user.is_valid() == <span class="hljs-literal">false</span>) &#123;<br>        user = create_invalid_user();<br>        <span class="hljs-keyword">return</span> user;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-keyword">return</span> user;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">User create_user(const std::string &username, const std::string &password) {
+    User user{username, password};
+    if (find(username)) {
+        user = get_user(username);
+        return user;
+    } else if (user.is_valid() == false) {
+        user = create_invalid_user();
+        return user;
+    } else {
+        return user;
+    }
+}</code></pre>
 <h3 id="situations-you-need-to-apply-move"><a href="#situations-you-need-to-apply-move" class="headerlink" title="situations you need to apply move"></a>situations you need to apply move</h3><p>the most important one is that the return type is a reference rather than a value.Either universal reference or rvalue reference for example</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;<br>Fraction <span class="hljs-comment">// by-value return</span><br>reduceAndCopy(T&amp;&amp; frac) <span class="hljs-comment">// universal reference param</span><br>&#123;<br>frac.reduce();<br><span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::forward&lt;T&gt;(frac); <span class="hljs-comment">// move rvalue into return</span><br>&#125; <span class="hljs-comment">// value, copy lvalue</span><br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">template<typename T>
+Fraction // by-value return
+reduceAndCopy(T&& frac) // universal reference param
+{
+frac.reduce();
+return std::forward<T>(frac); // move rvalue into return
+} // value, copy lvalue</code></pre>
 <p>or rvalue reference</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs C++">Matrix <span class="hljs-comment">// by-value return</span><br><span class="hljs-keyword">operator</span>+(Matrix&amp;&amp; lhs, <span class="hljs-keyword">const</span> Matrix&amp; rhs)<br>&#123;<br>lhs += rhs;<br><span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">move</span>(lhs); <span class="hljs-comment">// move lhs into</span><br>&#125; <span class="hljs-comment">// return value</span><br></code></pre></td></tr></table></figure>
-
+<pre class=" language-C++"><code class="language-C++">Matrix // by-value return
+operator+(Matrix&& lhs, const Matrix& rhs)
+{
+lhs += rhs;
+return std::move(lhs); // move lhs into
+} // return value</code></pre>
 <p>so all in all Never apply <code>std::move</code> or <code>std::forward</code> to local objects if they would otherwise be eligible for the return value optimization.but you should use std::move to the reference type</p>
 
             </div>
