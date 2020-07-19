@@ -296,7 +296,7 @@ operator+(Matrix&& lhs, const Matrix& rhs)
 lhs += rhs;
 return std::move(lhs); // move lhs into
 } // return value</code></pre>
-<p>so all in all Never apply <code>std::move</code> or <code>std::forward</code> to local objects if they would otherwise be eligible for the return value optimization.but you should use std::move to the reference type</p>
+<p>So all in all Never apply <code>std::move</code> or <code>std::forward</code> to local objects if they would otherwise be eligible for the return value optimization.But you should use std::move to the reference type</p>
 
             </div>
 
