@@ -4,7 +4,32 @@
   
   
   <entry>
-    <title>SQL cheetsheet(MySQL)(to be to be continued)</title>
+    <title>Maximum subsequence sum problem</title>
+    <link href="/2020/07/20/max-sum-of-subarray/"/>
+    <url>/2020/07/20/max-sum-of-subarray/</url>
+    
+    <content type="html"><![CDATA[<h1>three algorithms with different complexity for that problem</h1><p>Recently i have read several chapters of 《introduction to algorithms》.After reading it,i think have a general overview on how to solve the maximum subsequence problem .So i realized it by template and i want to share three algorithms with different complexity with you.</p><h2 id="O-N-sup-2-sup">O(N <sup>2</sup>)</h2><p>this algorithm simply traverse the sequence, it is stupid but easy to understand.I realize it by using the reference to the array</p><div class="hljs"><pre><code class="hljs C++"></code></pre></div>]]></content>
+    
+    
+    <categories>
+      
+      <category>algorithms</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>algorithms</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>SQL cheetsheet(MySQL)(to be continued)</title>
     <link href="/2020/07/19/sql-cheetsheet/"/>
     <url>/2020/07/19/sql-cheetsheet/</url>
     
