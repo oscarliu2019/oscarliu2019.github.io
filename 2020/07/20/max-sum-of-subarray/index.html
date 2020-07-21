@@ -142,7 +142,7 @@
 </nav>
 
     <div class="banner intro-2" id="background" parallax=true
-         style="background: url('https://w.wallhaven.cc/full/r2/wallhaven-r25q5w.jpg') no-repeat center center;
+         style="background: url('https://photo7n.gracg.com/1581931900_1_64431f55f88218e426b763e83233b72d.jpg!1200W') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
@@ -166,7 +166,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      79 字
+      878 字
     </span>
   
 
@@ -176,7 +176,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      1
+      21
        分钟
     </span>
   
@@ -209,12 +209,121 @@
             <h1 style="display: none">Maximum subsequence sum problem</h1>
             
             <div class="markdown-body" id="post-body">
-              <h1>three algorithms with different complexity for that problem</h1>
+              <h1>Three algorithms with different complexity for that problem</h1>
 <p>Recently i have read several chapters of 《introduction to algorithms》.After reading it,i think have a general overview on how to solve the maximum subsequence problem .So i realized it by template and i want to share three algorithms with different complexity with you.</p>
 <h2 id="O-N-sup-2-sup">O(N <sup>2</sup>)</h2>
-<p>this algorithm simply traverse the sequence, it is stupid but easy to understand.I realize it by using the reference to the array</p>
-<div class="hljs"><pre><code class="hljs C++">
-</code></pre></div>
+<p>this algorithm simply traverse the sequence, it is stupid but easy to understand.I realize it by using the reference to the array.</p>
+<div class="hljs"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T, <span class="hljs-keyword">size_t</span> N&gt;
+<span class="hljs-function">T <span class="hljs-title">maxsub_slow</span><span class="hljs-params">(T(&amp;seq)[N])</span></span>&#123;
+	T maxsum = <span class="hljs-number">0</span>;
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">size_t</span> i = <span class="hljs-number">0</span>; i &lt; N; i++)
+	&#123;
+		T thissum = <span class="hljs-number">0</span>;<span class="hljs-comment">// i means the head of the subsequence</span>
+		<span class="hljs-keyword">for</span> (<span class="hljs-keyword">size_t</span> j = i; j &lt; N; j++) &#123;
+			thissum += seq[j];<span class="hljs-comment">//j is meant to traverse the remain sequence</span>
+            <span class="hljs-keyword">if</span> (thissum &gt; maxsum) &#123;
+				maxsum = thissum;
+			&#125;
+		&#125;
+	&#125;
+	<span class="hljs-keyword">return</span> maxsum;
+&#125;</code></pre></div>
+<blockquote>
+<p>the logical of this algorithm is just use the loop to traverse it.Thus,it is inefficient</p>
+</blockquote>
+<h2 id="O-N-lgN">O(N lgN)</h2>
+<p>this algorithm adopt the idea of divide and conquer. It split the problem into three part.</p>
+<ol>
+<li>subsequence from begin to the middle</li>
+<li>subsequence from middle to the end</li>
+<li>subsequence contains and span the middle</li>
+</ol>
+<p>For the first and the second one,we can use recursion to solve it and the base situation is the sequence with only one element.For the third one,we can simply loop from the middle to the left  and then loop from the middle to the right.Finally,we add two part together and compare with 1 and 2 to get the answer. The recursive equation is T(n)=2T(n/2)+T(1)*n,you can use the tree or substitution method or mathematical induction to obtain the complexity is O(NlgN).The code is as followed,i changed the way to achieve it.</p>
+<div class="hljs"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;
+<span class="hljs-comment">// nlgn for big O notation</span>
+<span class="hljs-function">T <span class="hljs-title">maxsub_slow</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-built_in">vector</span>&lt;T&gt;&amp; <span class="hljs-built_in">array</span>, <span class="hljs-keyword">int</span> <span class="hljs-built_in">begin</span>, <span class="hljs-keyword">int</span> <span class="hljs-built_in">end</span>)</span> </span>&#123;
+	<span class="hljs-keyword">if</span> (<span class="hljs-built_in">begin</span> == <span class="hljs-built_in">end</span>) &#123;
+		<span class="hljs-keyword">if</span> (<span class="hljs-built_in">array</span>[<span class="hljs-built_in">begin</span>] &gt;= <span class="hljs-number">0</span>)<span class="hljs-keyword">return</span> <span class="hljs-built_in">array</span>[<span class="hljs-built_in">begin</span>];
+		<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+	&#125;
+	<span class="hljs-keyword">int</span> center = (<span class="hljs-built_in">begin</span> + <span class="hljs-built_in">end</span>) / <span class="hljs-number">2</span>;
+	T left = maxsub_slow(<span class="hljs-built_in">array</span>, <span class="hljs-built_in">begin</span>, center);
+	T right = maxsub_slow(<span class="hljs-built_in">array</span>, center + <span class="hljs-number">1</span>, <span class="hljs-built_in">end</span>);
+	T leftbound = <span class="hljs-number">0</span>, leftmaxbound = <span class="hljs-number">0</span>;
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = center; i &gt;= <span class="hljs-built_in">begin</span>; i--) &#123;
+		leftbound += <span class="hljs-built_in">array</span>[i];
+		<span class="hljs-keyword">if</span> (leftbound &gt; leftmaxbound) &#123;
+			leftmaxbound = leftbound;
+		&#125;
+	&#125;
+	T rightbound = <span class="hljs-number">0</span>, rightmaxbound = <span class="hljs-number">0</span>;
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = center + <span class="hljs-number">1</span>; i &lt;= <span class="hljs-built_in">end</span>; i++) &#123;
+		rightbound += <span class="hljs-built_in">array</span>[i];
+		<span class="hljs-keyword">if</span> (rightbound &gt; rightmaxbound) &#123;
+			rightmaxbound = rightbound;
+		&#125;
+	&#125;
+	T <span class="hljs-keyword">final</span> = leftmaxbound + rightmaxbound;
+	<span class="hljs-keyword">auto</span> ret = &#123; left, right, <span class="hljs-keyword">final</span> &#125;;
+	<span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">max</span>(ret);
+&#125;
+<span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;
+<span class="hljs-function">T <span class="hljs-title">maxsub_slow</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-built_in">vector</span>&lt;T&gt;&amp; <span class="hljs-built_in">array</span>)</span> </span>&#123;
+	<span class="hljs-keyword">return</span> maxsub_slow(<span class="hljs-built_in">array</span>, <span class="hljs-number">0</span>, <span class="hljs-built_in">array</span>.<span class="hljs-built_in">size</span>() - <span class="hljs-number">1</span>);
+&#125;</code></pre></div>
+<h2 id="O-N">O(N)</h2>
+<p>The third algorithm is the most clever one since its complexity is only O(N),i will first attach my code and then explain it.</p>
+<div class="hljs"><pre><code class="hljs C++"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt;
+<span class="hljs-function">T <span class="hljs-title">maxsub_fast</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-built_in">vector</span>&lt;T&gt;&amp; seq)</span> </span>&#123;
+	<span class="hljs-keyword">int</span> thissum=<span class="hljs-number">0</span>, maxsum = <span class="hljs-number">0</span>;
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">size_t</span> i = <span class="hljs-number">0</span>; i &lt; seq.<span class="hljs-built_in">size</span>(); i++)
+	&#123;
+		thissum += seq[i];
+		<span class="hljs-keyword">if</span> (thissum &gt; maxsum)
+		&#123;
+			maxsum = thissum;
+		&#125;
+		<span class="hljs-keyword">if</span> (thissum &lt; <span class="hljs-number">0</span>) &#123;
+			thissum = <span class="hljs-number">0</span>;
+		&#125;
+	&#125;
+	<span class="hljs-keyword">return</span> maxsum;
+&#125;</code></pre></div>
+<p>The core and critical idea of this algorithm is <code>if (thissum &lt; 0) {thissum = 0;}</code>because it is impossible that the subsequence started with a negative number or ended with a negative number.Moreover,when it comes to a sequence with <code>sum &lt; 0</code> you can also ignore it.Suppose the array starts with i and ends with j and j is the first index that make the sum of the array become to 0,for any p in [i,j],sum([p,j]) is smaller than sum([i,j]),because sum[i,p] must be positive.<br>
+So when sum([i,j])&lt;0 you can just let i jump to i+1,which dramatically optimize the algorithm.</p>
+<h2 id="test-of-the-time-cosume">test of the time cosume</h2>
+<p>the test code(use variadic template,i think it is a clever method)</p>
+<div class="hljs"><pre><code class="hljs C++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;ctime&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;utility&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-built_in">std</span>::clock;
+<span class="hljs-keyword">using</span> <span class="hljs-built_in">std</span>::forward;
+<span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> f,<span class="hljs-keyword">typename</span> ...args&gt;
+<span class="hljs-function"><span class="hljs-keyword">double</span> <span class="hljs-title">codetime</span><span class="hljs-params">(f funtion, args&amp;&amp;...arg)</span> </span>&#123;
+	<span class="hljs-keyword">double</span> start = clock();
+	funtion(forward&lt;args&gt;(arg)...);
+	<span class="hljs-keyword">double</span> <span class="hljs-built_in">end</span> = clock();
+	<span class="hljs-keyword">return</span> (<span class="hljs-built_in">end</span> - start) /CLOCKS_PER_SEC;
+&#125;</code></pre></div>
+<p>and i select several dataset to test the time consume</p>
+<div class="hljs"><pre><code class="hljs C++"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>&#123;
+    <span class="hljs-keyword">int</span> a[<span class="hljs-number">100000</span>];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">100000</span>; i++) &#123;
+        a[i] = rand();
+    &#125;
+    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt;test(a, a + <span class="hljs-keyword">sizeof</span>(a) / <span class="hljs-keyword">sizeof</span>(<span class="hljs-keyword">int</span>));
+    <span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"the first one "</span> &lt;&lt; codetime(maxsub_slow0&lt;<span class="hljs-keyword">int</span>, <span class="hljs-number">100000</span>&gt;, a) &lt;&lt; <span class="hljs-string">"     "</span> &lt;&lt; maxsub_slow0(a) &lt;&lt; <span class="hljs-built_in">endl</span>;
+    <span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"the second one "</span> &lt;&lt; codetime(maxsub_slow1&lt;<span class="hljs-keyword">int</span>&gt;,test, <span class="hljs-number">0</span>, <span class="hljs-number">99999</span>)&lt;&lt;<span class="hljs-string">"    "</span>&lt;&lt;maxsub_slow1(test,<span class="hljs-number">0</span>,<span class="hljs-number">99999</span>) &lt;&lt; <span class="hljs-built_in">endl</span>;
+    <span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"the third one "</span> &lt;&lt; codetime(maxsub_fast&lt;<span class="hljs-keyword">int</span>&gt;,test) &lt;&lt;<span class="hljs-string">"     "</span>&lt;&lt;maxsub_fast(test)&lt;&lt;<span class="hljs-built_in">endl</span>;
+&#125;</code></pre></div>
+<p>I open the O2 optimize,here comes the result.</p>
+<blockquote>
+<p>the first one 4.92     1643186939<br>
+the second one 0.086    1643186939<br>
+the third one 0.005     1643186939</p>
+</blockquote>
+<h2 id="summary">summary</h2>
+<p>I introduce several algorithms with different complexity and analyse it.Hope it could help you.</p>
+
             </div>
             <hr>
             <div>
