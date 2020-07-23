@@ -154,7 +154,7 @@
 </nav>
 
     <div class="banner intro-2" id="background" parallax=true
-         style="background: url('https://w.wallhaven.cc/full/83/wallhaven-83ywmo.jpg') no-repeat center center;
+         style="background: url('https://w.wallhaven.cc/full/2e/wallhaven-2evglg.jpg') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
@@ -178,7 +178,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      527 字
+      1.2k 字
     </span>
   
 
@@ -188,7 +188,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      13
+      29
        分钟
     </span>
   
@@ -259,6 +259,157 @@
 <ul>
 <li><strong>std::unique_ptr embodies exclusive ownership semantics.</strong></li>
 <li>std::unique_ptr is thus a move-only type.</li>
+<li>Only non-const unique_ptr can transfer the ownership of the managed object to another unique_ptr.</li>
+<li>you can specify the deleter by adding the second parameter</li>
+<li>for the shared one,you don’t need to specify the type</li>
+<li>for the unique one you need to specify the type</li>
+<li>it is vaild to return a unique pointer,because the unique pointer in the call stack is ready to be destroyed</li>
+</ul>
+<div class="hljs"><pre><code class="hljs C++"><span class="hljs-keyword">auto</span> unique_deleter = [](<span class="hljs-keyword">int</span>* p) &#123;
+    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"unique_ptr delete:"</span> &lt;&lt; *p &lt;&lt; <span class="hljs-string">"\n"</span>;
+    <span class="hljs-keyword">delete</span> p;
+&#125;;
+
+<span class="hljs-keyword">auto</span> shared_deleter = [](<span class="hljs-keyword">int</span>* p) &#123;
+    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"shared_ptr delete:"</span> &lt;&lt; *p &lt;&lt; <span class="hljs-string">"\n"</span>;
+    <span class="hljs-keyword">delete</span> p;
+&#125;;
+
+<span class="hljs-keyword">auto</span> shared_deleter_check_nullptr = [](<span class="hljs-keyword">int</span>* p) &#123;
+    <span class="hljs-keyword">if</span> (p != <span class="hljs-literal">nullptr</span>)
+    &#123;
+        <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"shared_ptr2 delete:"</span> &lt;&lt; *p &lt;&lt; <span class="hljs-string">"\n"</span>;
+        <span class="hljs-keyword">delete</span> p;
+    &#125;
+    <span class="hljs-keyword">else</span>
+    &#123;
+        <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"shared_ptr2 is null\n"</span>;
+    &#125;
+&#125;;
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>
+<span class="hljs-function"></span>&#123;
+    &#123;
+        std::unique_ptr&lt;int, decltype(unique_deleter)&gt; pUniquePtr(nullptr, unique_deleter);
+        std::unique_ptr&lt;int, decltype(unique_deleter)&gt; pUniquePtr2(new int(5), unique_deleter);
+        <span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-title">pSharedPtr</span><span class="hljs-params">(<span class="hljs-literal">nullptr</span>, shared_deleter_check_nullptr)</span></span>;
+        <span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-title">pSharedPtr2</span><span class="hljs-params">(<span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>(<span class="hljs-number">10</span>), shared_deleter)</span></span>;
+        <span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-title">pSharedPtr3</span><span class="hljs-params">(<span class="hljs-literal">nullptr</span>, shared_deleter)</span></span>;
+    &#125;
+&#125;</code></pre></div>
+<p>explanation:(the sequence corresponds to the code)</p>
+<ol>
+<li>
+<p>don’t call the unique_deleter,because the compiler will first identify whether it is nullptr</p>
+</li>
+<li>
+<p>call the unique_deleter,and the type of the deleter is determined at the compile time.</p>
+</li>
+<li>
+<ol start="4">
+<li>
+<ol start="5">
+<li>no matter whether it is nullptr or not,always call the deleter,because the compiler use the reference count to determine whether to call the deleter.5 has a run time error because don’t check whether it is nullptr</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p><strong>output</strong></p>
+<blockquote>
+<p>shared_ptr delete:10<br>
+shared_ptr2 is null<br>
+unique_ptr delete:5</p>
+</blockquote>
+<div class="hljs"><pre><code class="hljs C++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;memory&gt;</span></span>
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Foo</span> &#123;</span>
+    Foo(<span class="hljs-keyword">int</span> _val) : val(_val) &#123; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Foo...\n"</span>; &#125;
+    ~Foo() &#123; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"~Foo...\n"</span>; &#125;
+    <span class="hljs-keyword">int</span> val;
+&#125;;
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>
+<span class="hljs-function"></span>&#123;
+    <span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;Foo&gt; <span class="hljs-title">up1</span><span class="hljs-params">(<span class="hljs-keyword">new</span> Foo(<span class="hljs-number">1</span>))</span></span>;
+    <span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;Foo&gt; <span class="hljs-title">up2</span><span class="hljs-params">(<span class="hljs-keyword">new</span> Foo(<span class="hljs-number">2</span>))</span></span>;
+
+    up1.swap(up2);
+
+    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"up1-&gt;val:"</span> &lt;&lt; up1-&gt;val &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"up2-&gt;val:"</span> &lt;&lt; up2-&gt;val &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+&#125;</code></pre></div>
+<p><strong>output</strong>:</p>
+<blockquote>
+<p>Foo…<br>
+Foo…<br>
+up1-&gt;val:2<br>
+up2-&gt;val:1<br>
+~Foo…<br>
+~Foo…</p>
+</blockquote>
+<h2 id="copy-and-swap">copy and swap</h2>
+<p>we use copy and swap for three things</p>
+<ul>
+<li>code duplication</li>
+<li>providing a strong exception guarantee.</li>
+<li>avoid self copy</li>
+<li>faster speed</li>
+</ul>
+<p><strong>pass by value</strong></p>
+<p>because we can utilize compiler to do the value copy for you.You just need to implement the move and copy constructor</p>
+<blockquote>
+<p>i learned from stackoverflow and rewrite it</p>
+</blockquote>
+<div class="hljs"><pre><code class="hljs C++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;algorithm&gt; // std::copy</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;cstddef&gt; // std::size_t</span></span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">dumb_array</span></span>
+<span class="hljs-class">&#123;</span>
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-comment">// (default) constructor</span>
+    dumb_array(<span class="hljs-built_in">std</span>::<span class="hljs-keyword">size_t</span> <span class="hljs-built_in">size</span> = <span class="hljs-number">0</span>)
+        : mSize(<span class="hljs-built_in">size</span>),
+        mArray(mSize ? <span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[mSize]() : <span class="hljs-literal">nullptr</span>)
+    &#123;
+    &#125;
+    dumb_array(dumb_array&amp;&amp; other) :dumb_array() &#123;
+        swap(*<span class="hljs-keyword">this</span>, other);
+    &#125;
+    dumb_array(<span class="hljs-keyword">const</span> dumb_array&amp; other)
+        : mSize(other.mSize),
+        mArray(mSize ? <span class="hljs-keyword">new</span> <span class="hljs-keyword">int</span>[mSize] : <span class="hljs-literal">nullptr</span>)
+    &#123;
+        <span class="hljs-built_in">std</span>::copy(other.mArray, other.mArray + mSize, mArray);
+    &#125;
+        ~dumb_array()
+    &#123;
+        <span class="hljs-keyword">delete</span>[] mArray;
+    &#125;
+        <span class="hljs-function"><span class="hljs-keyword">friend</span> <span class="hljs-keyword">void</span> <span class="hljs-title">swap</span><span class="hljs-params">(dumb_array&amp; fiest, dumb_array&amp; second)</span></span>;
+        dumb_array&amp; <span class="hljs-keyword">operator</span> =(dumb_array a) &#123;
+            swap(*<span class="hljs-keyword">this</span>, a);
+            <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>;
+    &#125;
+        dumb_array&amp; <span class="hljs-keyword">operator</span> =(dumb_array &amp;&amp;a)&#123;
+            swap(*<span class="hljs-keyword">this</span>, a);
+            <span class="hljs-keyword">return</span> *<span class="hljs-keyword">this</span>;
+        &#125;
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-built_in">std</span>::<span class="hljs-keyword">size_t</span> mSize;
+    <span class="hljs-keyword">int</span>* mArray;
+&#125;;
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">swap</span><span class="hljs-params">(dumb_array&amp; first, dumb_array&amp; second)</span> </span>&#123;
+    <span class="hljs-keyword">using</span> <span class="hljs-built_in">std</span>::swap;
+    swap(first.mArray, second.mArray);
+    swap(first.mSize, second.mSize);
+&#125;</code></pre></div>
+<p>you may wonder why the compiler will choose the swap implemented by ourself,because the rules of template function,our swap are more specific.</p>
+<h2 id="conclusion">conclusion</h2>
+<ul>
+<li>use unique_ptr rather than raw pointer</li>
+<li>use copy and swap to instead move constructor and copy operator</li>
+<li>wrap the procedure of allocate resources by a class or a pointer.</li>
 </ul>
 
             </div>
