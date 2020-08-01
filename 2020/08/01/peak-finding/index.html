@@ -297,13 +297,13 @@ $$</p>
 <p>First you select the middle row and find the biggest element.We represent the index of the biggest element as max_index<br>
 $$<br>
 \begin{cases}<br>
-return\ a[0:\frac{m}{2}-1 ][0:n] &amp; a[\frac{m}{2}][max_index] &lt; a[\frac{n}{2}-1][max_index]\\<br>
-return\ a[\frac{m}{2}+1:m ][0:n] &amp; a[\frac{m}{2}][max_index] &lt; a[\frac{n}{2}+1][max_index]\\<br>
-return\ a[\frac{m}{2}][max_index] &amp; a[\frac{m}{2}] \geq a[\frac{m}{2}+1][max_index]\ and\\a[\frac{m}{2}][max_index] \geq a[\frac{m}{2}-1][max_index]<br>
+return\ a[0:\frac{m}{2}-1 ][0:n] &amp; a[\frac{m}{2}][max\_index] &lt; a[\frac{n}{2}-1][max\_index]\\<br>
+return\ a[\frac{m}{2}+1:m ][0:n] &amp; a[\frac{m}{2}][max\_index] &lt; a[\frac{n}{2}+1][max\_index]\\<br>
+return\ a[\frac{m}{2}][max\_index] &amp; a[\frac{m}{2}] \geq a[\frac{m}{2}+1][max\_index]\ and\\a[\frac{m}{2}][max\_index] \geq a[\frac{m}{2}-1][max\_index]<br>
 \end{cases}<br>
 $$</p>
 <blockquote>
-<p>the essence of this idea is similar to the 1D one and you can imagine compress the 2D matrix into an 1D array and use the max element to instead the whole row and it becomes to a 1D problem.You could also use prove that the $a[0:\frac{m}{2}-1 ][0:n]$ or the $a[\frac{m}{2}+1:m ][0:n]$ must have a peek,(because $a[0:\frac{m}{2}-1 ][max_index]$ become a lower edge and the initial edge is a lower edge so there must exist a peek. it quite like the fermat theorem in calculus)</p>
+<p>the essence of this idea is similar to the 1D one and you can imagine compress the 2D matrix into an 1D array and use the max element to instead the whole row and it becomes to a 1D problem.You could also use prove that the $a[0:\frac{m}{2}-1 ][0:n]$ or the $a[\frac{m}{2}+1:m ][0:n]$ must have a peek,(because $a[0:\frac{m}{2}-1 ][max\_index]$ become a lower edge and the initial edge is a lower edge so there must exist a peek. it quite like the fermat theorem in calculus)</p>
 </blockquote>
 <h3 id="Code-for-2D">Code for 2D</h3>
 <div class="hljs"><pre><code class="hljs C++"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;
