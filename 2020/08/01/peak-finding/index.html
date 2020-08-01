@@ -237,7 +237,7 @@
 <p>Suppose when $n=k$ it is true,which means an array of length k has at least one peek</p>
 <p>$$<br>
 \begin{pmatrix}<br>
-a_0&amp;&amp; a_1 &amp;&amp; a_2&amp;&amp;\cdots &amp;&amp; a_k \<br>
+a_0&amp;&amp; a_1 &amp;&amp; a_2&amp;&amp;\cdots &amp;&amp; a_k \\<br>
 \end{pmatrix}<br>
 $$</p>
 <p>Then it comes to $n=k+1$ we append an element to the array and it comes to two cases</p>
@@ -254,13 +254,13 @@ $$</p>
 <p>Suppose you have an array</p>
 <p>$$<br>
 \begin{pmatrix}<br>
-a_0&amp;&amp; a_1 &amp;&amp; a_2&amp;&amp;\cdots &amp;&amp; a_n \<br>
+a_0&amp;&amp; a_1 &amp;&amp; a_2&amp;&amp;\cdots &amp;&amp; a_n \\<br>
 \end{pmatrix}<br>
 $$</p>
 <p>$$<br>
 \begin{cases}<br>
-return\ a[0:\frac{n}{2}-1 ] &amp; a[\frac{n}{2}] &lt; a[\frac{n}{2}-1]\<br>
-return\ a[\frac{n}{2}+1:n ] &amp; a[\frac{n}{2}] &lt; a[\frac{n}{2}+1]\<br>
+return\ a[0:\frac{n}{2}-1 ] &amp; a[\frac{n}{2}] &lt; a[\frac{n}{2}-1]\\<br>
+return\ a[\frac{n}{2}+1:n ] &amp; a[\frac{n}{2}] &lt; a[\frac{n}{2}+1]\\<br>
 return\ a[\frac{n}{2}] &amp; a[\frac{n}{2}] \geq a[\frac{n}{2}+1]\ and\ a[\frac{n}{2}] \geq a[\frac{n}{2}-1]<br>
 \end{cases}<br>
 $$</p>
@@ -288,17 +288,17 @@ and the complexity is $\log_2N$</p>
 <p>Suppose you have an array</p>
 <p>$$<br>
 \begin{pmatrix}<br>
-a_{00}&amp;&amp; a_{01} &amp;&amp; a_{02}&amp;&amp;\cdots &amp;&amp; a_{0n} \<br>
-a_{10}&amp;&amp; a_{11} &amp;&amp; a_{12}&amp;&amp;\cdots &amp;&amp; a_{1n}\<br>
-\vdots &amp;&amp; \vdots  &amp;&amp; \vdots &amp;&amp; \ddots &amp;&amp; \vdots \<br>
-a_{m0}&amp;&amp; a_{m1} &amp;&amp; a_{m2}&amp;&amp;\cdots &amp;&amp; a_{mn} \<br>
+a_{00}&amp;&amp; a_{01} &amp;&amp; a_{02}&amp;&amp;\cdots &amp;&amp; a_{0n} \\<br>
+a_{10}&amp;&amp; a_{11} &amp;&amp; a_{12}&amp;&amp;\cdots &amp;&amp; a_{1n}\\<br>
+\vdots &amp;&amp; \vdots  &amp;&amp; \vdots &amp;&amp; \ddots &amp;&amp; \vdots \\<br>
+a_{m0}&amp;&amp; a_{m1} &amp;&amp; a_{m2}&amp;&amp;\cdots &amp;&amp; a_{mn} \\<br>
 \end{pmatrix}<br>
 $$</p>
 <p>First you select the middle row and find the biggest element.We represent the index of the biggest element as max_index<br>
 $$<br>
 \begin{cases}<br>
-return\ a[0:\frac{m}{2}-1 ][0:n] &amp; a[\frac{m}{2}][max_index] &lt; a[\frac{n}{2}-1][max_index]\<br>
-return\ a[\frac{m}{2}+1:m ][0:n] &amp; a[\frac{m}{2}][max_index] &lt; a[\frac{n}{2}+1][max_index]\<br>
+return\ a[0:\frac{m}{2}-1 ][0:n] &amp; a[\frac{m}{2}][max_index] &lt; a[\frac{n}{2}-1][max_index]\\<br>
+return\ a[\frac{m}{2}+1:m ][0:n] &amp; a[\frac{m}{2}][max_index] &lt; a[\frac{n}{2}+1][max_index]\\<br>
 return\ a[\frac{m}{2}][max_index] &amp; a[\frac{m}{2}] \geq a[\frac{m}{2}+1][max_index]\ and\ a[\frac{m}{2}][max_index] \geq a[\frac{m}{2}-1][max_index]<br>
 \end{cases}<br>
 $$</p>
@@ -530,8 +530,40 @@ $T(m,n)=T(\frac{m}{2},n)+O(n)$ and the complexity is $n\log_2m$</p>
   
 
   
-    <!-- KaTeX -->
-    <link  rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.11.1/katex.min.css" />
+    <!-- MathJax -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        options: {
+          renderActions: {
+            findScript: [10, doc => {
+              document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                const display = !!node.type.match(/; *mode=display/);
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                const text = document.createTextNode('');
+                node.parentNode.replaceChild(text, node);
+                math.start = { node: text, delim: '', n: 0 };
+                math.end = { node: text, delim: '', n: 0 };
+                doc.math.push(math);
+              });
+            }, '', false],
+            insertedScript: [200, () => {
+              document.querySelectorAll('mjx-container').forEach(node => {
+                let target = node.parentNode;
+                if (target.nodeName.toLowerCase() === 'li') {
+                  target.parentNode.classList.add('has-jax');
+                }
+              });
+            }, '', false]
+          }
+        }
+      };
+    </script>
+
+    <script async src="https://cdn.staticfile.org/mathjax/3.0.5/es5/tex-svg.js" ></script>
+
   
 
 
