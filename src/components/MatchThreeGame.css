@@ -1,0 +1,216 @@
+.match-three-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw; /* 填满视口宽度 */
+  height: 100vh; /* 填满视口高度 */
+  background-color: #FFB6C1; /* 主色：浅粉 */
+  padding: 10px; /* 稍微减小内边距 */
+  box-sizing: border-box;
+  font-family: sans-serif;
+  position: relative; /* 用于loading遮罩定位 */
+  overflow: hidden; /* 防止内容溢出导致滚动条 */
+}
+
+.game-status {
+  display: flex;
+  justify-content: space-between;
+  width: 90%; /* 相对于父容器的宽度 */
+  max-width: 600px; /* 限制最大宽度，避免在大屏幕上过宽 */
+  margin-bottom: 15px; /* 稍微减小下边距 */
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* 确保其宽度不超过游戏网格 */
+  /* width: calc(min(90vw, 90vh) - 20px); */ /* 尝试与 game-grid 宽度关联 */
+}
+
+.status-item {
+  font-size: 1.2em;
+  color: #87CEFA; /* 辅助色：Chiikawa蓝 */
+  font-weight: bold;
+}
+
+.status-item span[role="img"] {
+  margin-right: 5px;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  /* 使用vmin确保在不同屏幕尺寸下尽可能大且保持正方形 */
+  width: calc(min(90vw, 90vh) - 40px); /* 减去父容器padding和自身padding */
+  height: calc(min(90vw, 90vh) - 40px); /* 减去父容器padding和自身padding */
+  max-width: 800px; /* 限制最大尺寸，避免在大屏幕上过大 */
+  max-height: 800px; /* 限制最大尺寸，避免在大屏幕上过大 */
+  aspect-ratio: 1 / 1; /* 保持正方形 */
+  gap: clamp(2px, 0.5vmin, 5px); /* 响应式的间隙 */
+  background-color: #87CEFA; /* 辅助色：Chiikawa蓝 */
+  padding: clamp(5px, 1vmin, 10px); /* 响应式的内边距 */
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.grid-row {
+  /* ग्रिड लेआउट में पंक्ति की आवश्यकता नहीं है, सीधे सेल को ग्रिड में रखें */
+  /* This class might not be strictly necessary with display: grid on parent */
+}
+
+.grid-cell {
+  /* Ensure images fit within the cell and are centered */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Hide parts of image that don't fit */
+  background-color: white;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* font-size: 1.8em; /* 表情大小 - no longer needed for emoji */
+  /* Style for images within grid cells */
+  img {
+    max-width: 90%; /* Ensure image is not wider than cell */
+    max-height: 90%; /* Ensure image is not taller than cell */
+    object-fit: contain; /* Scale image to fit while maintaining aspect ratio */
+  }
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s ease, background-color 0.2s ease, opacity 0.3s ease; /* 基础过渡 */
+}
+
+.grid-cell:hover {
+  transform: scale(1.05);
+  background-color: #f0f0f0;
+}
+
+.grid-cell.selected {
+  outline: 3px solid #FFB6C1; /* 主色：浅粉 */
+  box-shadow: 0 0 10px #FFB6C1;
+}
+
+.grid-cell.clearing {
+  opacity: 0; /* 渐隐消失 */
+  transform: scale(0.5);
+}
+
+/* Game Over Screen */
+.game-over-screen {
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  color: #333;
+}
+
+.game-over-screen h2 {
+  color: #87CEFA; /* 辅助色：Chiikawa蓝 */
+  font-size: 2.2em;
+  margin-bottom: 15px;
+}
+
+.game-over-screen .final-score {
+  font-size: 1.3em;
+  margin-bottom: 10px;
+  color: #FFB6C1; /* 主色：浅粉 */
+}
+
+.game-over-screen .evaluation {
+  font-size: 1.1em;
+  margin-bottom: 25px;
+  color: #555;
+}
+
+.restart-button, .back-button {
+  background-color: #FFB6C1; /* 主色：浅粉 */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px; /* 圆形按钮 */
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  margin: 0 10px;
+}
+
+.restart-button:hover, .back-button:hover {
+  background-color: #f8a5b0;
+}
+
+.restart-button:active, .back-button:active {
+  transform: scale(0.95); /* 按钮按压效果 */
+}
+
+.back-button {
+  background-color: #87CEFA; /* 辅助色：Chiikawa蓝 */
+}
+
+.back-button:hover {
+  background-color: #76bde9;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.loading-overlay p {
+  font-size: 1.5em;
+  color: #87CEFA;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+/* Popup Overlay & Content */
+.popup-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20; /* Higher than loading overlay */
+}
+
+.popup-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  color: #333;
+  max-width: 80%;
+}
+
+.popup-content p {
+  font-size: 1.4em;
+  color: #87CEFA; /* Chiikawa blue for text */
+  margin-top: 15px;
+  margin-bottom: 0;
+  font-weight: bold;
+}
+
+.popup-image {
+  max-width: 100px; /* Adjust as needed */
+  max-height: 100px; /* Adjust as needed */
+  border-radius: 10px;
+  margin-bottom: 10px; /* Space between image and text if image is on top */
+}

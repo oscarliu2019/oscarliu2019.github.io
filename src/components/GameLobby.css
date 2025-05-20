@@ -1,0 +1,103 @@
+.game-lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #FFB6C1; /* 主色：浅粉 */
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+.lobby-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px; /* 保持原有的标题下边距效果 */
+}
+
+.lobby-logo {
+  width: 60px; /* 您可以根据实际logo调整 */
+  height: 60px; /* 您可以根据实际logo调整 */
+  margin-right: 15px;
+  object-fit: contain; /* 保持图片比例 */
+}
+
+.lobby-title {
+  color: #87CEFA; /* 辅助色：Chiikawa蓝 */
+  font-size: 2.5em;
+  /* margin-bottom: 30px; */ /* 已移至 .lobby-header */
+  cursor: pointer; /* 为点击彩蛋添加指示 */
+  user-select: none; /* 防止文本被选中 */
+}
+
+.secret-message {
+  color: #87CEFA; /* 辅助色：Chiikawa蓝 */
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  animation: fadeInOut 3s forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+.game-entries {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 600px;
+}
+
+.game-entry {
+  background-color: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 150px; /* 固定宽度 */
+  height: 180px; /* 固定高度，确保对齐 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-entry:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.game-icon-img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  object-fit: cover; /* 确保图片覆盖区域，可能会裁剪 */
+  background-color: #f0f0f0; /* 图片加载前的占位符颜色 */
+}
+
+.game-entry.locked .game-icon-img {
+  filter: grayscale(80%); /* 使锁定的图标变灰 */
+}
+
+.game-entry p {
+  color: #333;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin: 0;
+}
+
+.game-entry.locked p {
+  color: #888;
+}
+
+.game-entry.locked .gift-box-icon {
+  filter: grayscale(80%);
+}

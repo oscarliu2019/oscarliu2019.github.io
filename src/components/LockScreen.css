@@ -1,0 +1,77 @@
+.lock-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #FFB6C1; /* 主色：浅粉 */
+  /* 可以在这里添加Chiikawa背景图 */
+  /* background-image: url('../assets/chiikawa-bg.png'); */
+  /* background-size: cover; */
+  /* background-position: center; */
+  font-family: sans-serif;
+}
+
+.lock-screen-content {
+  background-color: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+.lock-screen-content h1 {
+  color: #87CEFA; /* 辅助色：Chiikawa蓝 */
+  margin-bottom: 10px;
+  font-size: 2em;
+}
+
+.lock-screen-content .question {
+  color: #555;
+  margin-bottom: 20px;
+  font-size: 1.1em;
+}
+
+.lock-screen-content input[type="text"] {
+  width: calc(100% - 22px); /* 减去padding和border */
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.submit-button {
+  background-color: #FFB6C1; /* 主色：浅粉 */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px; /* 圆形按钮 */
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.submit-button:hover {
+  background-color: #f8a5b0;
+}
+
+.submit-button:active {
+  transform: scale(0.95); /* 按钮按压效果 */
+}
+
+.error-message {
+  margin-top: 15px;
+  color: red;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-message span[role="img"] {
+  margin-right: 5px;
+  font-size: 1.2em;
+}

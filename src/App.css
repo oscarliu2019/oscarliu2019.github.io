@@ -1,38 +1,126 @@
+body, html, #root, .App {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #FFB6C1; /* 主背景色，与锁屏和游戏背景一致 */
+}
+
 .App {
-  text-align: center;
+  /* text-align: center; 已在各组件中处理 */
+  /* 移除原有的App-header等默认样式 */
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* 通用对话框/Modal样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明遮罩 */
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  align-items: center;
+  z-index: 1000; /*确保在最上层*/
+}
+
+.modal-content {
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 80%;
+}
+
+/* 云朵气泡样式 */
+.cloud-bubble {
+  background-color: white; 
+  color: #87CEFA; /* Chiikawa蓝文字 */
+  border-radius: 30px; /* 更圆润的边角 */
+  padding: 25px 35px;
+  position: relative;
+  font-size: 1.2em;
+  font-weight: bold;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 可选：为云朵添加一个小尾巴，纯CSS实现比较复杂，这里简化 */
+/* .cloud-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -15px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 20px solid white; 
+} */
+
+/* 音乐切换按钮样式 */
+.music-toggle-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 15px;
+  background-color: #FFB6C1; /* 浅粉 */
   color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 1001; /* 比 modal-overlay 高一点，确保可见 */
+  transition: background-color 0.3s ease;
 }
 
-.App-link {
-  color: #61dafb;
+.music-toggle-button:hover {
+  background-color: #f8a5b0;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* 通用圆形按钮样式 (如果需要在App.css中定义) */
+.chiikawa-button {
+  background-color: #FFB6C1; /* 浅粉 */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px; /* 圆形 */
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.chiikawa-button:hover {
+  background-color: #f8a5b0;
+}
+
+.chiikawa-button:active {
+  transform: scale(0.95);
+}
+
+/* 错误弹窗特定样式 */
+.error-modal-content {
+  background-color: #fff0f0; /* 淡红色背景 */
+  color: #d8000c; /* 深红色文字 */
+  border: 1px solid #d8000c;
+  padding: 20px 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 80%;
+  font-size: 1.1em;
+}
+
+.error-modal-content p {
+  margin: 0;
 }

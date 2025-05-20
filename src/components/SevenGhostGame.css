@@ -1,0 +1,279 @@
+.seven-ghost-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f8ff; /* AliceBlue */
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.loading-screen, .game-over-screen {
+  text-align: center;
+}
+
+.game-image {
+  max-width: 150px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.header-image {
+  max-width: 100px;
+  margin-bottom: 10px;
+}
+
+.game-title {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.sgg-button {
+  background-color: #ffc0cb; /* Pink */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.sgg-button:hover {
+  background-color: #ffb6c1; /* LightPink */
+}
+
+.sgg-button:disabled {
+  background-color: #d3d3d3; /* LightGray */
+  cursor: not-allowed;
+}
+
+.back-button.top-back-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.game-board {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 800px;
+  gap: 20px;
+}
+
+.player-area {
+  background-color: #fff0f5; /* LavenderBlush */
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.player-area h3 {
+  margin-top: 0;
+  color: #db7093; /* PaleVioletRed */
+}
+
+.ai-area {
+  border: 2px solid #add8e6; /* LightBlue */
+}
+
+.human-player-area {
+  border: 2px solid #90ee90; /* LightGreen */
+}
+
+.current-turn {
+  border-color: #ff6347; /* Tomato */
+  box-shadow: 0 0 10px #ff6347;
+}
+
+.cards-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 60px; /* Ensure area is visible even if empty */
+  align-items: center;
+}
+
+.hand-cards {
+  justify-content: center;
+}
+
+.card {
+  width: 50px;
+  height: 70px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+}
+
+.card.selected {
+  border-color: #ff6347; /* Tomato */
+  transform: translateY(-5px);
+  box-shadow: 0 0 8px #ff6347;
+}
+
+.card-value {
+  font-size: 1.2em;
+}
+
+.card-suit {
+  font-size: 0.8em;
+}
+
+/* Suit colors - optional */
+.card.spades .card-suit, .card.clubs .card-suit {
+  color: black;
+}
+.card.hearts .card-suit, .card.diamonds .card-suit {
+  color: red;
+}
+.card.joker .card-value {
+    font-size: 0.9em; /* Smaller for '大王', '小王' */
+}
+
+
+.card-back {
+  background-color: #b0c4de; /* LightSteelBlue */
+  color: #b0c4de;
+  justify-content: center;
+  align-items: center;
+  font-size: 2em;
+  cursor: default;
+}
+
+.discard-pile-area {
+  background-color: #fafad2; /* LightGoldenrodYellow */
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.play-info {
+  font-size: 0.9em;
+  color: #555;
+  margin-top: 5px;
+  width: 100%;
+  text-align: center;
+}
+
+.action-buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.game-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.game-log-area {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #e6e6fa; /* Lavender */
+  border-radius: 5px;
+  width: 100%;
+  max-width: 780px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.game-log-area h4 {
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+.game-log-area ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.game-log-area li {
+  padding: 3px 0;
+  border-bottom: 1px dashed #ccc;
+}
+
+.game-log-area li:last-child {
+  border-bottom: none;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.difficulty-selection-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+  min-height: calc(100vh - 40px); /* Adjust if you have a header/footer */
+  box-sizing: border-box;
+}
+
+.difficulty-selection-screen .game-image.chiikawa-welcome {
+  max-width: 150px;
+  margin-bottom: 20px;
+}
+
+.difficulty-selection-screen .game-title {
+  margin-bottom: 30px;
+}
+
+.difficulty-selection-screen .modal-buttons {
+  margin-bottom: 30px; /* Space before back button */
+}
+
+.sgg-button.difficulty-button {
+  padding: 12px 25px;
+  font-size: 1.1em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .card {
+    width: 40px;
+    height: 60px;
+  }
+  .card-value {
+    font-size: 1em;
+  }
+  .sgg-button {
+    padding: 8px 15px;
+    font-size: 0.9em;
+  }
+  .game-title {
+    font-size: 1.5em;
+  }
+  .back-button.top-back-button {
+    top: 10px;
+    right: 10px;
+    padding: 6px 10px;
+  }
+}
