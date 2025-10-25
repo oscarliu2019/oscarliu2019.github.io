@@ -1,0 +1,395 @@
+.duiduipeng-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f9f3e9;
+  font-family: 'Arial', sans-serif;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  padding: 8px 16px;
+  background-color: #ff8fab;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.back-button:hover {
+  background-color: #ff6b8a;
+}
+
+.game-header h1 {
+  margin: 0;
+  color: #ff8fab;
+  font-size: 28px;
+}
+
+.game-stats {
+  font-size: 16px;
+  color: #666;
+}
+
+.game-message {
+  margin: 10px 0 20px;
+  padding: 10px 20px;
+  background-color: #fff8e1;
+  border-radius: 20px;
+  color: #ff8fab;
+  font-weight: bold;
+  text-align: center;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.card-count {
+  background-color: #f0f0f0;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 14px;
+  color: #555;
+  border: 1px solid #ddd;
+}
+
+.start-game-button, .milk-guess-button, .wish-button {
+  padding: 10px 20px;
+  background-color: #ff8fab;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 20px;
+  transition: background-color 0.3s;
+}
+
+.start-game-button:hover, .milk-guess-button:hover, .wish-button:hover {
+  background-color: #ff6b8a;
+}
+
+.wish-button {
+  background-color: #ff9800;
+}
+
+.wish-button:hover {
+  background-color: #e68900;
+}
+
+.milk-guess-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.confirm-guess-button, .cancel-guess-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.confirm-guess-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.confirm-guess-button:hover {
+  background-color: #388e3c;
+}
+
+.cancel-guess-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.cancel-guess-button:hover {
+  background-color: #d32f2f;
+}
+
+.game-table {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 15px;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 20px;
+}
+
+.card {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+  perspective: 1000px;
+}
+
+.card-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card.matching {
+  animation: matchingPulse 0.8s ease-in-out;
+}
+
+@keyframes matchingPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(255, 143, 171, 0.7);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 143, 171, 0.7);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(255, 143, 171, 0.7);
+  }
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-front {
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotateY(180deg);
+}
+
+.card-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-back {
+  background-color: #ff8fab;
+}
+
+.card-back::before {
+  content: "?";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  color: white;
+}
+
+.card.visible .card-back {
+  background-color: #a5d6a7;
+}
+
+.card.visible .card-back::before {
+  content: "!";
+}
+
+.card.selected .card-front {
+  border: 3px solid #2196f3;
+  box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+}
+
+.card.wish-card .card-front {
+  border: 3px solid #ff9800;
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+}
+
+.card.milk-guess-card .card-front {
+  border: 3px solid #9c27b0;
+  box-shadow: 0 0 10px rgba(156, 39, 176, 0.5);
+}
+
+.card.removing {
+  animation: slideOut 0.5s ease-out forwards;
+}
+
+.card.new-card {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+@keyframes slideOut {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    transform: scale(0) rotate(-360deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.game-over {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.game-over h2 {
+  color: #ff8fab;
+  margin-top: 0;
+}
+
+.game-over p {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.game-over button {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #ff8fab;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.game-over button:hover {
+  background-color: #ff6b8a;
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-content h2 {
+  color: #ff8fab;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.modal-content p {
+  margin: 10px 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  background-color: #ff8fab;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.modal-buttons button:hover {
+  background-color: #ff6b8a;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+  .game-table {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+  }
+  
+  .card {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .game-header h1 {
+    font-size: 24px;
+  }
+}

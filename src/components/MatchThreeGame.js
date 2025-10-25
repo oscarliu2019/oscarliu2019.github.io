@@ -393,7 +393,7 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
                 className={`grid-cell ${selected && selected.row === rIndex && selected.col === cIndex ? 'selected' : ''}`}
                 onClick={() => !isCheckingMatches && handleCellClick(rIndex, cIndex)}
               >
-                {cell && <img src={process.env.PUBLIC_URL + cell} alt={`item-${rIndex}-${cIndex}`} />}
+                {cell && <img src={cell} alt={`item-${rIndex}-${cIndex}`} />}
               </div>
             ))}
           </div>

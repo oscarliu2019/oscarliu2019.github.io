@@ -1,0 +1,431 @@
+.what-to-eat-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.content-overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: #FFB6C1;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 1em;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #FFA0B4;
+}
+
+.game-title {
+  color: #87CEFA;
+  font-size: 2.5em;
+  margin: 40px 0 30px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* 菜单样式 */
+.menu-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+.menu-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.menu-option {
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  width: 300px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.menu-option:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.option-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.menu-option h2 {
+  color: #87CEFA;
+  margin: 10px 0;
+  font-size: 1.5em;
+}
+
+.menu-option p {
+  color: #666;
+  font-size: 1em;
+  line-height: 1.4;
+}
+
+/* 用户输入样式 */
+.user-input-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+}
+
+.input-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.food-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #87CEFA;
+  border-radius: 10px;
+  font-size: 1.1em;
+  resize: none;
+  margin-bottom: 20px;
+  font-family: inherit;
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.submit-button, .spin-button, .restart-button {
+  background-color: #87CEFA;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 12px 25px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover, .spin-button:hover, .restart-button:hover {
+  background-color: #6BB6D6;
+}
+
+.submit-button:disabled {
+  background-color: #CCCCCC;
+  cursor: not-allowed;
+}
+
+/* 选择屏幕样式 */
+.selection-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+.options-display {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.option-item {
+  background-color: white;
+  border-radius: 15px;
+  padding: 15px 20px;
+  font-size: 1.2em;
+  color: #333;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.option-item.highlighted {
+  background-color: #87CEFA;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(135, 206, 250, 0.4);
+}
+
+.result-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.result {
+  color: #FF6B6B;
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 20px;
+  animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+.result-image img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 5px solid #FFB6C1;
+  animation: rotate 3s infinite linear;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 结果弹窗样式 */
+.result-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.result-modal {
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: auto;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.result-modal-content {
+  padding: 30px;
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.close-modal-button {
+  background-color: #FFB6C1;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 12px 25px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.close-modal-button:hover {
+  background-color: #FFA0B4;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .game-title {
+    font-size: 2em;
+    margin: 30px 0 20px;
+  }
+  
+  .menu-options {
+    gap: 20px;
+  }
+  
+  .menu-option {
+    width: 250px;
+    padding: 20px;
+  }
+  
+  .option-image {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .menu-option h2 {
+    font-size: 1.3em;
+  }
+  
+  .menu-option p {
+    font-size: 0.9em;
+  }
+  
+  .food-input {
+    font-size: 1em;
+  }
+  
+  .options-display {
+    gap: 10px;
+  }
+  
+  .option-item {
+    padding: 12px 15px;
+    font-size: 1em;
+  }
+  
+  .result {
+    font-size: 1.5em;
+  }
+  
+  .result-image img {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-title {
+    font-size: 1.8em;
+    margin: 20px 0 15px;
+  }
+  
+  .menu-options {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .menu-option {
+    width: 90%;
+    max-width: 300px;
+    padding: 15px;
+  }
+  
+  .option-image {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .menu-option h2 {
+    font-size: 1.2em;
+  }
+  
+  .menu-option p {
+    font-size: 0.8em;
+  }
+  
+  .food-input {
+    font-size: 0.9em;
+    padding: 12px;
+  }
+  
+  .options-display {
+    gap: 8px;
+  }
+  
+  .option-item {
+    padding: 10px 12px;
+    font-size: 0.9em;
+  }
+  
+  .result {
+    font-size: 1.3em;
+  }
+  
+  .result-image img {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .submit-button, .spin-button, .restart-button, .back-button {
+    width: 80%;
+    max-width: 300px;
+  }
+  
+  .result-modal {
+    width: 95%;
+    max-width: 400px;
+  }
+  
+  .result-modal-content {
+    padding: 20px;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .close-modal-button, .restart-button {
+    width: 100%;
+  }
+}

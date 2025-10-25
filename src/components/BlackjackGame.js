@@ -7,21 +7,32 @@ const CARD_VALUES = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q'
 
 const getCardValue = (card) => {
   if (['J', 'Q', 'K'].includes(card.value)) return 10;
-  if (card.value === 'A') return 1; // Ace can be 1 or 11
+  if (card.value === 'A') return 11; // Ace is initially 11, will be adjusted in calculateHandValue if needed
   return parseInt(card.value);
 };
 
 const calculateHandValue = (hand) => {
   let value = 0;
   let aceCount = 0;
+  
+  // First, add up all non-ace cards
   hand.forEach(card => {
-    value += getCardValue(card);
-    if (card.value === 'A') aceCount++;
+    if (card.value === 'A') {
+      aceCount++;
+    } else {
+      value += getCardValue(card);
+    }
   });
-  while (value > 21 && aceCount > 0) {
-    value -= 10;
-    aceCount--;
+  
+  // Then add aces, treating each as 11 initially
+  for (let i = 0; i < aceCount; i++) {
+    if (value + 11 <= 21) {
+      value += 11;
+    } else {
+      value += 1;
+    }
   }
+  
   return value;
 };
 
@@ -44,7 +55,7 @@ const shuffleDeck = (deck) => {
 };
 
 function BlackjackGame({ onGoBack }) {
-  const [gameState, setGameState] = useState('rules'); // 'rules', 'difficulty', 'playing', 'gameOver'
+  const [gameState, setGameState] = useState('rules'); // 'rules', 'difficulty', 'playing', 'dealerRevealing', 'gameOver'
   const [difficulty, setDifficulty] = useState(null); // 'simple', 'hard'
   const [deck, setDeck] = useState([]);
   const [playerHand, setPlayerHand] = useState([]);
@@ -79,6 +90,14 @@ function BlackjackGame({ onGoBack }) {
 
   const handleHit = () => {
     if (gameState !== 'playing') return;
+    
+    // Check if deck is empty
+    if (deck.length === 0) {
+      setMessage('牌组已用完，游戏结束！');
+      setGameState('gameOver');
+      return;
+    }
+    
     const newCard = deck.pop();
     const newPlayerHand = [...playerHand, newCard];
     const newPlayerScore = calculateHandValue(newPlayerHand);
@@ -87,10 +106,20 @@ function BlackjackGame({ onGoBack }) {
     setDeck([...deck]);
 
     if (newPlayerScore > 21) {
-      setWinner('dealer');
-      setGameOverMessage('你爆牌了！庄家获胜。');
-      setGameState('gameOver');
-      revealDealerHand();
+      // Player busted, but first reveal dealer's cards
+      const revealedHand = revealDealerHand();
+      setMessage('你爆牌了！');
+      
+      // Change to dealerRevealing state to show the revealed cards
+      setGameState('dealerRevealing');
+      
+      // After a delay, show the game over screen
+      setTimeout(() => {
+        setWinner('dealer');
+        setGameOverMessage('你爆牌了！庄家获胜。');
+        setMessage('');
+        setGameState('gameOver');
+      }, 2000); // 2 second delay
     }
   };
 
@@ -101,22 +130,44 @@ function BlackjackGame({ onGoBack }) {
     return revealedHand; // Return for immediate use in handleStand
   };
 
-  const dealerPlay = (currentDealerHand) => {
+  const dealerPlay = async (currentDealerHand) => {
     // Ensure all cards received are treated as visible initially for this logic
     let hand = currentDealerHand.map(card => ({ ...card, hidden: false }));
     let currentDeck = [...deck];
     let handValue = calculateHandValue(hand);
 
     // Dealer must draw cards until hand value is 17 or more, or deck is empty
-    while (handValue < 17 && currentDeck.length > 0) {
+    // In hard mode, dealer stands on soft 17 (an ace and a 6)
+    // In simple mode, dealer always hits until 17 or more
+    while (currentDeck.length > 0) {
+      // Check if dealer should stop based on difficulty
+      if (difficulty === 'hard') {
+        // In hard mode, dealer stands on hard 17 or any 18+
+        if (handValue >= 17) {
+          // Check if it's a soft 17 (ace counted as 11 and total is 17)
+          const hasAce = hand.some(card => card.value === 'A');
+          const isSoft17 = handValue === 17 && hasAce;
+          if (!isSoft17) break; // Stand on hard 17 or any higher value
+        }
+      } else {
+        // In simple mode, dealer hits until 17 or more
+        if (handValue >= 17) break;
+      }
+
       const newCardFromDeck = currentDeck.pop();
       if (!newCardFromDeck) break; // Safety break if pop returns undefined
 
       // Add the new card, explicitly ensuring it's not hidden
       hand.push({ ...newCardFromDeck, hidden: false });
+      
+      // Update state to show the new card
+      setDealerHand([...hand]);
+      setDeck([...currentDeck]);
+      
+      // Wait a moment before drawing the next card
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       handValue = calculateHandValue(hand);
-      // Difficulty logic (currently same for simple/hard, could be expanded)
-      // if (difficulty === 'simple') { ... } else { ... }
     }
 
     // Before setting state, ensure all cards in the final hand are marked as not hidden.
@@ -126,17 +177,28 @@ function BlackjackGame({ onGoBack }) {
     const finalScore = calculateHandValue(finalDealerHand);
     setDealerScore(finalScore);
     setDeck(currentDeck);
+    
+    // Add a delay after the last card is shown
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
     return finalScore;
   };
 
-  const handleStand = () => {
+  const handleStand = async () => {
     if (gameState !== 'playing') return;
+    
+    // First, reveal the dealer's hidden card
     const revealedHand = revealDealerHand();
-    let finalDealerScore = calculateHandValue(revealedHand);
-
-    if (finalDealerScore <= 21 && finalDealerScore < 17) { // Dealer must draw until 17 or more
-        finalDealerScore = dealerPlay(revealedHand);
-    }
+    setMessage('庄家正在思考...');
+    
+    // Change to dealerRevealing state to show the revealed cards
+    setGameState('dealerRevealing');
+    
+    // Wait a moment to let the player see the revealed card
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Then let dealer play according to rules
+    const finalDealerScore = await dealerPlay(revealedHand);
 
     if (finalDealerScore > 21) {
       setWinner('player');
@@ -151,6 +213,7 @@ function BlackjackGame({ onGoBack }) {
       setWinner('push');
       setGameOverMessage('平局！');
     }
+    setMessage('');
     setGameState('gameOver');
   };
 
@@ -178,7 +241,7 @@ function BlackjackGame({ onGoBack }) {
         <p><strong>游戏目标：</strong>你的手牌点数需要尽可能接近21点，但不能超过21点，并且比庄家的点数大。</p>
         <p><strong>点数计算：</strong></p>
         <ul>
-          <li>A可以算作1点或11点。</li>
+          <li>A可以算作1点或11点，系统会自动选择最优值。</li>
           <li>K, Q, J 算作10点。</li>
           <li>其他牌按面值计算。</li>
         </ul>
@@ -204,9 +267,9 @@ function BlackjackGame({ onGoBack }) {
         <h2>选择游戏难度</h2>
         <div className="difficulty-options">
           <button onClick={() => startGame('simple')} className="blackjack-button simple-button">简单模式</button>
-          <p className="difficulty-description">庄家策略较为随机，适合新手。</p>
+          <p className="difficulty-description">庄家在17点或以上时停牌，适合新手。</p>
           <button onClick={() => startGame('hard')} className="blackjack-button hard-button">困难模式</button>
-          <p className="difficulty-description">庄家将遵循更标准的策略（如17点停牌），更具挑战性。</p>
+          <p className="difficulty-description">庄家在硬17点或以上时停牌（软17点会继续要牌），更具挑战性。</p>
         </div>
         <button onClick={() => setGameState('rules')} className="blackjack-button back-button">查看规则</button>
         <button onClick={onGoBack} className="blackjack-button back-button">返回大厅</button>
@@ -241,6 +304,12 @@ function BlackjackGame({ onGoBack }) {
         <div className="action-buttons">
           <button onClick={handleHit} className="blackjack-button hit-button">要牌 (Hit)</button>
           <button onClick={handleStand} className="blackjack-button stand-button">停牌 (Stand)</button>
+        </div>
+      )}
+      
+      {gameState === 'dealerRevealing' && (
+        <div className="dealer-thinking">
+          <p>庄家正在思考...</p>
         </div>
       )}
 

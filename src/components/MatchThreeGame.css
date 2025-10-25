@@ -67,19 +67,29 @@
   overflow: hidden; /* Hide parts of image that don't fit */
   background-color: white;
   border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* font-size: 1.8em; /* 表情大小 - no longer needed for emoji */
-  /* Style for images within grid cells */
-  img {
-    max-width: 90%; /* Ensure image is not wider than cell */
-    max-height: 90%; /* Ensure image is not taller than cell */
-    object-fit: contain; /* Scale image to fit while maintaining aspect ratio */
-  }
   cursor: pointer;
   user-select: none;
   transition: transform 0.1s ease, background-color 0.2s ease, opacity 0.3s ease; /* 基础过渡 */
+  position: relative; /* 为图片定位提供参考 */
+  min-width: 20px; /* 确保单元格有最小宽度 */
+  min-height: 20px; /* 确保单元格有最小高度 */
+  aspect-ratio: 1 / 1; /* 确保单元格是正方形 */
+}
+
+.grid-cell img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 改为contain，保持图片原始比例 */
+  border-radius: 8px;
+  display: block; /* 确保图片显示 */
+  z-index: 1; /* 确保图片在单元格上方 */
+  /* 确保图片居中 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
 }
 
 .grid-cell:hover {
@@ -110,6 +120,14 @@
 .game-over-screen h2 {
   color: #87CEFA; /* 辅助色：Chiikawa蓝 */
   font-size: 2.2em;
+  margin-bottom: 15px;
+}
+
+.game-over-image {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 10px;
   margin-bottom: 15px;
 }
 

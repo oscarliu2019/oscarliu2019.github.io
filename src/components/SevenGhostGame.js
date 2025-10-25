@@ -40,6 +40,7 @@ function SevenGhostGame({ onGoBack }) {
   const [winner, setWinner] = useState(null);
   const [turnPasses, setTurnPasses] = useState(0); // 记录连续pass的次数
   const [gameLog, setGameLog] = useState([]); // 游戏日志
+  const [opponentPlayedCards, setOpponentPlayedCards] = useState([]); // 记录对手出过的牌
 
   const chiikawaImage = getRandomImage(); // Or a specific one for the game
 
@@ -78,6 +79,9 @@ function SevenGhostGame({ onGoBack }) {
   };
 
   const initializeGame = () => {
+    // 重置对手出牌记忆
+    setOpponentPlayedCards([]);
+    
     const initialDeck = createDeck();
     const initialPlayersSetup = [
       { id: 'player', name: '你', hand: [], score: 0, isTurn: false, isAI: false, passCount: 0 },
@@ -404,6 +408,9 @@ function SevenGhostGame({ onGoBack }) {
     const playValidation = isValidPlay(selectedCards, player.hand, discardPile.length > 0 ? discardPile[discardPile.length - 1] : null);
 
     if (playValidation.valid) {
+      // 记录玩家出的牌
+      setOpponentPlayedCards(prev => [...prev, ...selectedCards]);
+      
       const newHand = player.hand.filter(card => !selectedCards.find(sc => sc.id === card.id));
       const newEntry = { cards: selectedCards, player: player.id, type: playValidation.type };
       
@@ -438,7 +445,14 @@ function SevenGhostGame({ onGoBack }) {
       let bestPlayDecision = null;
 
       if (possiblePlays && possiblePlays.length > 0) {
-        bestPlayDecision = possiblePlays[0];
+        // 根据AI难度选择不同的策略
+        if (aiPlayerInfo.difficulty === 'simple') {
+          // 简单AI：倾向于出小牌，保留大牌
+          bestPlayDecision = selectSimpleAIPlay(possiblePlays);
+        } else {
+          // 困难AI：使用更复杂的策略
+          bestPlayDecision = selectHardAIPlay(possiblePlays, aiPlayerInfo, lastPlay, playersListForThisTurn);
+        }
         setTimeout(() => {
           if (bestPlayDecision) {
             addToLog(`${aiPlayerInfo.name} 打出了 ${bestPlayDecision.cards.map(c => c.value + (c.suit !== 'Joker' ? c.suit : '')).join(', ')} (${bestPlayDecision.type})`);
@@ -470,6 +484,156 @@ function SevenGhostGame({ onGoBack }) {
       // Pass aiPlayerIndex as the acting player's index, currentTurnDiscardPile, and currentTurnDeck
       setTimeout(() => nextTurn(aiPlayerIndex, false, null, null, playersListForThisTurn, currentTurnDiscardPile, currentTurnDeck), 1000);
     }
+  };
+
+  // 简单AI策略：倾向于出小牌，保留大牌
+  const selectSimpleAIPlay = (possiblePlays) => {
+    // 简单AI倾向于出小牌，保留大牌
+    const nonBombPlays = possiblePlays.filter(play => !getPlayTypeAndValue(play.cards).isBomb);
+    if (nonBombPlays.length > 0) {
+      return nonBombPlays[0]; // 选择最小的非炸弹牌
+    }
+    return possiblePlays[0]; // 如果只有炸弹，选择最小的炸弹
+  };
+
+  // 困难AI策略：使用更复杂的策略
+  const selectHardAIPlay = (possiblePlays, aiPlayerInfo, lastPlay, allPlayers) => {
+    // 困难AI考虑更多因素：
+    // 1. 得分牌的保留策略
+    // 2. 牌局形势分析
+    // 3. 对手手牌推测
+    
+    // 分析当前牌局形势
+    const gameSituation = analyzeGameSituation(aiPlayerInfo, allPlayers, lastPlay);
+    
+    // 推测对手手牌
+    const opponentHandEstimate = estimateOpponentHand(opponentPlayedCards);
+    
+    // 根据不同情况选择不同策略
+    if (gameSituation.isWinning) {
+      // 如果处于优势，保守出牌
+      return selectConservativePlay(possiblePlays);
+    } else if (gameSituation.isLosing) {
+      // 如果处于劣势，冒险出牌
+      return selectAggressivePlay(possiblePlays, opponentHandEstimate);
+    } else {
+      // 均势，平衡策略
+      return selectBalancedPlay(possiblePlays, aiPlayerInfo, opponentHandEstimate);
+    }
+  };
+
+  // 分析当前牌局形势
+  const analyzeGameSituation = (aiPlayer, allPlayers, lastPlay) => {
+    const humanPlayer = allPlayers ? allPlayers.find(p => !p.isAI) : null;
+    const scoreDiff = humanPlayer ? aiPlayer.score - humanPlayer.score : 0;
+    
+    // 估算牌堆剩余牌数（简化计算）
+    const cardsInDeck = 54 - (allPlayers ? allPlayers.reduce((sum, p) => sum + (p.hand ? p.hand.length : 0), 0) : 0);
+    
+    // 计算手中的得分牌
+    const scoreCardsInHand = aiPlayer.hand.filter(card => SCORE_CARDS[card.value] > 0);
+    const scoreValueInHand = scoreCardsInHand.reduce((sum, card) => sum + SCORE_CARDS[card.value], 0);
+    
+    // 判断牌局形势
+    const isWinning = scoreDiff > 20 || (scoreDiff > 0 && cardsInDeck < 10);
+    const isLosing = scoreDiff < -20 || (scoreDiff < 0 && cardsInDeck < 10);
+    
+    return {
+      isWinning,
+      isLosing,
+      scoreDiff,
+      cardsInDeck,
+      scoreValueInHand
+    };
+  };
+
+  // 保守策略：保留大牌和得分牌
+  const selectConservativePlay = (possiblePlays) => {
+    // 优先出非得分的小牌
+    const nonScorePlays = possiblePlays.filter(play => {
+      return !play.cards.some(card => SCORE_CARDS[card.value] > 0);
+    });
+    
+    if (nonScorePlays.length > 0) {
+      // 在非得分牌中选择最小的
+      return nonScorePlays.sort((a, b) => a.value - b.value)[0];
+    }
+    
+    // 如果只有得分牌，选择分值最小的
+    return possiblePlays.sort((a, b) => {
+      const aScore = a.cards.reduce((sum, card) => sum + (SCORE_CARDS[card.value] || 0), 0);
+      const bScore = b.cards.reduce((sum, card) => sum + (SCORE_CARDS[card.value] || 0), 0);
+      return aScore - bScore;
+    })[0];
+  };
+
+  // 估算对手手牌
+  const estimateOpponentHand = (playedCards) => {
+    // 基于已出的牌推测对手可能的手牌
+    const allCardIds = [];
+    for (let suit of SUITS) {
+      for (let value of VALUES) {
+        allCardIds.push(`${value}${suit}`);
+      }
+    }
+    allCardIds.push('SJoker', 'BJoker');
+    
+    const playedCardIds = playedCards.map(card => card.id);
+    const remainingCardIds = allCardIds.filter(id => !playedCardIds.includes(id));
+    
+    // 这里可以实现更复杂的推测逻辑，比如根据出牌模式推测
+    // 目前简化处理，只返回剩余的牌ID
+    return remainingCardIds;
+  };
+
+  // 激进策略：尽快出掉手中的牌
+  const selectAggressivePlay = (possiblePlays, opponentHandEstimate) => {
+    // 分析对手可能有的大牌
+    const opponentBigCards = opponentHandEstimate.filter(id => {
+      const value = id.slice(0, -1); // 去掉花色
+      return CARD_RANK_MAP[value] > 10; // 大牌阈值
+    });
+    
+    // 如果对手可能有很多大牌，优先出炸弹压制
+    if (opponentBigCards.length > 3) {
+      const bombPlays = possiblePlays.filter(play => getPlayTypeAndValue(play.cards).isBomb);
+      if (bombPlays.length > 0) {
+        return bombPlays.sort((a, b) => b.value - a.value)[0];
+      }
+    }
+    
+    // 否则，优先出大牌，尽快清空手牌
+    return possiblePlays.sort((a, b) => b.value - a.value)[0];
+  };
+
+  // 平衡策略：综合考虑牌的大小和得分
+  const selectBalancedPlay = (possiblePlays, aiPlayer, opponentHandEstimate) => {
+    // 计算每个出牌选项的"价值"
+    const playsWithValue = possiblePlays.map(play => {
+      const cardCount = play.cards.length;
+      const scoreValue = play.cards.reduce((sum, card) => sum + (SCORE_CARDS[card.value] || 0), 0);
+      const isBomb = getPlayTypeAndValue(play.cards).isBomb;
+      
+      // 计算手牌剩余情况
+      const remainingCards = aiPlayer.hand.length - cardCount;
+      
+      // 分析对手可能有的牌
+      const opponentMayHaveSameType = opponentHandEstimate.some(id => {
+        const value = id.slice(0, -1);
+        return play.cards.some(card => card.value === value);
+      });
+      
+      // 综合评分：出牌数量多、得分价值低、剩余手牌少，则评分高
+      // 如果是炸弹或者对手可能没有同类型牌，加分
+      let value = cardCount * 10 - scoreValue * 2 - remainingCards * 5;
+      if (isBomb) value += 20; // 炸弹加分
+      if (!opponentMayHaveSameType) value += 15; // 对手可能没有同类型牌加分
+      
+      return { ...play, strategicValue: value };
+    });
+    
+    // 选择战略价值最高的出牌
+    return playsWithValue.sort((a, b) => b.strategicValue - a.strategicValue)[0];
   };
 
   // --- Helper functions for play validation (TO BE IMPLEMENTED) ---
@@ -657,7 +821,19 @@ function SevenGhostGame({ onGoBack }) {
       tryAddPlay([smallJoker, bigJoker]);
     }
     
-    // TODO: Add Three with Two, Straights if getPlayTypeAndValue and isValidPlay support them
+    // Three with Two (三带二)
+    for (const threeValue in valueCounts) {
+      if (valueCounts[threeValue] >= 3) {
+        const threeCards = hand.filter(c => c.value === threeValue).slice(0, 3);
+        // Find pairs for the two cards
+        for (const pairValue in valueCounts) {
+          if (pairValue !== threeValue && valueCounts[pairValue] >= 2) {
+            const pairCards = hand.filter(c => c.value === pairValue).slice(0, 2);
+            tryAddPlay([...threeCards, ...pairCards]);
+          }
+        }
+      }
+    }
 
     // Sort plays: by type (bombs last unless they are the only option or strategically better),
     // then by value (smaller values first for simple AI, or more complex for hard AI).

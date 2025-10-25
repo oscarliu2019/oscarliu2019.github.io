@@ -22,7 +22,7 @@ function LockScreen({ onUnlock }) {
     <div className="lock-screen">
       <div className="lock-screen-content">
         {/* 静态背景可以在CSS中设置 */}
-        <h1>猪一头520礼物！</h1>
+        <h1>猪一头23岁生日礼物！</h1>
         <p className="question">绵绵最喜欢吃的甜品是什么</p>
         <form onSubmit={handleSubmit}>
           <input
