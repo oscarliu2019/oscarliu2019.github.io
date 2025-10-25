@@ -256,13 +256,27 @@ const DuiDuiPengGame = ({ onGoBack }) => {
               );
               
               // 添加一张新牌
-              if (addNewCardToTable()) {
+              if (deckIndex < deck.length) {
+                const newCard = { ...deck[deckIndex], isFlipped: false, isNewCard: true };
+                setDeckIndex(deckIndex + 1);
+                
+                // 延迟移除新牌标记，以便动画只播放一次
+                setTimeout(() => {
+                  setTableCards(cards => 
+                    cards.map(card => 
+                      card.uniqueId === newCard.uniqueId 
+                        ? { ...card, isNewCard: false }
+                        : card
+                    )
+                  );
+                }, 500); // 与CSS动画时间相同
+                
                 setMessage('配对成功！获得一张新牌（点击翻开）');
+                return [...filteredCards, newCard];
               } else {
                 setMessage('配对成功！但牌堆已空');
+                return filteredCards;
               }
-              
-              return filteredCards;
             });
             
             setSelectedCards([]);
@@ -327,8 +341,23 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     setWishCount(wishCount - 1);
     
     setTimeout(() => {
-      if (addNewCardToTable()) {
+      if (deckIndex < deck.length) {
+        const newCard = { ...deck[deckIndex], isFlipped: false, isNewCard: true };
+        setDeckIndex(deckIndex + 1);
+        
+        // 延迟移除新牌标记，以便动画只播放一次
+        setTimeout(() => {
+          setTableCards(cards => 
+            cards.map(card => 
+              card.uniqueId === newCard.uniqueId 
+                ? { ...card, isNewCard: false }
+                : card
+            )
+          );
+        }, 500); // 与CSS动画时间相同
+        
         setMessage(`使用许愿机会，获得一张新牌！剩余${wishCount - 1}次机会（点击翻开）`);
+        setTableCards(currentCards => [...currentCards, newCard]);
       } else {
         setMessage('使用许愿机会，但牌堆已空');
       }
@@ -343,8 +372,23 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     setMilkGuessUsed(true);
     
     setTimeout(() => {
-      if (addNewCardToTable()) {
+      if (deckIndex < deck.length) {
+        const newCard = { ...deck[deckIndex], isFlipped: false, isNewCard: true };
+        setDeckIndex(deckIndex + 1);
+        
+        // 延迟移除新牌标记，以便动画只播放一次
+        setTimeout(() => {
+          setTableCards(cards => 
+            cards.map(card => 
+              card.uniqueId === newCard.uniqueId 
+                ? { ...card, isNewCard: false }
+                : card
+            )
+          );
+        }, 500); // 与CSS动画时间相同
+        
         setMessage('奶一口！获得一张新牌（点击翻开）');
+        setTableCards(currentCards => [...currentCards, newCard]);
       } else {
         setMessage('奶一口！但牌堆已空');
       }
