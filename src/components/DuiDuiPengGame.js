@@ -55,6 +55,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
   const [showMilkGuessModal, setShowMilkGuessModal] = useState(false); // 是否显示奶一口弹窗
   const [selectedCards, setSelectedCards] = useState([]); // 玩家选择的牌
   const [isPlayerTurn, setIsPlayerTurn] = useState(false); // 是否是玩家回合
+  const [drawCount, setDrawCount] = useState(0); // 抽牌次数
 
   // 初始化游戏
   useEffect(() => {
@@ -82,6 +83,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     setShowMilkGuessModal(false); // 重置奶一口弹窗状态
     setSelectedCards([]); // 重置选中的牌
     setIsPlayerTurn(false); // 重置玩家回合状态
+    setDrawCount(0); // 重置抽牌次数
   };
 
   // 选择许愿牌
@@ -192,6 +194,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
       const updatedCards = [...tableCards];
       updatedCards[cardIndex] = { ...updatedCards[cardIndex], isFlipped: true };
       setTableCards(updatedCards);
+      setDrawCount(drawCount + 1); // 增加抽牌次数
       
       // 检查翻开后是否有可配对的牌
       setTimeout(() => {
@@ -256,27 +259,13 @@ const DuiDuiPengGame = ({ onGoBack }) => {
               );
               
               // 添加一张新牌
-              if (deckIndex < deck.length) {
-                const newCard = { ...deck[deckIndex], isFlipped: false, isNewCard: true };
-                setDeckIndex(deckIndex + 1);
-                
-                // 延迟移除新牌标记，以便动画只播放一次
-                setTimeout(() => {
-                  setTableCards(cards => 
-                    cards.map(card => 
-                      card.uniqueId === newCard.uniqueId 
-                        ? { ...card, isNewCard: false }
-                        : card
-                    )
-                  );
-                }, 500); // 与CSS动画时间相同
-                
+              if (addNewCardToTable()) {
                 setMessage('配对成功！获得一张新牌（点击翻开）');
-                return [...filteredCards, newCard];
               } else {
                 setMessage('配对成功！但牌堆已空');
-                return filteredCards;
               }
+              
+              return filteredCards;
             });
             
             setSelectedCards([]);
@@ -341,23 +330,8 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     setWishCount(wishCount - 1);
     
     setTimeout(() => {
-      if (deckIndex < deck.length) {
-        const newCard = { ...deck[deckIndex], isFlipped: false, isNewCard: true };
-        setDeckIndex(deckIndex + 1);
-        
-        // 延迟移除新牌标记，以便动画只播放一次
-        setTimeout(() => {
-          setTableCards(cards => 
-            cards.map(card => 
-              card.uniqueId === newCard.uniqueId 
-                ? { ...card, isNewCard: false }
-                : card
-            )
-          );
-        }, 500); // 与CSS动画时间相同
-        
+      if (addNewCardToTable()) {
         setMessage(`使用许愿机会，获得一张新牌！剩余${wishCount - 1}次机会（点击翻开）`);
-        setTableCards(currentCards => [...currentCards, newCard]);
       } else {
         setMessage('使用许愿机会，但牌堆已空');
       }
@@ -372,23 +346,8 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     setMilkGuessUsed(true);
     
     setTimeout(() => {
-      if (deckIndex < deck.length) {
-        const newCard = { ...deck[deckIndex], isFlipped: false, isNewCard: true };
-        setDeckIndex(deckIndex + 1);
-        
-        // 延迟移除新牌标记，以便动画只播放一次
-        setTimeout(() => {
-          setTableCards(cards => 
-            cards.map(card => 
-              card.uniqueId === newCard.uniqueId 
-                ? { ...card, isNewCard: false }
-                : card
-            )
-          );
-        }, 500); // 与CSS动画时间相同
-        
+      if (addNewCardToTable()) {
         setMessage('奶一口！获得一张新牌（点击翻开）');
-        setTableCards(currentCards => [...currentCards, newCard]);
       } else {
         setMessage('奶一口！但牌堆已空');
       }
@@ -403,6 +362,17 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     if (matchCount >= 5) return '5包卡牌';
     if (matchCount >= 3) return '3包卡牌';
     return '1包卡牌';
+  };
+
+  // 根据抽牌次数生成不同的消息
+  const getDrawCountMessage = () => {
+    if (drawCount <= 7) {
+      return '笨不笨！很傻猪一头';
+    } else if (drawCount <= 10) {
+      return '好猪！奖励亲亲！';
+    } else {
+      return '恭喜你！请找绵绵领取你的小礼物！永远生效！';
+    }
   };
 
   return (
@@ -489,6 +459,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
           <div className="modal-content">
             <h2>游戏结束</h2>
             <p>恭喜你！本次游戏中你成功碰了 {matchCount} 次</p>
+            <p className="draw-count-message">{getDrawCountMessage()}</p>
             <div className="modal-buttons">
               <button onClick={() => {
                 setShowGameOverModal(false);
