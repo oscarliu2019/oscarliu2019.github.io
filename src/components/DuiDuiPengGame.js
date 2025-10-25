@@ -153,20 +153,19 @@ const DuiDuiPengGame = ({ onGoBack }) => {
   };
 
   // 添加新牌到桌面
-  const addNewCardToTable = () => {
-    if (deckIndex >= deck.length) {
-      return false; // 牌堆已空
+  const addNewCardToTable = (currentCards, currentDeckIndex) => {
+    if (currentDeckIndex >= deck.length) {
+      return { success: false, cards: currentCards, newDeckIndex: currentDeckIndex }; // 牌堆已空
     }
     
-    const newCard = { ...deck[deckIndex], isFlipped: false, isNewCard: true }; // 新牌默认不翻开，并标记为新牌
-    // 使用函数式更新，确保使用最新的状态
-    setTableCards(currentCards => [...currentCards, newCard]);
-    setDeckIndex(deckIndex + 1);
+    const newCard = { ...deck[currentDeckIndex], isFlipped: false, isNewCard: true }; // 新牌默认不翻开，并标记为新牌
+    const updatedCards = [...currentCards, newCard];
+    const newDeckIndex = currentDeckIndex + 1;
     
     // 延迟移除新牌标记，以便动画只播放一次
     setTimeout(() => {
-      setTableCards(currentCards => 
-        currentCards.map(card => 
+      setTableCards(cards => 
+        cards.map(card => 
           card.uniqueId === newCard.uniqueId 
             ? { ...card, isNewCard: false }
             : card
@@ -174,7 +173,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
       );
     }, 500); // 与CSS动画时间相同
     
-    return true;
+    return { success: true, cards: updatedCards, newDeckIndex };
   };
 
   // 处理玩家点击牌
@@ -259,13 +258,16 @@ const DuiDuiPengGame = ({ onGoBack }) => {
               );
               
               // 添加一张新牌
-              if (addNewCardToTable()) {
+              const result = addNewCardToTable(filteredCards, deckIndex);
+              
+              if (result.success) {
+                setDeckIndex(result.newDeckIndex);
                 setMessage('配对成功！获得一张新牌（点击翻开）');
+                return result.cards;
               } else {
                 setMessage('配对成功！但牌堆已空');
+                return filteredCards;
               }
-              
-              return filteredCards;
             });
             
             setSelectedCards([]);
@@ -330,11 +332,19 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     setWishCount(wishCount - 1);
     
     setTimeout(() => {
-      if (addNewCardToTable()) {
-        setMessage(`使用许愿机会，获得一张新牌！剩余${wishCount - 1}次机会（点击翻开）`);
-      } else {
-        setMessage('使用许愿机会，但牌堆已空');
-      }
+      setTableCards(currentCards => {
+        const result = addNewCardToTable(currentCards, deckIndex);
+        
+        if (result.success) {
+          setDeckIndex(result.newDeckIndex);
+          setMessage(`使用许愿机会，获得一张新牌！剩余${wishCount - 1}次机会（点击翻开）`);
+          return result.cards;
+        } else {
+          setMessage('使用许愿机会，但牌堆已空');
+          return currentCards;
+        }
+      });
+      
       setIsProcessing(false);
     }, 1000);
   };
@@ -346,11 +356,19 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     setMilkGuessUsed(true);
     
     setTimeout(() => {
-      if (addNewCardToTable()) {
-        setMessage('奶一口！获得一张新牌（点击翻开）');
-      } else {
-        setMessage('奶一口！但牌堆已空');
-      }
+      setTableCards(currentCards => {
+        const result = addNewCardToTable(currentCards, deckIndex);
+        
+        if (result.success) {
+          setDeckIndex(result.newDeckIndex);
+          setMessage('奶一口！获得一张新牌（点击翻开）');
+          return result.cards;
+        } else {
+          setMessage('奶一口！但牌堆已空');
+          return currentCards;
+        }
+      });
+      
       setIsProcessing(false);
     }, 1000);
   };
