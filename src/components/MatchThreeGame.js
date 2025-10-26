@@ -230,30 +230,36 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
 
       // 延迟处理，让用户看到消除效果
       setTimeout(() => {
-        // 元素下落
-        let droppedGrid = newGrid.map(row => [...row]);
-        for (let c = 0; c < GRID_SIZE; c++) {
-          let emptySlots = 0;
-          for (let r = GRID_SIZE - 1; r >= 0; r--) {
-            if (droppedGrid[r][c] === null) {
-              emptySlots++;
-            } else if (emptySlots > 0) {
-              droppedGrid[r + emptySlots][c] = droppedGrid[r][c];
-              droppedGrid[r][c] = null;
+        // 使用函数式更新确保状态一致性
+        setGrid(currentGrid => {
+          // 元素下落
+          let droppedGrid = currentGrid.map(row => [...row]);
+          for (let c = 0; c < GRID_SIZE; c++) {
+            let emptySlots = 0;
+            for (let r = GRID_SIZE - 1; r >= 0; r--) {
+              if (droppedGrid[r][c] === null) {
+                emptySlots++;
+              } else if (emptySlots > 0) {
+                droppedGrid[r + emptySlots][c] = droppedGrid[r][c];
+                droppedGrid[r][c] = null;
+              }
             }
           }
-        }
 
-        // 填充新的元素
-        let filledGrid = droppedGrid.map(row => row.map(cell => cell === null ? getRandomElement() : cell));
-        setGrid(filledGrid);
-        
-        // 递归检查新生成的面板是否还有匹配
-        const furtherMatchesFound = checkAndClearMatches(filledGrid);
-        if (!furtherMatchesFound) {
-          // 这是连锁反应的结束
-          setIsCheckingMatches(false);
-        }
+          // 填充新的元素
+          let filledGrid = droppedGrid.map(row => row.map(cell => cell === null ? getRandomElement() : cell));
+          
+          // 递归检查新生成的面板是否还有匹配
+          setTimeout(() => {
+            const furtherMatchesFound = checkAndClearMatches(filledGrid);
+            if (!furtherMatchesFound) {
+              // 这是连锁反应的结束
+              setIsCheckingMatches(false);
+            }
+          }, 300);
+          
+          return filledGrid;
+        });
       }, 300); // 渐隐动画时间
       return true; // 本轮操作找到了匹配
     } else {

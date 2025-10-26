@@ -870,23 +870,29 @@ function SevenGhostGame({ onGoBack }) {
   const renderCard = (card, index, isSelected, onCardClick, onCardDoubleClick, isPlayerCard = true) => {
     const cardValueDisplay = card.value === 'S' ? '小王' : card.value === 'B' ? '大王' : card.value;
     const suitDisplay = card.suit === 'Joker' ? '' : card.suit;
-    return (
-      <div 
-        key={card.id || index} 
-        className={`card ${isSelected ? 'selected' : ''} ${card.suit && isPlayerCard ? card.suit.toLowerCase() : ''} ${!isPlayerCard ? 'card-back' : ''}`}
-        onClick={() => onCardClick && isPlayerCard && onCardClick(card)}
-        onDoubleClick={() => onCardDoubleClick && isPlayerCard && onCardDoubleClick(card)}
-      >
-        {isPlayerCard ? (
-          <>
-            <span className="card-value">{cardValueDisplay}</span>
-            {suitDisplay && <span className="card-suit">{suitDisplay}</span>}
-          </>
-        ) : (
-          <span>?</span> // Placeholder for card back
-        )}
-      </div>
-    );
+    
+    if (isPlayerCard) {
+      return (
+        <div 
+          key={card.id || index} 
+          className={`card ${isSelected ? 'selected' : ''} ${card.suit ? card.suit.toLowerCase() : ''}`}
+          onClick={() => onCardClick && onCardClick(card)}
+          onDoubleClick={() => onCardDoubleClick && onCardDoubleClick(card)}
+        >
+          <span className="card-value">{cardValueDisplay}</span>
+          {suitDisplay && <span className="card-suit">{suitDisplay}</span>}
+        </div>
+      );
+    } else {
+      // AI牌 - 完全不显示，只显示一个空白的牌背
+      return (
+        <div 
+          key={card.id || index} 
+          className="card card-back-empty"
+        >
+        </div>
+      );
+    }
   };
 
   const [selectedPlayerCards, setSelectedPlayerCards] = useState([]);
@@ -970,9 +976,8 @@ function SevenGhostGame({ onGoBack }) {
           <div key={ai.id} className={`player-area ai-area ${ai.isTurn ? 'current-turn' : ''}`}>
             <h3>{ai.name} ({ai.difficulty}) {ai.isTurn ? '(思考中...)' : ''}</h3>
             <p>得分: {ai.score}</p>
-            <div className="cards-display hand-cards">
-              {ai.hand.map((card, idx) => renderCard(card, idx, false, null, null, false))}
-            </div>
+            <p>手牌数: {ai.hand.length}</p>
+            {/* 不显示AI的牌，只显示手牌数量 */}
           </div>
         ))}
 

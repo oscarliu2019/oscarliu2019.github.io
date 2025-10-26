@@ -466,7 +466,6 @@ const DuiDuiPengGame = ({ onGoBack }) => {
         <div className="game-over">
           <h2>游戏结束</h2>
           <p>你总共配对了 {matchCount} 对牌</p>
-          <p>获得奖励: {calculateReward()}</p>
           <button onClick={startNewGame}>再玩一次</button>
           <button onClick={onGoBack}>返回大厅</button>
         </div>

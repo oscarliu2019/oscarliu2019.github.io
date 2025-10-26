@@ -52,22 +52,30 @@ const QuizGame = ({ gameId, gameTitle, quizDataPath, onGoBack }) => {
     // Convert index (0, 1, 2, 3) to letter ('A', 'B', 'C', 'D')
     const selectedAnswerLetter = String.fromCharCode(65 + selectedOptionIndex);
     const correct = selectedAnswerLetter === currentQuestion.answer;
-    setIsCorrect(correct);
-    if (correct) {
-      setScore(score + 1);
-    }
-    setShowAnswer(true);
-    setFeedbackImage(getRandomImage());
+    
+    // 使用函数式更新确保状态一致性
+    setScore(currentScore => {
+      const newScore = correct ? currentScore + 1 : currentScore;
+      
+      setIsCorrect(correct);
+      setShowAnswer(true);
+      setFeedbackImage(getRandomImage());
 
-    setTimeout(() => {
-      setShowAnswer(false);
-      setFeedbackImage(null);
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
-      } else {
-        setGameOver(true);
-      }
-    }, 3500); // 答案反馈显示3.5秒 (增加显示时间以阅读解析)
+      setTimeout(() => {
+        setShowAnswer(false);
+        setFeedbackImage(null);
+        setCurrentQuestionIndex(currentIndex => {
+          if (currentIndex < questions.length - 1) {
+            return currentIndex + 1;
+          } else {
+            setGameOver(true);
+            return currentIndex;
+          }
+        });
+      }, 3500); // 答案反馈显示3.5秒 (增加显示时间以阅读解析)
+      
+      return newScore;
+    });
   };
 
   const restartGame = () => {

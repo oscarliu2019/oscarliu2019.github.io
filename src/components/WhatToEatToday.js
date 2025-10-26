@@ -61,6 +61,8 @@ function WhatToEatToday({ onGoBack }) {
     setTimeout(() => {
       clearInterval(spinInterval);
       const randomIndex = Math.floor(Math.random() * optionList.length);
+      
+      // 使用函数式更新确保状态一致性
       setHighlightedIndex(randomIndex);
       setResult(`今天吃: ${optionList[randomIndex]}! 🎉`);
       setIsSpinning(false);

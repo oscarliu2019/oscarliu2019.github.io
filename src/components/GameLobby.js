@@ -12,16 +12,21 @@ function GameLobby({ onStartGame, onShowLockedMessage }) {
   }, []);
 
   const handleTitleClick = () => {
-    const newClicks = titleClicks + 1;
-    setTitleClicks(newClicks);
-    if (newClicks >= 5) { // 假设连续点击5次显示彩蛋
-      setShowSecretMessage(true);
-      // 可以在一段时间后自动隐藏彩蛋
-      setTimeout(() => {
-        setShowSecretMessage(false);
-        setTitleClicks(0); // 重置点击次数
-      }, 3000);
-    }
+    // 使用函数式更新确保状态一致性
+    setTitleClicks(currentClicks => {
+      const newClicks = currentClicks + 1;
+      
+      if (newClicks >= 5) { // 假设连续点击5次显示彩蛋
+        setShowSecretMessage(true);
+        // 可以在一段时间后自动隐藏彩蛋
+        setTimeout(() => {
+          setShowSecretMessage(false);
+          setTitleClicks(0); // 重置点击次数
+        }, 3000);
+      }
+      
+      return newClicks;
+    });
   };
 
   return (
