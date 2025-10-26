@@ -8,6 +8,7 @@ import BlackjackGame from './components/BlackjackGame'; // 导入BlackjackGame�
 import SevenGhostGame from './components/SevenGhostGame'; // 导入SevenGhostGame组件
 import WhatToEatToday from './components/WhatToEatToday'; // 导入WhatToEatToday组件
 import DuiDuiPengGame from './components/DuiDuiPengGame'; // 导入DuiDuiPengGame组件
+import TwentyFourGame from './components/TwentyFourGame'; // 导入TwentyFourGame组件
 import { getRandomImage } from './config/images'; // 导入获取随机图片的函数
 // import Modal from './components/Modal'; // 稍后会创建和使用
 
@@ -24,7 +25,7 @@ const MUSIC_LIST = [
 ];
 
 const App = () => {
-  const [currentView, setCurrentView] = useState('lockScreen'); // 'lockScreen', 'gameLobby', 'matchThree', 'chiikawaQuiz', 'zhenhuanQuiz', 'blackjackGame', 'sevenGhostGame', 'whatToEatToday', 'duiduipengGame'
+  const [currentView, setCurrentView] = useState('lockScreen'); // 'lockScreen', 'gameLobby', 'matchThree', 'chiikawaQuiz', 'zhenhuanQuiz', 'blackjackGame', 'sevenGhostGame', 'whatToEatToday', 'duiduipengGame', 'twentyFourGame'
   const [lockedMessage, setLockedMessage] = useState('');
   const [lockedImage, setLockedImage] = useState(null); // 新增状态来存储随机图片
   const [isMusicPlaying, setIsMusicPlaying] = useState(true); // 音乐默认播放
@@ -67,6 +68,8 @@ const App = () => {
       setCurrentView('whatToEatToday');
     } else if (gameId === 'duiduipengGame') {
       setCurrentView('duiduipengGame');
+    } else if (gameId === 'twentyFourGame') {
+      setCurrentView('twentyFourGame');
     }
     // 可以为其他游戏ID添加逻辑
   };
@@ -110,6 +113,8 @@ const App = () => {
         return <WhatToEatToday onGoBack={handleQuizGoBack} />; // 使用 handleQuizGoBack 因为功能相同，都是返回大厅
       case 'duiduipengGame':
         return <DuiDuiPengGame onGoBack={handleQuizGoBack} />; // 使用 handleQuizGoBack 因为功能相同，都是返回大厅
+      case 'twentyFourGame':
+        return <TwentyFourGame onGoBack={handleQuizGoBack} />; // 使用 handleQuizGoBack 因为功能相同，都是返回大厅
       default:
         return <LockScreen onUnlock={handleUnlock} />;
     }

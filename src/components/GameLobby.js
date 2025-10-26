@@ -67,6 +67,10 @@ function GameLobby({ onStartGame, onShowLockedMessage }) {
           <img src={getSpecificImage('duiduipengGameLogo') || getRandomImage()} alt="对对碰 Logo" className="game-icon-img" />
           <p>吉伊对对碰</p>
         </div>
+        <div className="game-entry" onClick={() => onStartGame('twentyFourGame')}>
+          <img src={getSpecificImage('twentyFourGameLogo') || getRandomImage()} alt="24点 Logo" className="game-icon-img" />
+          <p>和绵绵玩24点</p>
+        </div>
       </div>
       {/* 通用对话框可以在App.js中管理，或者在这里根据需要弹出 */}
     </div>
