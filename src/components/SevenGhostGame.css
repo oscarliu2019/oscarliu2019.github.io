@@ -7,6 +7,7 @@
   background-color: #f0f8ff; /* AliceBlue */
   min-height: 100vh;
   box-sizing: border-box;
+  position: relative; /* 添加相对定位，使绝对定位的按钮相对于此容器定位 */
 }
 
 .loading-screen, .game-over-screen {
@@ -53,7 +54,21 @@
 .back-button.top-back-button {
   position: absolute;
   top: 20px;
-  right: 20px;
+  left: 20px;
+  background-color: #ff6347; /* Tomato - 更醒目的颜色 */
+  color: white;
+  font-weight: bold;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(255, 99, 71, 0.4);
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.back-button.top-back-button:hover {
+  background-color: #ff4500; /* OrangeRed - 悬停时更深的颜色 */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 99, 71, 0.6);
 }
 
 .game-board {
@@ -318,7 +333,7 @@
   }
   .back-button.top-back-button {
     top: 10px;
-    right: 10px;
-    padding: 6px 10px;
+    left: 10px;
+    padding: 8px 12px;
   }
 }
