@@ -34,10 +34,10 @@ function GameLobby({ onStartGame, onShowLockedMessage }) {
       <div className="lobby-header">
         {logoImage && <img src={logoImage} alt="Chiikawa Logo" className="lobby-logo" />}
         <h1 className="lobby-title" onClick={handleTitleClick}>
-          Chiikawa的生日游戏屋
+          Chiikawa的游戏屋
         </h1>
       </div>
-      {showSecretMessage && <p className="secret-message">猪一头23岁生日快乐！</p>}
+      {showSecretMessage && <p className="secret-message">猪一头23岁生日快乐🎂！</p>}
       <div className="game-entries">
         <div className="game-entry" onClick={() => onStartGame('matchThree')}> 
           <img src={getSpecificImage('matchThreeLogo') || getRandomImage()} alt="消消乐 Logo" className="game-icon-img" />
@@ -70,6 +70,10 @@ function GameLobby({ onStartGame, onShowLockedMessage }) {
         <div className="game-entry" onClick={() => onStartGame('twentyFourGame')}>
           <img src={getSpecificImage('twentyFourGameLogo') || getRandomImage()} alt="24点 Logo" className="game-icon-img" />
           <p>和绵绵玩24点</p>
+        </div>
+        <div className="game-entry" onClick={() => onStartGame('messageToPig')}>
+          <img src={getSpecificImage('messageToPigLogo') || getRandomImage()} alt="想对猪说的话 Logo" className="game-icon-img" />
+          <p>想对猪说的话</p>
         </div>
       </div>
       {/* 通用对话框可以在App.js中管理，或者在这里根据需要弹出 */}

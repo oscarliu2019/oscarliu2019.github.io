@@ -41,6 +41,7 @@ function SevenGhostGame({ onGoBack }) {
   const [turnPasses, setTurnPasses] = useState(0); // 记录连续pass的次数
   const [gameLog, setGameLog] = useState([]); // 游戏日志
   const [opponentPlayedCards, setOpponentPlayedCards] = useState([]); // 记录对手出过的牌
+  const [aiSwapCount, setAiSwapCount] = useState(0); // 记录AI已使用的交换次数
 
   const chiikawaImage = getRandomImage(); // Or a specific one for the game
 
@@ -81,6 +82,8 @@ function SevenGhostGame({ onGoBack }) {
   const initializeGame = () => {
     // 重置对手出牌记忆
     setOpponentPlayedCards([]);
+    // 重置AI交换次数
+    setAiSwapCount(0);
     
     const initialDeck = createDeck();
     const initialPlayersSetup = [
@@ -96,61 +99,6 @@ function SevenGhostGame({ onGoBack }) {
         }
       }
     }
-    
-    // 如果是困难AI，增加获得大牌的概率
-    if (aiDifficulty === 'hard') {
-      const aiPlayer = initialPlayersSetup.find(p => p.isAI);
-      const humanPlayer = initialPlayersSetup.find(p => !p.isAI);
-      
-      // 定义大牌：7、大王、小王、5、2
-      const bigCardValues = ['7', 'B', 'S', '5', '2'];
-      
-      // 获取AI和人类玩家的大牌和小牌
-      const aiBigCards = aiPlayer.hand.filter(card => bigCardValues.includes(card.value));
-      const aiSmallCards = aiPlayer.hand.filter(card => !bigCardValues.includes(card.value));
-      const humanBigCards = humanPlayer.hand.filter(card => bigCardValues.includes(card.value));
-      const humanSmallCards = humanPlayer.hand.filter(card => !bigCardValues.includes(card.value));
-      
-      // 限制交换次数，最多交换3次
-      const maxSwaps = 3;
-      let swapCount = 0;
-      
-      // 如果AI的大牌少于人类玩家的大牌，且有可交换的牌
-      while (aiBigCards.length < humanBigCards.length && 
-             aiSmallCards.length > 0 && 
-             humanBigCards.length > 0 && 
-             swapCount < maxSwaps) {
-        
-        // 随机选择一张AI的小牌和人类玩家的一张大牌进行交换
-        const aiSmallCardIndex = Math.floor(Math.random() * aiSmallCards.length);
-        const humanBigCardIndex = Math.floor(Math.random() * humanBigCards.length);
-        
-        const aiSmallCard = aiSmallCards[aiSmallCardIndex];
-        const humanBigCard = humanBigCards[humanBigCardIndex];
-        
-        // 找到这两张牌在各自手牌中的索引
-        const aiCardIndexInHand = aiPlayer.hand.findIndex(c => c.id === aiSmallCard.id);
-        const humanCardIndexInHand = humanPlayer.hand.findIndex(c => c.id === humanBigCard.id);
-        
-        // 交换这两张牌
-        if (aiCardIndexInHand !== -1 && humanCardIndexInHand !== -1) {
-          aiPlayer.hand[aiCardIndexInHand] = humanBigCard;
-          humanPlayer.hand[humanCardIndexInHand] = aiSmallCard;
-          
-          // 更新牌的列表
-          aiBigCards.push(humanBigCard);
-          aiSmallCards.splice(aiSmallCardIndex, 1);
-          humanBigCards.splice(humanBigCardIndex, 1);
-          humanSmallCards.push(aiSmallCard);
-          
-          swapCount++;
-        } else {
-          // 如果找不到牌，跳出循环避免无限循环
-          break;
-        }
-      }
-    }
-    
     initialPlayersSetup.forEach(p => p.hand.sort((a, b) => (CARD_RANK_MAP[a.value] || 0) - (CARD_RANK_MAP[b.value] || 0)));
 
     // 决定先手：手牌中单张最小的玩家先出
@@ -496,12 +444,26 @@ function SevenGhostGame({ onGoBack }) {
     addToLog(`${aiPlayerInfo.name} 正在思考...`);
 
     try {
-      const possiblePlays = findAllValidPlays(aiPlayerInfo.hand, lastPlay);
+      // 在AI回合开始时检查是否需要交换大牌
+      const swapResult = checkAndSwapCards(playersListForThisTurn || players, currentTurnDeck);
+      const updatedPlayers = swapResult.players;
+      const updatedDeck = swapResult.deck;
+      
+      // 如果有交换，更新玩家状态
+      if (swapResult.players !== playersListForThisTurn && swapResult.deck !== currentTurnDeck) {
+        setPlayers(updatedPlayers);
+        setDeck(updatedDeck);
+      }
+      
+      // 使用更新后的玩家信息
+      const updatedAiPlayerInfo = updatedPlayers.find(p => p.id === aiPlayerInfo.id);
+      
+      const possiblePlays = findAllValidPlays(updatedAiPlayerInfo.hand, lastPlay);
       let bestPlayDecision = null;
 
       if (possiblePlays && possiblePlays.length > 0) {
         // 根据AI难度选择不同的策略
-        if (aiPlayerInfo.difficulty === 'simple') {
+        if (updatedAiPlayerInfo.difficulty === 'simple') {
           // 简单AI：倾向于出小牌，保留大牌
           bestPlayDecision = selectSimpleAIPlay(possiblePlays);
         } else {
@@ -510,27 +472,27 @@ function SevenGhostGame({ onGoBack }) {
         }
         setTimeout(() => {
           if (bestPlayDecision) {
-            addToLog(`${aiPlayerInfo.name} 打出了 ${bestPlayDecision.cards.map(c => c.value + (c.suit !== 'Joker' ? c.suit : '')).join(', ')} (${bestPlayDecision.type})`);
-            const newHand = aiPlayerInfo.hand.filter(card => !bestPlayDecision.cards.find(pc => pc.id === card.id));
-            const newDiscardEntry = { cards: bestPlayDecision.cards, player: aiPlayerInfo.id, type: bestPlayDecision.type };
+            addToLog(`${updatedAiPlayerInfo.name} 打出了 ${bestPlayDecision.cards.map(c => c.value + (c.suit !== 'Joker' ? c.suit : '')).join(', ')} (${bestPlayDecision.type})`);
+            const newHand = updatedAiPlayerInfo.hand.filter(card => !bestPlayDecision.cards.find(pc => pc.id === card.id));
+            const newDiscardEntry = { cards: bestPlayDecision.cards, player: updatedAiPlayerInfo.id, type: bestPlayDecision.type };
             
             // Removed setPlayers here, nextTurn will handle it.
             // Pass aiPlayerIndex as the acting player's index, currentTurnDiscardPile, and currentTurnDeck
-            nextTurn(aiPlayerIndex, true, newHand, newDiscardEntry, playersListForThisTurn, currentTurnDiscardPile, currentTurnDeck);
+            nextTurn(aiPlayerIndex, true, newHand, newDiscardEntry, updatedPlayers, currentTurnDiscardPile, updatedDeck);
           } else {
-            addToLog(`${aiPlayerInfo.name} 选择跳过 (无法确定最佳出牌).`);
+            addToLog(`${updatedAiPlayerInfo.name} 选择跳过 (无法确定最佳出牌).`);
             // Pass aiPlayerIndex as the acting player's index, currentTurnDiscardPile, and currentTurnDeck
-            nextTurn(aiPlayerIndex, false, null, null, playersListForThisTurn, currentTurnDiscardPile, currentTurnDeck);
+            nextTurn(aiPlayerIndex, false, null, null, updatedPlayers, currentTurnDiscardPile, updatedDeck);
           }
         }, 1000 + Math.random() * 1000);
       } else {
         setTimeout(() => {
-          addToLog(`${aiPlayerInfo.name} 选择跳过 (无牌可出).`);
-          if (lastPlay === null && aiPlayerInfo.hand.length > 0) {
-              console.error("AI Error: Has cards but cannot find a valid opening play. Hand:", JSON.stringify(aiPlayerInfo.hand.map(c=>c.id)), "PossiblePlays:", JSON.stringify(possiblePlays));
+          addToLog(`${updatedAiPlayerInfo.name} 选择跳过 (无牌可出).`);
+          if (lastPlay === null && updatedAiPlayerInfo.hand.length > 0) {
+              console.error("AI Error: Has cards but cannot find a valid opening play. Hand:", JSON.stringify(updatedAiPlayerInfo.hand.map(c=>c.id)), "PossiblePlays:", JSON.stringify(possiblePlays));
           }
           // Pass aiPlayerIndex as the acting player's index, currentTurnDiscardPile, and currentTurnDeck
-          nextTurn(aiPlayerIndex, false, null, null, playersListForThisTurn, currentTurnDiscardPile, currentTurnDeck);
+          nextTurn(aiPlayerIndex, false, null, null, updatedPlayers, currentTurnDiscardPile, updatedDeck);
         }, 1000);
       }
     } catch (error) {
@@ -541,7 +503,87 @@ function SevenGhostGame({ onGoBack }) {
     }
   };
 
-  // 简单AI策略：倾向于出小牌，保留大牌
+  // AI回合开始时检查是否需要交换大牌
+  const checkAndSwapCards = (currentPlayers, currentDeck) => {
+    // 只有在困难AI模式下，且还有交换次数时才执行
+    if (aiDifficulty !== 'hard' || aiSwapCount >= 3) {
+      return { players: currentPlayers, deck: currentDeck };
+    }
+    
+    const aiPlayer = currentPlayers.find(p => p.isAI);
+    if (!aiPlayer) return { players: currentPlayers, deck: currentDeck };
+    
+    // 定义大牌：7、大王、小王、5、2
+    const bigCardValues = ['7', 'B', 'S', '5', '2'];
+    
+    // 获取AI的大牌数量
+    const aiBigCardsCount = aiPlayer.hand.filter(card => bigCardValues.includes(card.value)).length;
+    
+    // 如果AI的大牌少于2张，从牌堆中补充大牌
+    if (aiBigCardsCount < 2) {
+      // 计算需要补充的大牌数量
+      const cardsToAdd = Math.min(2 - aiBigCardsCount, 2 - aiSwapCount); // 最多补充2次
+      
+      // 从牌堆中找出大牌
+      const bigCardsInDeck = currentDeck.filter(card => bigCardValues.includes(card.value));
+      
+      // 如果牌堆中有足够的大牌
+      if (bigCardsInDeck.length >= cardsToAdd) {
+        // 随机选择需要补充的大牌
+        const selectedBigCards = [];
+        const tempDeck = [...bigCardsInDeck];
+        
+        for (let i = 0; i < cardsToAdd; i++) {
+          const randomIndex = Math.floor(Math.random() * tempDeck.length);
+          selectedBigCards.push(tempDeck[randomIndex]);
+          tempDeck.splice(randomIndex, 1);
+        }
+        
+        // 找出AI手牌中的小牌（非大牌）
+        const aiSmallCards = aiPlayer.hand.filter(card => !bigCardValues.includes(card.value));
+        
+        // 如果有足够的小牌可以替换
+        if (aiSmallCards.length >= selectedBigCards.length) {
+          // 随机选择要替换的小牌
+          const smallCardsToReplace = [];
+          const tempSmallCards = [...aiSmallCards];
+          
+          for (let i = 0; i < selectedBigCards.length; i++) {
+            const randomIndex = Math.floor(Math.random() * tempSmallCards.length);
+            smallCardsToReplace.push(tempSmallCards[randomIndex]);
+            tempSmallCards.splice(randomIndex, 1);
+          }
+          
+          // 创建新的玩家数组和牌堆
+          const newPlayers = JSON.parse(JSON.stringify(currentPlayers));
+          const newDeck = [...currentDeck];
+          const newAiPlayer = newPlayers.find(p => p.isAI);
+          
+          // 执行替换：将AI的小牌换成大牌
+          for (let i = 0; i < selectedBigCards.length; i++) {
+            const smallCardIndex = newAiPlayer.hand.findIndex(c => c.id === smallCardsToReplace[i].id);
+            if (smallCardIndex !== -1) {
+              // 从牌堆中移除大牌
+              const bigCardIndex = newDeck.findIndex(c => c.id === selectedBigCards[i].id);
+              if (bigCardIndex !== -1) {
+                // 将小牌放回牌堆
+                newDeck[bigCardIndex] = newAiPlayer.hand[smallCardIndex];
+                // 将大牌给AI
+                newAiPlayer.hand[smallCardIndex] = selectedBigCards[i];
+              }
+            }
+          }
+          
+          // 增加交换次数
+          setAiSwapCount(aiSwapCount + selectedBigCards.length);
+          
+          return { players: newPlayers, deck: newDeck };
+        }
+      }
+    }
+    
+    return { players: currentPlayers, deck: currentDeck };
+  };
   const selectSimpleAIPlay = (possiblePlays) => {
     // 简单AI倾向于出小牌，保留大牌
     const nonBombPlays = possiblePlays.filter(play => !getPlayTypeAndValue(play.cards).isBomb);

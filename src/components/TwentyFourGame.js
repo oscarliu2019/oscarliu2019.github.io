@@ -25,10 +25,122 @@ const isValidExpression = (expr) => {
 
 // 检查给定的四个数字是否可以组成24点
 const canMake24 = (numbers) => {
-  // 这里简化处理，实际应该有更复杂的算法
-  // 为了游戏体验，我们假设大多数组合都有解
-  // 如果需要，可以预先生成一个有解的数字组合列表
-  return true;
+  // 使用穷举法检查所有可能的运算组合
+  const ops = ['+', '-', '*', '/'];
+  
+  // 尝试所有数字的排列
+  const permute = (arr) => {
+    if (arr.length <= 1) return [arr];
+    const result = [];
+    for (let i = 0; i < arr.length; i++) {
+      const current = arr[i];
+      const remaining = [...arr.slice(0, i), ...arr.slice(i + 1)];
+      const perms = permute(remaining);
+      for (const perm of perms) {
+        result.push([current, ...perm]);
+      }
+    }
+    return result;
+  };
+  
+  // 尝试所有运算符组合
+  const tryOperations = (nums) => {
+    // 尝试不同的括号组合方式
+    
+    // 1. ((a op b) op c) op d
+    for (const op1 of ops) {
+      for (const op2 of ops) {
+        for (const op3 of ops) {
+          try {
+            const result1 = eval(`${nums[0]} ${op1} ${nums[1]}`);
+            const result2 = eval(`${result1} ${op2} ${nums[2]}`);
+            const result3 = eval(`${result2} ${op3} ${nums[3]}`);
+            if (Math.abs(result3 - 24) < 0.0001) return true;
+          } catch (e) {
+            // 忽略除以零等错误
+          }
+        }
+      }
+    }
+    
+    // 2. (a op (b op c)) op d
+    for (const op1 of ops) {
+      for (const op2 of ops) {
+        for (const op3 of ops) {
+          try {
+            const result1 = eval(`${nums[1]} ${op2} ${nums[2]}`);
+            const result2 = eval(`${nums[0]} ${op1} ${result1}`);
+            const result3 = eval(`${result2} ${op3} ${nums[3]}`);
+            if (Math.abs(result3 - 24) < 0.0001) return true;
+          } catch (e) {
+            // 忽略除以零等错误
+          }
+        }
+      }
+    }
+    
+    // 3. a op ((b op c) op d)
+    for (const op1 of ops) {
+      for (const op2 of ops) {
+        for (const op3 of ops) {
+          try {
+            const result1 = eval(`${nums[1]} ${op2} ${nums[2]}`);
+            const result2 = eval(`${result1} ${op3} ${nums[3]}`);
+            const result3 = eval(`${nums[0]} ${op1} ${result2}`);
+            if (Math.abs(result3 - 24) < 0.0001) return true;
+          } catch (e) {
+            // 忽略除以零等错误
+          }
+        }
+      }
+    }
+    
+    // 4. a op (b op (c op d))
+    for (const op1 of ops) {
+      for (const op2 of ops) {
+        for (const op3 of ops) {
+          try {
+            const result1 = eval(`${nums[2]} ${op3} ${nums[3]}`);
+            const result2 = eval(`${nums[1]} ${op2} ${result1}`);
+            const result3 = eval(`${nums[0]} ${op1} ${result2}`);
+            if (Math.abs(result3 - 24) < 0.0001) return true;
+          } catch (e) {
+            // 忽略除以零等错误
+          }
+        }
+      }
+    }
+    
+    // 5. (a op b) op (c op d)
+    for (const op1 of ops) {
+      for (const op2 of ops) {
+        for (const op3 of ops) {
+          try {
+            const result1 = eval(`${nums[0]} ${op1} ${nums[1]}`);
+            const result2 = eval(`${nums[2]} ${op3} ${nums[3]}`);
+            const result3 = eval(`${result1} ${op2} ${result2}`);
+            if (Math.abs(result3 - 24) < 0.0001) return true;
+          } catch (e) {
+            // 忽略除以零等错误
+          }
+        }
+      }
+    }
+    
+    return false;
+  };
+  
+  // 获取所有数字排列
+  const permutations = permute(numbers);
+  
+  // 检查每种排列是否能得到24
+  for (const perm of permutations) {
+    if (tryOperations(perm)) {
+      return true;
+    }
+  }
+  
+  return false;
 };
 
 function TwentyFourGame({ onGoBack }) {

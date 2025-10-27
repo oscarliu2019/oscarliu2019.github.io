@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './LockScreen.css';
 
 // 假设正确的答案，实际应用中可以更灵活
-const CORRECT_ANSWER = '酒酿圆子';
+const CORRECT_ANSWER = '猪一头！';
 
 function LockScreen({ onUnlock }) {
   const [answer, setAnswer] = useState('');
@@ -21,9 +21,8 @@ function LockScreen({ onUnlock }) {
   return (
     <div className="lock-screen">
       <div className="lock-screen-content">
-        {/* 静态背景可以在CSS中设置 */}
-        <h1>猪一头23岁生日礼物！</h1>
-        <p className="question">绵绵最喜欢吃的甜品是什么</p>
+        <h1>猪一头23岁生日快乐！永远爱你！</h1>
+        <p className="question">绵绵最喜欢的小猪是谁！（注意标点符号）</p>
         <form onSubmit={handleSubmit}>
           <input
             type="text"

@@ -306,7 +306,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
           // 延迟更长时间再显示奶一口选项
           setTimeout(() => {
             setShowMilkGuessModal(true);
-          }, 500);
+          }, 2000);
         } else {
           // 延迟更长时间再结束游戏
           setTimeout(() => {

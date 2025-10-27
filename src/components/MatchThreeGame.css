@@ -13,9 +13,12 @@
   overflow: hidden; /* 防止内容溢出导致滚动条 */
 }
 
+
+
 .game-status {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 90%; /* 相对于父容器的宽度 */
   max-width: 600px; /* 限制最大宽度，避免在大屏幕上过宽 */
   margin-bottom: 15px; /* 稍微减小下边距 */
@@ -31,6 +34,34 @@
   font-size: 1.2em;
   color: #87CEFA; /* 辅助色：Chiikawa蓝 */
   font-weight: bold;
+}
+
+.shuffle-button {
+  background-color: #FFD700; /* 金色按钮 */
+  color: #333;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.shuffle-button:hover:not(:disabled) {
+  background-color: #FFC700; /* 悬停时稍微深一点的金色 */
+}
+
+.shuffle-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.shuffle-button:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .status-item span[role="img"] {
@@ -105,6 +136,24 @@
 .grid-cell.clearing {
   opacity: 0; /* 渐隐消失 */
   transform: scale(0.5);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.grid-cell.new {
+  opacity: 0; /* 初始不可见 */
+  transform: scale(0.5);
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Game Over Screen */
@@ -225,6 +274,8 @@
   margin-bottom: 0;
   font-weight: bold;
 }
+
+
 
 .popup-image {
   max-width: 100px; /* Adjust as needed */

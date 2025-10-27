@@ -3,6 +3,13 @@ import './MatchThreeGame.css';
 import { getMultipleRandomImages, getRandomImage as getRandomChiikawaImage } from '../config/images'; // 导入配置
 
 const GRID_SIZE = 9; // Changed from 5 to 9
+const MATCH_MESSAGES = [
+  "太棒啦！",
+  "好厉害！",
+  "为你庆祝！",
+  "继续加油！",
+  "最棒了！"
+];
 // 使用配置文件中的图片，例如获取5张不同的图片作为游戏元素
 const ELEMENT_TYPES = getMultipleRandomImages(9); // 直接获取完整的图片路径
 // 如果 ELEMENT_TYPES 为空（例如配置文件中没有图片），需要有备用方案或提示
@@ -186,6 +193,9 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
   const [popupMessage, setPopupMessage] = useState('');
   const [popupImage, setPopupImage] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [clearingCells, setClearingCells] = useState(new Set()); // 存储正在消除的单元格
+  const [newCells, setNewCells] = useState(new Set()); // 存储新出现的单元格
+  const [isShuffling, setIsShuffling] = useState(false); // 是否正在洗牌
 
   // 检查并处理消除 (仅用于玩家操作后)
   const checkAndClearMatches = useCallback((currentGrid) => {
@@ -193,6 +203,7 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
     let matchesFound = false;
     let pointsEarnedThisTurn = 0;
     const toClear = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(false));
+    const clearingPositions = new Set(); // 存储要消除的单元格位置
 
     // 检查行
     for (let r = 0; r < GRID_SIZE; r++) {
@@ -200,6 +211,10 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
         if (newGrid[r][c] && newGrid[r][c] === newGrid[r][c+1] && newGrid[r][c] === newGrid[r][c+2]) {
           toClear[r][c] = toClear[r][c+1] = toClear[r][c+2] = true;
           matchesFound = true;
+          // 添加要消除的单元格位置
+          clearingPositions.add(`${r}-${c}`);
+          clearingPositions.add(`${r}-${c+1}`);
+          clearingPositions.add(`${r}-${c+2}`);
         }
       }
     }
@@ -209,11 +224,18 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
         if (newGrid[r][c] && newGrid[r][c] === newGrid[r+1][c] && newGrid[r][c] === newGrid[r+2][c]) {
           toClear[r][c] = toClear[r+1][c] = toClear[r+2][c] = true;
           matchesFound = true;
+          // 添加要消除的单元格位置
+          clearingPositions.add(`${r}-${c}`);
+          clearingPositions.add(`${r+1}-${c}`);
+          clearingPositions.add(`${r+2}-${c}`);
         }
       }
     }
 
     if (matchesFound) {
+      // 标记要消除的单元格
+      setClearingCells(clearingPositions);
+      
       // 清除匹配的元素并计分
       for (let r = 0; r < GRID_SIZE; r++) {
         for (let c = 0; c < GRID_SIZE; c++) {
@@ -230,44 +252,60 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
 
       // 延迟处理，让用户看到消除效果
       setTimeout(() => {
-        // 使用函数式更新确保状态一致性
-        setGrid(currentGrid => {
-          // 元素下落
-          let droppedGrid = currentGrid.map(row => [...row]);
-          for (let c = 0; c < GRID_SIZE; c++) {
-            let emptySlots = 0;
-            for (let r = GRID_SIZE - 1; r >= 0; r--) {
-              if (droppedGrid[r][c] === null) {
-                emptySlots++;
-              } else if (emptySlots > 0) {
-                droppedGrid[r + emptySlots][c] = droppedGrid[r][c];
-                droppedGrid[r][c] = null;
-              }
+        // 清除消除标记
+        setClearingCells(new Set());
+        
+        // 元素下落
+        let droppedGrid = newGrid.map(row => [...row]);
+        const newPositions = new Set(); // 存储新卡片的位置
+        
+        for (let c = 0; c < GRID_SIZE; c++) {
+          let emptySlots = 0;
+          for (let r = GRID_SIZE - 1; r >= 0; r--) {
+            if (droppedGrid[r][c] === null) {
+              emptySlots++;
+            } else if (emptySlots > 0) {
+              droppedGrid[r + emptySlots][c] = droppedGrid[r][c];
+              droppedGrid[r][c] = null;
             }
           }
+        }
 
-          // 填充新的元素
-          let filledGrid = droppedGrid.map(row => row.map(cell => cell === null ? getRandomElement() : cell));
-          
-          // 递归检查新生成的面板是否还有匹配
-          setTimeout(() => {
-            const furtherMatchesFound = checkAndClearMatches(filledGrid);
-            if (!furtherMatchesFound) {
-              // 这是连锁反应的结束
-              setIsCheckingMatches(false);
+        // 填充新的元素
+        let filledGrid = droppedGrid.map((row, r) => 
+          row.map((cell, c) => {
+            if (cell === null) {
+              newPositions.add(`${r}-${c}`);
+              return getRandomElement();
             }
-          }, 300);
-          
-          return filledGrid;
-        });
-      }, 300); // 渐隐动画时间
+            return cell;
+          })
+        );
+        
+        // 标记新卡片
+        setNewCells(newPositions);
+        
+        // 更新网格状态
+        setGrid(filledGrid);
+        
+        // 递归检查新生成的面板是否还有匹配
+        setTimeout(() => {
+          // 清除新卡片标记
+          setNewCells(new Set());
+          const furtherMatchesFound = checkAndClearMatches(filledGrid);
+          if (!furtherMatchesFound) {
+            // 这是连锁反应的结束
+            setIsCheckingMatches(false);
+          }
+        }, 500); // 让新卡片动画有足够时间播放
+      }, 500); // 增加延迟时间，让消除动画有足够时间播放
       return true; // 本轮操作找到了匹配
     } else {
       // 此调用未找到匹配。如果这是由 handleCellClick 直接调用的，它将处理 isCheckingMatches
       // 如果这是递归调用，则由其父调用处理 isCheckingMatches
       return false; // 本轮操作没有找到匹配
     }
-  }, [setGrid, setScore, setIsCheckingMatches, getRandomElement]);
+  }, [setScore, setIsCheckingMatches, getRandomElement]);
 
   useEffect(() => {
     // 确保在棋盘稳定后（非检查匹配状态）且游戏未结束时，检查是否有可行的移动
@@ -319,17 +357,18 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
         const foundMatches = checkAndClearMatches(tempGrid);
 
         if (foundMatches) {
-          // Moves are NOT decremented here as per new requirement
+          // 找到匹配，不减少步数
           // Score is handled by checkAndClearMatches
           // isCheckingMatches will be set to false by checkAndClearMatches when cascade ends
-          setPopupMessage("太棒啦！");
+          const randomMatchMessage = MATCH_MESSAGES[Math.floor(Math.random() * MATCH_MESSAGES.length)];
+          setPopupMessage(randomMatchMessage);
           setPopupImage(getRandomChiikawaImage());
           setShowPopup(true);
           setTimeout(() => setShowPopup(false), 1500); // Hide popup after 1.5s
         } else {
-          // Swap resulted in no matches
-          setMoves(prevMoves => prevMoves - 1); // Penalize move
-          setPopupMessage("错不想！");
+          // Swap resulted in no matches, penalize move
+          setMoves(prevMoves => prevMoves - 1);
+          setPopupMessage("再试试！");
           setPopupImage(getRandomChiikawaImage());
           setShowPopup(true);
           setTimeout(() => {
@@ -356,6 +395,44 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
     }
   }, [moves, isCheckingMatches, isGameOver, showPopup]);
 
+  const handleShuffle = () => {
+    if (isShuffling || isCheckingMatches || isGameOver) return;
+    
+    setIsShuffling(true);
+    
+    // 标记所有当前单元格为"清除"状态
+    const allCells = new Set();
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        allCells.add(`${r}-${c}`);
+      }
+    }
+    setClearingCells(allCells);
+    
+    // 延迟后生成新的地图
+    setTimeout(() => {
+      const newGrid = createAndProcessInitialGrid(GRID_SIZE, getRandomElement, hasPossibleSwaps, clearInitialMatchesOnBoard);
+      
+      // 标记所有新单元格
+      const newCellPositions = new Set();
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          newCellPositions.add(`${r}-${c}`);
+        }
+      }
+      
+      setClearingCells(new Set());
+      setNewCells(newCellPositions);
+      setGrid(newGrid);
+      
+      // 清除新单元格标记
+      setTimeout(() => {
+        setNewCells(new Set());
+        setIsShuffling(false);
+      }, 500);
+    }, 500);
+  };
+
   const restartGame = () => {
     const newProcessedGrid = createAndProcessInitialGrid(GRID_SIZE, getRandomElement, hasPossibleSwaps, clearInitialMatchesOnBoard);
     setGrid(newProcessedGrid);
@@ -365,6 +442,9 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
     setIsGameOver(false);
     setGameOverImage(null); // 重置游戏结束图片
     setIsCheckingMatches(false); // Ensure checking is false on restart
+    setClearingCells(new Set()); // 清除消除标记
+    setNewCells(new Set()); // 清除新卡片标记
+    setIsShuffling(false); // 重置洗牌状态
   };
 
   // (restartGame 函数已在上一个修改块中更新，这里删除重复的旧代码)
@@ -375,8 +455,8 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
         <h2>游戏结束!</h2>
         {gameOverImage && <img src={gameOverImage} alt="Chiikawa Over" className="game-over-image" />}
         <p className="final-score">最终得分: {score}</p>
-        <p className="evaluation">{score >= 100 ? '太棒了，Chiikawa为你鼓掌！' : score >=50 ? '好厉害！继续加油！' : '再试一次吧！'}</p>
-        <button onClick={restartGame} className="restart-button">重玩一次</button>
+        <p className="evaluation">{score >= 100 ? '太棒了！Chiikawa为你鼓掌！🥳' : score >=50 ? '好厉害！继续加油！🎈' : '再试一次吧！'}</p>
+        <button onClick={restartGame} className="restart-button">再玩一次</button>
         <button onClick={() => onGameOver(score)} className="back-button">返回大厅</button>
       </div>
     );
@@ -389,19 +469,33 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
           <span role="img" aria-label="Heart">❤️</span> x {moves}
         </div>
         <div className="status-item score">分数: {score}</div>
+        <button 
+          className="shuffle-button" 
+          onClick={handleShuffle}
+          disabled={isShuffling || isCheckingMatches || isGameOver}
+        >
+          换一下
+        </button>
       </div>
       <div className="game-grid">
         {grid.map((row, rIndex) => (
           <div key={rIndex} className="grid-row">
-            {row.map((cell, cIndex) => (
-              <div
-                key={`${rIndex}-${cIndex}`}
-                className={`grid-cell ${selected && selected.row === rIndex && selected.col === cIndex ? 'selected' : ''}`}
-                onClick={() => !isCheckingMatches && handleCellClick(rIndex, cIndex)}
-              >
-                {cell && <img src={cell} alt={`item-${rIndex}-${cIndex}`} />}
-              </div>
-            ))}
+            {row.map((cell, cIndex) => {
+              const cellKey = `${rIndex}-${cIndex}`;
+              const isClearing = clearingCells.has(cellKey);
+              const isNew = newCells.has(cellKey);
+              const isSelected = selected && selected.row === rIndex && selected.col === cIndex;
+              
+              return (
+                <div
+                  key={cellKey}
+                  className={`grid-cell ${isSelected ? 'selected' : ''} ${isClearing ? 'clearing' : ''} ${isNew ? 'new' : ''}`}
+                  onClick={() => !isCheckingMatches && handleCellClick(rIndex, cIndex)}
+                >
+                  {cell && <img src={cell} alt={`item-${rIndex}-${cIndex}`} />}
+                </div>
+              );
+            })}
           </div>
         ))}
         </div> {/* End of game-grid */}

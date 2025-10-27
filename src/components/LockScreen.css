@@ -4,10 +4,7 @@
   align-items: center;
   min-height: 100vh;
   background-color: #FFB6C1; /* 主色：浅粉 */
-  /* 可以在这里添加Chiikawa背景图 */
-  /* background-image: url('../assets/chiikawa-bg.png'); */
-  /* background-size: cover; */
-  /* background-position: center; */
+  position: relative;
   font-family: sans-serif;
 }
 
