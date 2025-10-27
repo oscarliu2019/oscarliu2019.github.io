@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './BlackjackGame.css';
 import { getRandomImage, getSpecificImage } from '../config/images'; // 假设有图片
 
@@ -66,14 +66,59 @@ function BlackjackGame({ onGoBack }) {
   const [gameOverMessage, setGameOverMessage] = useState('');
   const [winner, setWinner] = useState(null); // 'player', 'dealer', 'push'
   const [chiikawaImage, setChiikawaImage] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false); // 防止重复点击
+  
+  // 使用ref来存储最新的状态，避免闭包问题
+  const deckRef = useRef(deck);
+  const playerHandRef = useRef(playerHand);
+  const dealerHandRef = useRef(dealerHand);
+  const playerScoreRef = useRef(playerScore);
+  const dealerScoreRef = useRef(dealerScore);
+  const dealerDrawInterval = useRef(null); // 存储定时器引用
+  
+  // 更新ref值
+  useEffect(() => {
+    deckRef.current = deck;
+  }, [deck]);
+  
+  useEffect(() => {
+    playerHandRef.current = playerHand;
+  }, [playerHand]);
+  
+  useEffect(() => {
+    dealerHandRef.current = dealerHand;
+  }, [dealerHand]);
+  
+  useEffect(() => {
+    playerScoreRef.current = playerScore;
+  }, [playerScore]);
+  
+  useEffect(() => {
+    dealerScoreRef.current = dealerScore;
+  }, [dealerScore]);
+
+  useEffect(() => {
+    if (gameState === 'dealerRevealing') {
+      dealerPlay();
+    }
+  }, [gameState]);
 
   useEffect(() => {
     setChiikawaImage(getRandomImage());
+    
+    // 清除定时器的清理函数
+    return () => {
+      if (dealerDrawInterval.current) {
+        clearInterval(dealerDrawInterval.current);
+        dealerDrawInterval.current = null;
+      }
+    };
   }, []);
 
   const startGame = (selectedDifficulty) => {
     setDifficulty(selectedDifficulty);
     setGameState('playing');
+    setIsProcessing(false);
     const newDeck = shuffleDeck(createDeck());
     const initialPlayerHand = [newDeck.pop(), newDeck.pop()];
     const initialDealerHand = [newDeck.pop(), { ...newDeck.pop(), hidden: true }];
@@ -89,126 +134,94 @@ function BlackjackGame({ onGoBack }) {
   };
 
   const handleHit = () => {
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing' || isProcessing) return;
     
-    setDeck(currentDeck => {
-      // Check if deck is empty
-      if (currentDeck.length === 0) {
-        setMessage('牌组已用完，游戏结束！');
+    setIsProcessing(true);
+    
+    // 直接使用当前状态，避免闭包问题
+    const currentDeck = [...deckRef.current];
+    const currentHand = [...playerHandRef.current];
+    
+    if (currentDeck.length === 0) {
+      setMessage('牌组已用完，游戏结束！');
+      setGameState('gameOver');
+      setIsProcessing(false);
+      return;
+    }
+    
+    const newCard = currentDeck.pop();
+    if (!newCard) {
+      setIsProcessing(false);
+      return;
+    }
+    
+    const newHand = [...currentHand, newCard];
+    const newScore = calculateHandValue(newHand);
+    const newDeck = [...currentDeck];
+    
+    // 更新状态
+    setDeck(newDeck);
+    setPlayerHand(newHand);
+    setPlayerScore(newScore);
+    
+    if (newScore > 21) {
+      // Player busted, but first reveal dealer's cards
+      const revealedHand = dealerHandRef.current.map(card => ({ ...card, hidden: false }));
+      setDealerHand(revealedHand);
+      setDealerScore(calculateHandValue(revealedHand));
+      setMessage('你爆牌了！');
+      
+      // Change to dealerRevealing state to show the revealed cards
+      setGameState('dealerRevealing');
+      
+      // After a delay, show the game over screen
+      setTimeout(() => {
+        setWinner('dealer');
+        setGameOverMessage('你爆牌了！庄家获胜。');
+        setMessage('');
         setGameState('gameOver');
-        return currentDeck;
-      }
-      
-      const newCard = currentDeck.pop();
-      if (!newCard) return currentDeck; // 如果没有牌了，返回原状态
-      
-      setPlayerHand(currentHand => {
-        const newPlayerHand = [...currentHand, newCard];
-        const newPlayerScore = calculateHandValue(newPlayerHand);
-        setPlayerScore(newPlayerScore);
-        
-        if (newPlayerScore > 21) {
-          // Player busted, but first reveal dealer's cards
-          const revealedHand = dealerHand.map(card => ({ ...card, hidden: false }));
-          setDealerHand(revealedHand);
-          setDealerScore(calculateHandValue(revealedHand));
-          setMessage('你爆牌了！');
-          
-          // Change to dealerRevealing state to show the revealed cards
-          setGameState('dealerRevealing');
-          
-          // After a delay, show the game over screen
-          setTimeout(() => {
-            setWinner('dealer');
-            setGameOverMessage('你爆牌了！庄家获胜。');
-            setMessage('');
-            setGameState('gameOver');
-          }, 2000); // 2 second delay
-        }
-        
-        return newPlayerHand;
-      });
-      
-      return currentDeck;
-    });
+        setIsProcessing(false);
+      }, 800); // 从1200ms减少到800ms
+    } else {
+      setIsProcessing(false);
+    }
   };
 
-  const revealDealerHand = () => {
-    const revealedHand = dealerHand.map(card => ({ ...card, hidden: false }));
-    setDealerHand(revealedHand);
-    setDealerScore(calculateHandValue(revealedHand));
-    return revealedHand; // Return for immediate use in handleStand
-  };
-
-  const dealerPlay = async () => {
+  const dealerPlay = () => {
     if (gameState !== 'dealerRevealing') return;
-    
-    setMessage('庄家正在思考...');
-    
-    // 使用函数式更新确保状态一致性
-    setDealerHand(currentDealerHand => {
-      setDeck(currentDeck => {
-        // Ensure all cards received are treated as visible initially for this logic
-        let hand = currentDealerHand.map(card => ({ ...card, hidden: false }));
-        let deckState = [...currentDeck];
-        let handValue = calculateHandValue(hand);
 
-        // Dealer must draw cards until hand value is 17 or more, or deck is empty
-        // In hard mode, dealer stands on soft 17 (an ace and a 6)
-        // In simple mode, dealer always hits until 17 or more
-        const drawCardStep = () => {
-          // Check if dealer should stop based on difficulty
-          if (difficulty === 'hard') {
-            // In hard mode, dealer stands on hard 17 or any 18+
-            if (handValue >= 17) {
-              // Check if it's a soft 17 (ace counted as 11 and total is 17)
-              const hasAce = hand.some(card => card.value === 'A');
-              const isSoft17 = handValue === 17 && hasAce;
-              if (!isSoft17) return false; // Stand on hard 17 or any higher value
-            }
-          } else {
-            // In simple mode, dealer hits until 17 or more
-            if (handValue >= 17) return false;
-          }
+    // 清除任何现有的定时器
+    if (dealerDrawInterval.current) {
+      clearInterval(dealerDrawInterval.current);
+      dealerDrawInterval.current = null;
+    }
 
-          const newCardFromDeck = deckState.pop();
-          if (!newCardFromDeck) return false; // Safety break if pop returns undefined
+    const processNextStep = (hand, deck) => {
+      const handValue = calculateHandValue(hand);
 
-          // Add the new card, explicitly ensuring it's not hidden
-          hand.push({ ...newCardFromDeck, hidden: false });
-          
-          // Update state to show the new card
-          setDealerHand([...hand]);
-          setDeck([...deckState]);
-          
-          handValue = calculateHandValue(hand);
-          return true; // Continue drawing
-        };
+      let shouldStop = false;
+      if (difficulty === 'hard') {
+        if (handValue >= 17) {
+          const hasAce = hand.some(card => card.value === 'A');
+          const isSoft17 = handValue === 17 && hasAce;
+          if (!isSoft17) shouldStop = true;
+        }
+      } else {
+        if (handValue >= 17) shouldStop = true;
+      }
 
-        // 使用异步循环来处理抽牌过程
-        const drawCardsAsync = async () => {
-          while (drawCardStep()) {
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait a moment before drawing next card
-          }
-          
-          // Before setting state, ensure all cards in final hand are marked as not hidden.
-          const finalDealerHand = hand.map(card => ({ ...card, hidden: false }));
-          
-          setDealerHand(finalDealerHand);
-          const finalScore = calculateHandValue(finalDealerHand);
-          setDealerScore(finalScore);
-          
-          // Add a delay after the last card is shown
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          
-          // Determine the winner
-          if (finalScore > 21) {
+      if (shouldStop || deck.length === 0) {
+        setDealerHand(hand);
+        setDealerScore(handValue);
+        setTimeout(() => {
+          const playerScore = playerScoreRef.current;
+          if (handValue > 21) {
             setWinner('player');
             setGameOverMessage('庄家爆牌！你赢了！');
-          } else if (playerScore > finalScore) {
+          } else if (playerScore > handValue) {
             setWinner('player');
             setGameOverMessage('你赢了！');
-          } else if (playerScore < finalScore) {
+          } else if (playerScore < handValue) {
             setWinner('dealer');
             setGameOverMessage('庄家赢了！');
           } else {
@@ -217,41 +230,52 @@ function BlackjackGame({ onGoBack }) {
           }
           setMessage('');
           setGameState('gameOver');
-        };
-        
-        // Start the async drawing process
-        drawCardsAsync();
-        
-        return currentDeck;
-      });
-      return currentDealerHand;
-    });
+        }, 500);
+        return;
+      }
+
+      dealerDrawInterval.current = setTimeout(() => {
+        const newCard = deck.pop();
+        if (!newCard) {
+          setDealerHand(hand);
+          setDealerScore(calculateHandValue(hand));
+          return;
+        }
+        const newHand = [...hand, { ...newCard, hidden: false }];
+        setDealerHand(newHand);
+        setDeck(deck);
+        processNextStep(newHand, deck);
+      }, 800);
+    };
+
+    // Start the process with revealing the hidden card
+    dealerDrawInterval.current = setTimeout(() => {
+      const revealedHand = dealerHandRef.current.map(card => ({ ...card, hidden: false }));
+      setDealerHand(revealedHand);
+      const currentDeck = [...deckRef.current];
+      processNextStep(revealedHand, currentDeck);
+    }, 800);
   };
 
-  const handleStand = async () => {
-    if (gameState !== 'playing') return;
+  const handleStand = () => {
+    if (gameState !== 'playing' || isProcessing) return;
     
-    // First, reveal the dealer's hidden card
-    setDealerHand(currentDealerHand => {
-      const revealedHand = currentDealerHand.map(card => ({ ...card, hidden: false }));
-      setDealerScore(calculateHandValue(revealedHand));
-      setMessage('庄家正在思考...');
-      
-      // Change to dealerRevealing state to show the revealed cards
-      setGameState('dealerRevealing');
-      
-      // Wait a moment to let the player see the revealed card
-      setTimeout(() => {
-        // Then let the dealer play according to the rules
-        dealerPlay();
-      }, 1500);
-      
-      return revealedHand;
-    });
+    setIsProcessing(true);
+    setMessage(''); // 清空消息，避免重复显示
+    
+    // Change to dealerRevealing state to show the revealed cards
+    setGameState('dealerRevealing');
   };
 
   const resetGame = () => {
+    // 清除定时器
+    if (dealerDrawInterval.current) {
+      clearInterval(dealerDrawInterval.current);
+      dealerDrawInterval.current = null;
+    }
+    
     setGameState('difficulty'); // Go back to difficulty selection
+    setIsProcessing(false);
     // Or 'rules' if you want them to see rules again: setGameState('rules');
   };
 
@@ -282,9 +306,9 @@ function BlackjackGame({ onGoBack }) {
         <ol>
           <li>选择难度开始游戏。</li>
           <li>你会收到两张明牌，庄家一张明牌一张暗牌。</li>
-          <li>你可以选择“要牌”（Hit）来多拿一张牌，或者“停牌”（Stand）。</li>
-          <li>如果你选择“要牌”后总点数超过21点，则“爆牌”，庄家获胜。</li>
-          <li>如果你选择“停牌”，庄家会亮出暗牌并根据规则要牌（通常是直到17点或以上）。</li>
+          <li>你可以选择"要牌"（Hit）来多拿一张牌，或者"停牌"（Stand）。</li>
+          <li>如果你选择"要牌"后总点数超过21点，则"爆牌"，庄家获胜。</li>
+          <li>如果你选择"停牌"，庄家会亮出暗牌并根据规则要牌（通常是直到17点或以上）。</li>
           <li>比较双方点数，更接近21点且未爆牌者胜。</li>
         </ol>
         <button onClick={() => setGameState('difficulty')} className="blackjack-button">我明白了，选择难度</button>
@@ -302,7 +326,7 @@ function BlackjackGame({ onGoBack }) {
           <button onClick={() => startGame('simple')} className="blackjack-button simple-button">简单模式</button>
           <p className="difficulty-description">庄家在17点或以上时停牌，适合新手。</p>
           <button onClick={() => startGame('hard')} className="blackjack-button hard-button">困难模式</button>
-          <p className="difficulty-description">庄家在硬17点或以上时停牌（软17点会继续要牌），更具挑战性。</p>
+          <p className="difficulty-description">庄家在硬17点或以上时停牌（软17点会继续要牌），更有挑战性。</p>
         </div>
         <button onClick={() => setGameState('rules')} className="blackjack-button back-button">查看规则</button>
         <button onClick={onGoBack} className="blackjack-button back-button">返回大厅</button>
@@ -335,8 +359,8 @@ function BlackjackGame({ onGoBack }) {
 
       {gameState === 'playing' && (
         <div className="action-buttons">
-          <button onClick={handleHit} className="blackjack-button hit-button">要牌 (Hit)</button>
-          <button onClick={handleStand} className="blackjack-button stand-button">停牌 (Stand)</button>
+          <button onClick={handleHit} className="blackjack-button hit-button" disabled={isProcessing}>要牌 (Hit)</button>
+          <button onClick={handleStand} className="blackjack-button stand-button" disabled={isProcessing}>停牌 (Stand)</button>
         </div>
       )}
       
