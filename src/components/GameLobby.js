@@ -75,6 +75,10 @@ function GameLobby({ onStartGame, onShowLockedMessage }) {
           <img src={getSpecificImage('messageToPigLogo') || getRandomImage()} alt="想对猪说的话 Logo" className="game-icon-img" />
           <p>想对猪说的话</p>
         </div>
+        <div className="game-entry" onClick={() => onStartGame('rockGrassBadgeGame')}>
+          <img src={process.env.PUBLIC_URL + '/images/rock/shuiling.png'} alt="精灵弹珠救援 Logo" className="game-icon-img" />
+          <p>精灵弹珠救援</p>
+        </div>
       </div>
       {/* 通用对话框可以在App.js中管理，或者在这里根据需要弹出 */}
     </div>

@@ -10,6 +10,7 @@ import WhatToEatToday from './components/WhatToEatToday'; // 导入WhatToEatToda
 import DuiDuiPengGame from './components/DuiDuiPengGame'; // 导入DuiDuiPengGame组件
 import TwentyFourGame from './components/TwentyFourGame'; // 导入TwentyFourGame组件
 import MessageToPig from './components/MessageToPig'; // 导入MessageToPig组件
+import RockGrassBadgeGame from './components/RockGrassBadgeGame';
 import { getRandomImage } from './config/images'; // 导入获取随机图片的函数
 // import Modal from './components/Modal'; // 稍后会创建和使用
 
@@ -73,6 +74,8 @@ const App = () => {
       setCurrentView('twentyFourGame');
     } else if (gameId === 'messageToPig') {
       setCurrentView('messageToPig');
+    } else if (gameId === 'rockGrassBadgeGame') {
+      setCurrentView('rockGrassBadgeGame');
     }
     // 可以为其他游戏ID添加逻辑
   };
@@ -120,6 +123,8 @@ const App = () => {
         return <TwentyFourGame onGoBack={handleQuizGoBack} />; // 使用 handleQuizGoBack 因为功能相同，都是返回大厅
       case 'messageToPig':
         return <MessageToPig onGoBack={handleQuizGoBack} />; // 使用 handleQuizGoBack 因为功能相同，都是返回大厅
+      case 'rockGrassBadgeGame':
+        return <RockGrassBadgeGame onGoBack={handleQuizGoBack} />;
       default:
         return <LockScreen onUnlock={handleUnlock} />;
     }
