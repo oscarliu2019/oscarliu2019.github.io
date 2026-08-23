@@ -5,7 +5,7 @@ function MessageToPig({ onGoBack }) {
   return (
     <div className="message-to-pig-container">
       <div className="message-header">
-        <button className="back-button" onClick={onGoBack}>← 返回</button>
+        <button className="back-button" onClick={onGoBack}>← 返回大厅</button>
         <h1 className="message-title">想对猪说的话</h1>
       </div>
       

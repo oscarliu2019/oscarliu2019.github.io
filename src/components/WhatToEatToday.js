@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './WhatToEatToday.css';
 import { getRandomImage, getSpecificImage } from '../config/images';
 
@@ -27,9 +27,19 @@ function WhatToEatToday({ onGoBack }) {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [showResultModal, setShowResultModal] = useState(false);
+  const spinIntervalRef = useRef(null);
+  const spinTimeoutRef = useRef(null);
 
   useEffect(() => {
     setBackgroundImage(getRandomImage());
+  }, []);
+
+  // 组件卸载时清理转盘定时器，避免卸载后 setState 报错与内存泄漏
+  useEffect(() => {
+    return () => {
+      if (spinIntervalRef.current) clearInterval(spinIntervalRef.current);
+      if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
+    };
   }, []);
 
   // 处理用户输入的食物选项
@@ -47,19 +57,26 @@ function WhatToEatToday({ onGoBack }) {
 
   // 开始随机选择动画
   const startRandomSelection = (optionList) => {
+    // 边界防护：没有可选项时直接返回，避免取模除零与越界
+    if (!optionList || optionList.length === 0) return;
+    // 若已有动画在进行，先清理，避免叠加多个定时器
+    if (spinIntervalRef.current) clearInterval(spinIntervalRef.current);
+    if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
+
     setIsSpinning(true);
     setResult('');
     setShowResultModal(false);
     
     let currentIndex = 0;
-    const spinInterval = setInterval(() => {
+    spinIntervalRef.current = setInterval(() => {
       setHighlightedIndex(currentIndex);
       currentIndex = (currentIndex + 1) % optionList.length;
     }, 100);
 
     // 3秒后停止动画并显示结果
-    setTimeout(() => {
-      clearInterval(spinInterval);
+    spinTimeoutRef.current = setTimeout(() => {
+      clearInterval(spinIntervalRef.current);
+      spinIntervalRef.current = null;
       const randomIndex = Math.floor(Math.random() * optionList.length);
       
       // 使用函数式更新确保状态一致性
@@ -79,6 +96,10 @@ function WhatToEatToday({ onGoBack }) {
 
   // 重置游戏
   const resetGame = () => {
+    if (spinIntervalRef.current) clearInterval(spinIntervalRef.current);
+    if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
+    spinIntervalRef.current = null;
+    spinTimeoutRef.current = null;
     setGameMode('menu');
     setUserInput('');
     setOptions([]);

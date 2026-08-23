@@ -4,11 +4,27 @@ import { chiikawaImagePaths } from './chiikawaImagePaths'; // Assumes chiikawaIm
 // Fallback in case the imported array is undefined or null, though the script should ensure it's an array.
 const effectiveChiikawaImages = Array.isArray(chiikawaImagePaths) ? chiikawaImagePaths : [];
 
+// Stable images for named UI slots. Every path here exists under public/images/chiikawa.
+// Keeping this mapping explicit avoids noisy "not found" warnings and prevents lobby
+// artwork from changing on every render.
+const NAMED_IMAGE_PATHS = {
+  matchThreeLogo: '/images/chiikawa/1.webp',
+  chiikawaQuizLogo: '/images/chiikawa/10.webp',
+  zhenhuanQuizLogo: '/images/chiikawa/100.webp',
+  sevenGhostGameLogo: '/images/chiikawa/101.webp',
+  blackjackGameLogo: '/images/chiikawa/102.webp',
+  whatToEatTodayLogo: '/images/chiikawa/103.webp',
+  duiduipengGameLogo: '/images/chiikawa/104.webp',
+  twentyFourGameLogo: '/images/chiikawa/105.webp',
+  messageToPigLogo: '/images/chiikawa/23birthday.webp',
+  chiikawaWin: '/images/chiikawa/106.webp',
+  chiikawaLose: '/images/chiikawa/107.webp',
+  chiikawaPush: '/images/chiikawa/108.webp'
+};
+
 export const getRandomImage = () => {
   if (effectiveChiikawaImages.length === 0) {
-    console.warn('Image list (chiikawaImagePaths) is empty. Ensure images are in public/images/chiikawa/ and the generation script has run. Consider adding a placeholder.png to public/images/chiikawa/');
-    // Return a default placeholder image path. Ensure this placeholder exists in public/images/chiikawa/
-    return '/images/chiikawa/placeholder.png'; // Example placeholder
+    return null;
   }
   const randomIndex = Math.floor(Math.random() * effectiveChiikawaImages.length);
   return effectiveChiikawaImages[randomIndex]; // Paths are already correct (e.g., /images/chiikawa/name.webp)
@@ -16,7 +32,6 @@ export const getRandomImage = () => {
 
 export const getMultipleRandomImages = (count) => {
   if (effectiveChiikawaImages.length === 0) {
-    console.warn('Image list (chiikawaImagePaths) is empty. Ensure images are in public/images/chiikawa/ and the generation script has run.');
     return [];
   }
 
@@ -35,19 +50,15 @@ export const getMultipleRandomImages = (count) => {
 
 export const getSpecificImage = (name) => {
   if (!name) {
-    console.warn('No image name provided to getSpecificImage, returning a random image.');
-    return getRandomImage();
+    return null;
   }
+
+  if (NAMED_IMAGE_PATHS[name]) return NAMED_IMAGE_PATHS[name];
 
   const imageName = name.endsWith('.webp') ? name : `${name}.webp`;
   const foundImage = effectiveChiikawaImages.find(path => path.endsWith(`/${imageName}`));
 
-  if (foundImage) {
-    return foundImage;
-  }
-
-  console.warn(`Image "${name}" not found in chiikawaImagePaths, returning a random image.`);
-  return getRandomImage();
+  return foundImage || null;
 };
 
 // The default export of the raw chiikawaImages array is no longer needed

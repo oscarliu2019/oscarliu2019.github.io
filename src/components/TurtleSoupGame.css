@@ -1,0 +1,568 @@
+.turtle-page {
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: 108px 12px 28px;
+  background: #edf1ee;
+  color: #303936;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+}
+
+.turtle-page button,
+.turtle-page input {
+  font: inherit;
+  touch-action: manipulation;
+}
+
+.turtle-page button:focus-visible,
+.turtle-page input:focus-visible {
+  outline: 3px solid #217b75;
+  outline-offset: 2px;
+}
+
+.turtle-header,
+.turtle-surface,
+.turtle-progress,
+.turtle-chat,
+.turtle-clarify,
+.turtle-facts,
+.turtle-suggestions,
+.turtle-controls {
+  width: min(760px, 100%);
+  margin-right: auto;
+  margin-left: auto;
+  box-sizing: border-box;
+}
+
+.turtle-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.turtle-header > button {
+  min-height: 42px;
+  padding: 8px 11px;
+  border: 1px solid #9eada7;
+  border-radius: 8px;
+  background: #fff;
+  color: #3f5550;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.turtle-header > div:nth-child(2) {
+  min-width: 0;
+}
+
+.turtle-header span {
+  color: #5d7c75;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.turtle-header h1 {
+  margin: 2px 0 0;
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.turtle-timer {
+  min-width: 50px;
+  padding: 8px;
+  border: 1px solid #c8d1cc;
+  border-radius: 8px;
+  background: #fff;
+  color: #a34e35;
+  font-weight: 800;
+  text-align: center;
+}
+
+.turtle-surface {
+  margin-top: 14px;
+  padding: 15px;
+  border-left: 4px solid #267d76;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(40, 65, 55, 0.09);
+}
+
+.turtle-surface > span {
+  color: #267d76;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.turtle-surface > p {
+  margin: 7px 0 0;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.7;
+}
+
+.turtle-entities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.turtle-entities i {
+  padding: 4px 7px;
+  border: 1px solid #cbd8d3;
+  border-radius: 5px;
+  background: #f2f7f5;
+  color: #537169;
+  font-size: 11px;
+  font-style: normal;
+}
+
+.turtle-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.turtle-progress > div {
+  flex: 1;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #d9dfdc;
+}
+
+.turtle-progress > div span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #2d8981;
+  transition: width 0.25s ease;
+}
+
+.turtle-progress p {
+  margin: 0;
+  color: #586862;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.turtle-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-height: 180px;
+  max-height: 360px;
+  margin-top: 12px;
+  overflow-y: auto;
+  padding: 11px;
+  border: 1px solid #cbd5d0;
+  background: #f8faf9;
+}
+
+.turtle-message {
+  max-width: 88%;
+}
+
+.turtle-message > span {
+  display: block;
+  margin-bottom: 3px;
+  color: #72807b;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.turtle-message p {
+  display: inline-block;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.turtle-message.player {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.turtle-message.player p {
+  background: #dceee9;
+}
+
+.turtle-message b {
+  display: inline-grid;
+  width: 34px;
+  height: 24px;
+  margin-right: 5px;
+  place-items: center;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 10px;
+}
+
+.turtle-message b.yes {
+  background: #33825f;
+}
+
+.turtle-message b.no {
+  background: #b25038;
+}
+
+.turtle-message b.irrelevant {
+  width: 40px;
+  background: #737b79;
+}
+
+.turtle-clarify {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #d2c99e;
+  background: #fffbea;
+}
+
+.turtle-clarify p {
+  margin: 0 0 7px;
+  color: #665d39;
+  font-size: 12px;
+}
+
+.turtle-clarify button,
+.turtle-suggestions button {
+  margin: 3px;
+  padding: 7px 9px;
+  border: 1px solid #9db5ae;
+  border-radius: 6px;
+  background: #fff;
+  color: #405f58;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.turtle-facts,
+.turtle-suggestions {
+  margin-top: 14px;
+}
+
+.turtle-facts h2,
+.turtle-suggestions h2 {
+  margin: 0 0 7px;
+  font-size: 14px;
+}
+
+.turtle-facts > div {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 7px;
+  align-items: start;
+  margin-top: 5px;
+  padding: 8px;
+  border-left: 3px solid #8d9b96;
+  background: #fff;
+}
+
+.turtle-facts > div.core {
+  border-left-color: #2b847b;
+}
+
+.turtle-facts span {
+  padding: 3px;
+  border-radius: 4px;
+  background: #e8efec;
+  color: #526a64;
+  font-size: 9px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.turtle-facts p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.turtle-suggestions > div {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.turtle-controls {
+  position: sticky;
+  z-index: 20;
+  bottom: 8px;
+  margin-top: 14px;
+  padding: 10px;
+  border: 1px solid #aebbb6;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 6px 24px rgba(35, 55, 48, 0.2);
+}
+
+.turtle-controls form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+}
+
+.turtle-controls input {
+  min-width: 0;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #9eada7;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.turtle-controls form button,
+.turtle-controls > div button {
+  min-height: 42px;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.turtle-controls form button {
+  border: 1px solid #267d76;
+  background: #267d76;
+  color: #fff;
+}
+
+.turtle-controls > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.turtle-controls > div button:first-child {
+  border: 1px solid #9b844b;
+  background: #fff9e8;
+  color: #765f2c;
+}
+
+.turtle-solve-button {
+  border: 1px solid #a94932;
+  background: #b9553b;
+  color: #fff;
+}
+
+.turtle-controls > .turtle-reveal-button {
+  width: 100%;
+  min-height: 36px;
+  margin-top: 7px;
+  border: 0;
+  background: transparent;
+  color: #6a6159;
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.turtle-controls button:disabled {
+  border-color: #c8ccc9;
+  background: #dddeda;
+  color: #898c89;
+  cursor: not-allowed;
+}
+
+.turtle-reconstruct-page,
+.turtle-complete {
+  display: grid;
+  align-items: start;
+  justify-items: center;
+}
+
+.turtle-reconstruct,
+.turtle-complete-panel {
+  width: min(640px, 100%);
+  box-sizing: border-box;
+  padding: 18px 14px;
+  border-top: 5px solid #267d76;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(35, 55, 48, 0.15);
+}
+
+.turtle-reconstruct-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+}
+
+.turtle-reconstruct-header span,
+.turtle-complete-panel > span {
+  color: #267d76;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.turtle-reconstruct-header h1,
+.turtle-complete-panel h1 {
+  margin: 3px 0 0;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.turtle-reconstruct-header > button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #aebbb6;
+  border-radius: 50%;
+  background: #fff;
+  color: #52635e;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.turtle-reconstruct-intro {
+  margin: 12px 0;
+  color: #66716d;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.turtle-node-options {
+  display: grid;
+  gap: 7px;
+}
+
+.turtle-node-options button {
+  min-height: 48px;
+  padding: 9px 11px;
+  border: 1px solid #b9c5c0;
+  border-radius: 7px;
+  background: #f7f9f8;
+  color: #3e4b47;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+}
+
+.turtle-node-options button.selected {
+  border-color: #267d76;
+  background: #dceee9;
+  color: #1f625d;
+}
+
+.turtle-reconstruct-message {
+  margin: 10px 0 0;
+  padding: 8px;
+  border-left: 3px solid #b65038;
+  background: #fff1ed;
+  color: #8a3c28;
+  font-size: 11px;
+}
+
+.turtle-submit-truth {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 12px;
+  border: 1px solid #267d76;
+  border-radius: 7px;
+  background: #267d76;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.turtle-complete-panel {
+  text-align: center;
+}
+
+.turtle-complete-panel > p {
+  margin: 14px 0 0;
+  padding: 12px;
+  background: #edf5f2;
+  color: #42544f;
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: left;
+}
+
+.turtle-complete-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 13px;
+  overflow: hidden;
+  border: 1px solid #c8d2ce;
+  background: #c8d2ce;
+}
+
+.turtle-complete-stats > div {
+  padding: 9px 3px;
+  background: #fff;
+}
+
+.turtle-complete-stats b,
+.turtle-complete-stats span {
+  display: block;
+}
+
+.turtle-complete-stats b {
+  font-size: 16px;
+}
+
+.turtle-complete-stats span {
+  color: #6f7975;
+  font-size: 9px;
+}
+
+.turtle-complete-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.turtle-complete-actions button {
+  min-height: 44px;
+  border-radius: 7px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.turtle-complete-actions button:first-child {
+  border: 1px solid #267d76;
+  background: #267d76;
+  color: #fff;
+}
+
+.turtle-complete-actions button:last-child {
+  border: 1px solid #aebbb6;
+  background: #f2f5f3;
+  color: #465752;
+}
+
+@media (min-width: 700px) {
+  .turtle-page {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .turtle-header h1 {
+    font-size: 27px;
+  }
+
+  .turtle-reconstruct,
+  .turtle-complete-panel {
+    padding: 24px 26px;
+  }
+}
+
+@media (min-width: 1380px) {
+  .turtle-page {
+    padding-top: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turtle-page * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

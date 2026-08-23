@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './TwentyFourGame.css';
 import { getRandomImage, getSpecificImage } from '../config/images';
 
@@ -7,6 +7,8 @@ const generateNumbers = () => {
   // 生成4个1-10之间的随机数
   return Array.from({ length: 4 }, () => Math.floor(Math.random() * 10) + 1);
 };
+
+const FALLBACK_SOLVABLE_NUMBERS = [1, 3, 4, 6];
 
 // 检查表达式是否有效
 const isValidExpression = (expr) => {
@@ -168,8 +170,17 @@ function TwentyFourGame({ onGoBack }) {
   const [showAnswerCheck, setShowAnswerCheck] = useState(false);
   const [currentPlayer, setCurrentPlayer] = useState('');
 
+  const roundTimerRef = useRef(null);
+
   useEffect(() => {
     setChiikawaImage(getRandomImage());
+  }, []);
+
+  // 卸载时清理进入下一轮的定时器
+  useEffect(() => {
+    return () => {
+      if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
+    };
   }, []);
 
   const startGame = () => {
@@ -190,10 +201,16 @@ function TwentyFourGame({ onGoBack }) {
   };
 
   const nextRound = () => {
-    let newNumbers;
-    do {
+    // 加上尝试上限，避免极端情况下 do...while 长时间同步阻塞主线程
+    let newNumbers = generateNumbers();
+    let attempts = 0;
+    while (!canMake24(newNumbers) && attempts < 200) {
       newNumbers = generateNumbers();
-    } while (!canMake24(newNumbers)); // 确保生成的数字有解
+      attempts += 1;
+    }
+    if (!canMake24(newNumbers)) {
+      newNumbers = [...FALLBACK_SOLVABLE_NUMBERS];
+    }
     
     setNumbers(newNumbers);
     setExpression('');
@@ -202,10 +219,16 @@ function TwentyFourGame({ onGoBack }) {
   };
 
   const nextBattleRound = () => {
-    let newNumbers;
-    do {
+    // 加上尝试上限，避免极端情况下 do...while 长时间同步阻塞主线程
+    let newNumbers = generateNumbers();
+    let attempts = 0;
+    while (!canMake24(newNumbers) && attempts < 200) {
       newNumbers = generateNumbers();
-    } while (!canMake24(newNumbers)); // 确保生成的数字有解
+      attempts += 1;
+    }
+    if (!canMake24(newNumbers)) {
+      newNumbers = [...FALLBACK_SOLVABLE_NUMBERS];
+    }
     
     setNumbers(newNumbers);
     setBattleWinner('');
@@ -282,7 +305,7 @@ function TwentyFourGame({ onGoBack }) {
         setGameState('gameOver');
       } else {
         setRound(prev => prev + 1);
-        setTimeout(() => {
+        roundTimerRef.current = setTimeout(() => {
           nextRound();
         }, 1500);
       }
@@ -368,7 +391,7 @@ function TwentyFourGame({ onGoBack }) {
     setShowBattleResult(true);
     
     // 3秒后进入下一轮或结束游戏
-    setTimeout(() => {
+    roundTimerRef.current = setTimeout(() => {
       if (battleRound >= battleTotalRounds) {
         setGameState('gameOver');
       } else {

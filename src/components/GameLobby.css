@@ -64,10 +64,12 @@
 
 .game-entry {
   background-color: white;
+  border: 0;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   text-align: center;
+  font: inherit;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   width: 150px; /* 固定宽度 */
@@ -87,6 +89,11 @@
 .game-entry:active {
   transform: translateY(-2px); /* 点击时的反馈 */
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.game-entry:focus-visible {
+  outline: 3px solid #397f9b;
+  outline-offset: 3px;
 }
 
 .game-icon-img {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './SevenGhostGame.css';
 import { getRandomImage, getSpecificImage } from '../config/images'; // 假设图片配置
 
@@ -43,7 +43,26 @@ function SevenGhostGame({ onGoBack }) {
   const [opponentPlayedCards, setOpponentPlayedCards] = useState([]); // 记录对手出过的牌
   const [aiSwapCount, setAiSwapCount] = useState(0); // 记录AI已使用的交换次数
 
-  const chiikawaImage = getRandomImage(); // Or a specific one for the game
+  const chiikawaImage = useRef(getRandomImage()).current; // 固定一张图片，避免每次渲染都随机变化
+  const aiTimersRef = useRef([]); // 记录所有 AI 相关定时器，卸载时统一清理
+
+  // 统一注册定时器，便于卸载时清理，避免"卸载后 setState"警告与内存泄漏
+  const scheduleTimer = useCallback((callback, delay) => {
+    const timerId = setTimeout(() => {
+      aiTimersRef.current = aiTimersRef.current.filter(id => id !== timerId);
+      callback();
+    }, delay);
+    aiTimersRef.current.push(timerId);
+    return timerId;
+  }, []);
+
+  // 组件卸载时清理所有挂起的 AI 定时器
+  useEffect(() => {
+    return () => {
+      aiTimersRef.current.forEach(id => clearTimeout(id));
+      aiTimersRef.current = [];
+    };
+  }, []);
 
   // 初始化牌局
   useEffect(() => {
@@ -143,7 +162,7 @@ function SevenGhostGame({ onGoBack }) {
         // Pass firstPlayerIndex as actingPlayerActualIndex for the initial AI turn
         // Also pass initialPlayersSetup to handleAIPlay for the very first AI turn
         // Pass initialDeck as the current deck state for the AI's first turn
-        setTimeout(() => handleAIPlay(initialPlayersSetup[firstPlayerIndex], firstPlayerIndex, [], initialDeck, firstPlayerIndex, initialPlayersSetup), 1000);
+        scheduleTimer(() => handleAIPlay(initialPlayersSetup[firstPlayerIndex], firstPlayerIndex, [], initialDeck, firstPlayerIndex, initialPlayersSetup), 1000);
     }
   };
 
@@ -395,7 +414,7 @@ function SevenGhostGame({ onGoBack }) {
       // Pass nextPlayerIdx as the actingPlayerIdx for the AI's turn
       // Pass finalPlayersListForSetState to ensure AI operates on the latest player states
       // Pass currentDeckFromState (which should be the most up-to-date deck after replenishment if any)
-      setTimeout(() => handleAIPlay(finalPlayersListForSetState[nextPlayerIdx], nextPlayerIdx, freshDiscardPileForAI, [...currentDeckFromState], nextPlayerIdx, finalPlayersListForSetState), 1000);
+      scheduleTimer(() => handleAIPlay(finalPlayersListForSetState[nextPlayerIdx], nextPlayerIdx, freshDiscardPileForAI, [...currentDeckFromState], nextPlayerIdx, finalPlayersListForSetState), 1000);
     } else if (!finalPlayersListForSetState[nextPlayerIdx]?.isAI && gameState === 'playing') {
       setGameMessage(`${finalPlayersListForSetState[nextPlayerIdx].name} 的回合，请出牌`);
     }
@@ -470,7 +489,7 @@ function SevenGhostGame({ onGoBack }) {
           // 困难AI：使用与简单AI相同的策略
           bestPlayDecision = selectHardAIPlay(possiblePlays);
         }
-        setTimeout(() => {
+        scheduleTimer(() => {
           if (bestPlayDecision) {
             addToLog(`${updatedAiPlayerInfo.name} 打出了 ${bestPlayDecision.cards.map(c => c.value + (c.suit !== 'Joker' ? c.suit : '')).join(', ')} (${bestPlayDecision.type})`);
             const newHand = updatedAiPlayerInfo.hand.filter(card => !bestPlayDecision.cards.find(pc => pc.id === card.id));
@@ -486,7 +505,7 @@ function SevenGhostGame({ onGoBack }) {
           }
         }, 1000 + Math.random() * 1000);
       } else {
-        setTimeout(() => {
+        scheduleTimer(() => {
           addToLog(`${updatedAiPlayerInfo.name} 选择跳过 (无牌可出).`);
           if (lastPlay === null && updatedAiPlayerInfo.hand.length > 0) {
               console.error("AI Error: Has cards but cannot find a valid opening play. Hand:", JSON.stringify(updatedAiPlayerInfo.hand.map(c=>c.id)), "PossiblePlays:", JSON.stringify(possiblePlays));
@@ -499,7 +518,7 @@ function SevenGhostGame({ onGoBack }) {
       console.error("Error in handleAIPlay:", error);
       addToLog(`${aiPlayerInfo.name} 遇到错误，自动跳过.`);
       // Pass aiPlayerIndex as the acting player's index, currentTurnDiscardPile, and currentTurnDeck
-      setTimeout(() => nextTurn(aiPlayerIndex, false, null, null, playersListForThisTurn, currentTurnDiscardPile, currentTurnDeck), 1000);
+      scheduleTimer(() => nextTurn(aiPlayerIndex, false, null, null, playersListForThisTurn, currentTurnDiscardPile, currentTurnDeck), 1000);
     }
   };
 
@@ -883,8 +902,8 @@ function SevenGhostGame({ onGoBack }) {
 
   const [selectedPlayerCards, setSelectedPlayerCards] = useState([]);
   const handleCardClick = (card) => {
-    if (players[currentPlayerIndex].isAI) return; // AI turn, player cannot select
-    if (players[currentPlayerIndex].isAI || gameState !== 'playing') return;
+    const actor = players[currentPlayerIndex];
+    if (!actor || actor.isAI || gameState !== 'playing') return; // AI 回合或非游戏中禁止选牌
     setSelectedPlayerCards(prev => 
       prev.find(c => c.id === card.id) 
         ? prev.filter(c => c.id !== card.id) 
@@ -898,14 +917,16 @@ function SevenGhostGame({ onGoBack }) {
   };
 
   const handleConfirmPlay = () => {
-    if (selectedPlayerCards.length > 0 && !players[currentPlayerIndex].isAI && gameState === 'playing') {
+    const actor = players[currentPlayerIndex];
+    if (selectedPlayerCards.length > 0 && actor && !actor.isAI && gameState === 'playing') {
       handlePlayerPlay(selectedPlayerCards);
       setSelectedPlayerCards([]);
     }
   };
 
   const handleCardDoubleClick = (card) => {
-    if (players[currentPlayerIndex].isAI || gameState !== 'playing') return;
+    const actor = players[currentPlayerIndex];
+    if (!actor || actor.isAI || gameState !== 'playing') return;
     // Attempt to play the single double-clicked card
     handlePlayerPlay([card]);
     setSelectedPlayerCards([]); // Clear selection after attempting to play
@@ -926,7 +947,12 @@ function SevenGhostGame({ onGoBack }) {
   }
 
   if (gameState === 'setup') {
-    return <div className="seven-ghost-container loading-screen">正在准备牌局...</div>;
+    return (
+      <div className="seven-ghost-container loading-screen">
+        <p>正在准备牌局...</p>
+        <button onClick={onGoBack} className="sgg-button back-button top-back-button">返回大厅</button>
+      </div>
+    );
   }
 
   if (gameState === 'gameOver') {

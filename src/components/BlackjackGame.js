@@ -75,6 +75,7 @@ function BlackjackGame({ onGoBack }) {
   const playerScoreRef = useRef(playerScore);
   const dealerScoreRef = useRef(dealerScore);
   const dealerDrawInterval = useRef(null); // 存储定时器引用
+  const resultTimerRef = useRef(null); // 存储爆牌/结算的一次性定时器
   
   // 更新ref值
   useEffect(() => {
@@ -109,8 +110,12 @@ function BlackjackGame({ onGoBack }) {
     // 清除定时器的清理函数
     return () => {
       if (dealerDrawInterval.current) {
-        clearInterval(dealerDrawInterval.current);
+        clearTimeout(dealerDrawInterval.current);
         dealerDrawInterval.current = null;
+      }
+      if (resultTimerRef.current) {
+        clearTimeout(resultTimerRef.current);
+        resultTimerRef.current = null;
       }
     };
   }, []);
@@ -175,7 +180,7 @@ function BlackjackGame({ onGoBack }) {
       setGameState('dealerRevealing');
       
       // After a delay, show the game over screen
-      setTimeout(() => {
+      resultTimerRef.current = setTimeout(() => {
         setWinner('dealer');
         setGameOverMessage('你爆牌了！庄家获胜。');
         setMessage('');
@@ -192,7 +197,7 @@ function BlackjackGame({ onGoBack }) {
 
     // 清除任何现有的定时器
     if (dealerDrawInterval.current) {
-      clearInterval(dealerDrawInterval.current);
+      clearTimeout(dealerDrawInterval.current);
       dealerDrawInterval.current = null;
     }
 
@@ -213,7 +218,7 @@ function BlackjackGame({ onGoBack }) {
       if (shouldStop || deck.length === 0) {
         setDealerHand(hand);
         setDealerScore(handValue);
-        setTimeout(() => {
+        resultTimerRef.current = setTimeout(() => {
           const playerScore = playerScoreRef.current;
           if (handValue > 21) {
             setWinner('player');
@@ -270,8 +275,12 @@ function BlackjackGame({ onGoBack }) {
   const resetGame = () => {
     // 清除定时器
     if (dealerDrawInterval.current) {
-      clearInterval(dealerDrawInterval.current);
+      clearTimeout(dealerDrawInterval.current);
       dealerDrawInterval.current = null;
+    }
+    if (resultTimerRef.current) {
+      clearTimeout(resultTimerRef.current);
+      resultTimerRef.current = null;
     }
     
     setGameState('difficulty'); // Go back to difficulty selection

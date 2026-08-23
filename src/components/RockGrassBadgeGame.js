@@ -54,17 +54,21 @@ const RESCUES = [
     id: 'chiikawa',
     name: '吉伊',
     stageName: '花影浅庭',
-    stageFeature: '固定花灯',
+    stageFeature: '固定花灯 · 新手庭院',
     image: process.env.PUBLIC_URL + '/images/duiduipeng/吉伊.avif',
     palette: ['#dff5ed', '#f7e9c9', '#f1a9b8'],
     seals: 3,
     shots: 7,
+    shielded: 0,
+    portalDrift: false,
     target: [0.5, 0.25],
     bumpers: [
       [0.23, 0.47, 27],
       [0.77, 0.47, 27],
       [0.5, 0.61, 31]
     ],
+    walls: [],
+    drains: [],
     stars: [
       [0.14, 0.34],
       [0.86, 0.35],
@@ -77,22 +81,33 @@ const RESCUES = [
     id: 'hachiware',
     name: '小八',
     stageName: '流光回廊',
-    stageFeature: '移动花灯 · 吉伊助力',
+    stageFeature: '移动花灯 · 石桥阻隔 · 漂移莲池',
     image: process.env.PUBLIC_URL + '/images/duiduipeng/小八.avif',
     palette: ['#e8edf9', '#dff4ef', '#82a9d8'],
     seals: 4,
-    shots: 8,
+    shots: 6,
+    shielded: 1,
+    portalDrift: true,
     target: [0.29, 0.25],
     bumpers: [
       [0.72, 0.28, 26, 'horizontal'],
-      [0.31, 0.52, 28],
-      [0.72, 0.62, 30, 'vertical'],
-      [0.48, 0.75, 23]
+      [0.33, 0.55, 26, 'vertical'],
+      [0.74, 0.63, 28, 'vertical'],
+      [0.5, 0.78, 22, 'horizontal']
+    ],
+    // [x, y, 宽度比例, 高度比例, 旋转角度] —— 挡在救援目标下方，逼迫走位
+    walls: [
+      [0.29, 0.41, 0.34, 0.028, 0],
+      [0.63, 0.44, 0.026, 0.22, 0]
+    ],
+    // [x, y, 半径] —— 危险漩涡，碰到即损失本球
+    drains: [
+      [0.13, 0.8, 24]
     ],
     stars: [
       [0.51, 0.34],
       [0.86, 0.42],
-      [0.13, 0.65],
+      [0.13, 0.6],
       [0.84, 0.78]
     ],
     vortices: []
@@ -101,17 +116,28 @@ const RESCUES = [
     id: 'usagi',
     name: '乌萨奇',
     stageName: '双月水庭',
-    stageFeature: '传送水门 · 双伙伴助力',
+    stageFeature: '传送水门 · 双重封印 · 危险漩涡',
     image: process.env.PUBLIC_URL + '/images/duiduipeng/乌萨奇.avif',
     palette: ['#f2e7fb', '#dff3f1', '#f3c85a'],
     seals: 5,
-    shots: 9,
+    shots: 7,
+    shielded: 2,
+    portalDrift: true,
     target: [0.5, 0.22],
     bumpers: [
-      [0.2, 0.42, 25, 'vertical'],
-      [0.8, 0.42, 25, 'vertical'],
-      [0.34, 0.62, 27, 'horizontal'],
-      [0.66, 0.62, 27, 'horizontal']
+      [0.2, 0.44, 24, 'vertical'],
+      [0.8, 0.44, 24, 'vertical'],
+      [0.34, 0.64, 26, 'horizontal'],
+      [0.66, 0.64, 26, 'horizontal']
+    ],
+    // 两道斜置石桥在目标上方组成守护顶棚，中间留出窄缝
+    walls: [
+      [0.33, 0.37, 0.22, 0.026, -26],
+      [0.67, 0.37, 0.22, 0.026, 26]
+    ],
+    drains: [
+      [0.12, 0.82, 23],
+      [0.88, 0.82, 23]
     ],
     stars: [
       [0.12, 0.29],
@@ -144,12 +170,15 @@ const createRuntime = petId => ({
   ball: null,
   bodies: [],
   bumpers: [],
+  walls: [],
+  drains: [],
   seals: [],
   stars: [],
   vortices: [],
   assists: [],
   targetBody: null,
   portalBody: null,
+  portalDrift: 0,
   launcher: { x: 0, y: 0 },
   mode: 'ready',
   shotsLeft: RESCUES[0].shots,
@@ -185,6 +214,8 @@ function RockGrassBadgeGame({ onGoBack }) {
   const [selectedPetId, setSelectedPetId] = useState('shuiling');
   const [result, setResult] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
+  const [bestScore, setBestScore] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
   const [hud, setHud] = useState({
     stage: 0,
     shots: RESCUES[0].shots,
@@ -228,6 +259,16 @@ function RockGrassBadgeGame({ onGoBack }) {
     };
   }, []);
 
+  // 读取历史最高分（localStorage 不可用时静默降级）
+  useEffect(() => {
+    try {
+      const saved = Number(window.localStorage.getItem('pinballBestScore'));
+      if (!Number.isNaN(saved) && saved > 0) setBestScore(saved);
+    } catch (error) {
+      // 忽略隐私模式等导致的读取失败
+    }
+  }, []);
+
   const addParticles = useCallback((runtime, x, y, color, count, speed = 100) => {
     for (let index = 0; index < count; index += 1) {
       const angle = Math.random() * Math.PI * 2;
@@ -265,6 +306,20 @@ function RockGrassBadgeGame({ onGoBack }) {
       maxCombo: runtime.maxCombo,
       stars: runtime.stats.stars,
       rescues: runtime.stats.rescues
+    });
+    // 刷新历史最高分
+    setBestScore(previous => {
+      if (runtime.score > previous) {
+        setIsNewBest(true);
+        try {
+          window.localStorage.setItem('pinballBestScore', String(runtime.score));
+        } catch (error) {
+          // 忽略写入失败
+        }
+        return runtime.score;
+      }
+      setIsNewBest(false);
+      return previous;
     });
     setScreen('result');
   }, []);
@@ -318,12 +373,15 @@ function RockGrassBadgeGame({ onGoBack }) {
       runtime.ball = null;
       runtime.bodies = [];
       runtime.bumpers = [];
+      runtime.walls = [];
+      runtime.drains = [];
       runtime.seals = [];
       runtime.stars = [];
       runtime.vortices = [];
       runtime.assists = [];
       runtime.targetBody = null;
       runtime.portalBody = null;
+      runtime.portalDrift = 0;
       runtime.mode = 'ready';
       runtime.aiming = null;
       runtime.pointer = null;
@@ -371,6 +429,36 @@ function RockGrassBadgeGame({ onGoBack }) {
         return body;
       });
 
+      // 石桥：静态障碍物，阻挡弹珠的直线路径，逼迫玩家绕行或借助能力
+      runtime.walls = (stage.walls || []).map((data, index) => {
+        const [xRatio, yRatio, wRatio, hRatio, degrees] = data;
+        const bodyWidth = Math.max(12, width * wRatio);
+        const bodyHeight = Math.max(12, height * hRatio);
+        const body = Bodies.rectangle(width * xRatio, height * yRatio, bodyWidth, bodyHeight, {
+          isStatic: true,
+          restitution: 0.72,
+          friction: 0,
+          angle: (degrees || 0) * Math.PI / 180,
+          label: `wall-${index}`,
+          chamfer: { radius: Math.min(bodyWidth, bodyHeight) / 2 }
+        });
+        body.bodyWidth = bodyWidth;
+        body.bodyHeight = bodyHeight;
+        return body;
+      });
+
+      // 危险漩涡：碰到即损失本球，出现在 2、3 关，增加走位风险
+      runtime.drains = (stage.drains || []).map((data, index) => {
+        const [xRatio, yRatio, radius] = data;
+        const body = Bodies.circle(width * xRatio, height * yRatio, radius, {
+          isStatic: true,
+          isSensor: true,
+          label: `drain-${index}`
+        });
+        body.radius = radius;
+        return { body, radius };
+      });
+
       const targetX = width * stage.target[0];
       const targetY = height * stage.target[1];
       runtime.targetBody = Bodies.circle(targetX, targetY, 42, {
@@ -379,6 +467,8 @@ function RockGrassBadgeGame({ onGoBack }) {
         label: 'target'
       });
 
+      // 后 shielded 个封印带有护盾，需要额外命中一次才能击碎
+      const shielded = stage.shielded || 0;
       runtime.seals = Array.from({ length: stage.seals }, (_, index) => {
         const angle = index * Math.PI * 2 / stage.seals - Math.PI / 2;
         const orbitX = stageIndex === 2 ? 76 : 68;
@@ -393,7 +483,8 @@ function RockGrassBadgeGame({ onGoBack }) {
             label: `seal-${index}`
           }
         );
-        return { body, active: true, angle };
+        const shield = index >= stage.seals - shielded ? 1 : 0;
+        return { body, active: true, angle, shield };
       });
 
       runtime.stars = stage.stars.map((position, index) => {
@@ -430,6 +521,8 @@ function RockGrassBadgeGame({ onGoBack }) {
       Composite.add(engine.world, [
         ...boundaries,
         ...runtime.bumpers,
+        ...runtime.walls,
+        ...runtime.drains.map(drain => drain.body),
         runtime.targetBody,
         ...runtime.seals.map(seal => seal.body),
         ...runtime.stars.map(star => star.body),
@@ -442,6 +535,8 @@ function RockGrassBadgeGame({ onGoBack }) {
           if (!preserved.seals[index]) {
             seal.active = false;
             Composite.remove(engine.world, seal.body);
+          } else if (preserved.sealShields && preserved.sealShields[index] !== undefined) {
+            seal.shield = preserved.sealShields[index];
           }
         });
         runtime.stars.forEach((star, index) => {
@@ -492,6 +587,7 @@ function RockGrassBadgeGame({ onGoBack }) {
       const preserved = runtime.width
         ? {
             seals: runtime.seals.map(seal => seal.active),
+            sealShields: runtime.seals.map(seal => seal.shield),
             stars: runtime.stars.map(star => star.active),
             shotsLeft: runtime.shotsLeft + (runtime.ball && !runtime.portalOpen ? 1 : 0),
             stageStars: runtime.stageStars,
@@ -554,9 +650,18 @@ function RockGrassBadgeGame({ onGoBack }) {
       runtime.timers.push(timer);
     };
 
-    const breakSeal = index => {
+    const breakSeal = (index, options = {}) => {
       const seal = runtime.seals[index];
       if (!seal || !seal.active) return;
+      // 护盾封印：第一次命中只破盾并弹一小串火花，第二次才真正击碎
+      if (seal.shield > 0 && !options.force) {
+        seal.shield -= 1;
+        seal.shieldFlashUntil = performance.now() + 260;
+        runtime.score += 60;
+        addParticles(runtime, seal.body.position.x, seal.body.position.y, '#cfe4ff', 12, 90);
+        addRipple(runtime, seal.body.position.x, seal.body.position.y, '#9ecbff', 18);
+        return;
+      }
       seal.active = false;
       Composite.remove(engine.world, seal.body);
       runtime.stats.seals += 1;
@@ -606,6 +711,17 @@ function RockGrassBadgeGame({ onGoBack }) {
         y: runtime.ball.velocity.y * 1.18
       });
       addRipple(runtime, destination.x, destination.y, '#ae8fe2', 24);
+    };
+
+    const hitDrain = index => {
+      const drain = runtime.drains[index];
+      if (!drain || !runtime.ball || runtime.mode !== 'rolling') return;
+      const position = runtime.ball.position;
+      addParticles(runtime, position.x, position.y, '#6a5b9a', 26, 120);
+      addRipple(runtime, drain.body.position.x, drain.body.position.y, '#8f7ac2', 26);
+      runtime.combo = 0;
+      runtime.bloom = 0;
+      resetBall();
     };
 
     const activateAssist = index => {
@@ -685,6 +801,7 @@ function RockGrassBadgeGame({ onGoBack }) {
         if (other.label.startsWith('seal-')) breakSeal(Number(other.label.split('-')[1]));
         if (other.label.startsWith('star-')) collectStar(Number(other.label.split('-')[1]));
         if (other.label.startsWith('vortex-')) teleportBall(Number(other.label.split('-')[1]));
+        if (other.label.startsWith('drain-')) hitDrain(Number(other.label.split('-')[1]));
         if (other.label.startsWith('assist-')) activateAssist(Number(other.label.split('-')[1]));
         if (other.label === 'target') rescueTarget();
         if (other.label === 'portal' && runtime.portalOpen) completeStage();
@@ -834,6 +951,20 @@ function RockGrassBadgeGame({ onGoBack }) {
     const drawSeal = (seal, now) => {
       if (!seal.active) return;
       const { x, y } = seal.body.position;
+      // 护盾封印：外圈多一道蓝色光环，命中破盾时闪一下
+      if (seal.shield > 0) {
+        const flashing = seal.shieldFlashUntil && now < seal.shieldFlashUntil;
+        context.save();
+        context.translate(x, y);
+        context.strokeStyle = flashing ? '#ffffff' : '#8ec6ff';
+        context.lineWidth = flashing ? 4 : 2.5;
+        context.shadowColor = '#8ec6ff';
+        context.shadowBlur = 12;
+        context.beginPath();
+        context.arc(0, 0, 21 + Math.sin(now / 220) * 1.5, 0, Math.PI * 2);
+        context.stroke();
+        context.restore();
+      }
       context.save();
       context.translate(x, y);
       context.rotate(now / 650 + seal.angle);
@@ -850,6 +981,63 @@ function RockGrassBadgeGame({ onGoBack }) {
       context.strokeStyle = '#ffffff';
       context.lineWidth = 2;
       context.stroke();
+      context.restore();
+    };
+
+    const drawWall = wall => {
+      const { x, y } = wall.position;
+      context.save();
+      context.translate(x, y);
+      context.rotate(wall.angle);
+      context.shadowColor = 'rgba(70,90,110,0.35)';
+      context.shadowBlur = 10;
+      const w = wall.bodyWidth;
+      const h = wall.bodyHeight;
+      const radius = Math.min(w, h) / 2;
+      const gradient = context.createLinearGradient(0, -h / 2, 0, h / 2);
+      gradient.addColorStop(0, 'rgba(150,170,186,0.95)');
+      gradient.addColorStop(1, 'rgba(108,132,150,0.95)');
+      context.fillStyle = gradient;
+      context.beginPath();
+      context.moveTo(-w / 2 + radius, -h / 2);
+      context.lineTo(w / 2 - radius, -h / 2);
+      context.arc(w / 2 - radius, 0, radius, -Math.PI / 2, Math.PI / 2);
+      context.lineTo(-w / 2 + radius, h / 2);
+      context.arc(-w / 2 + radius, 0, radius, Math.PI / 2, -Math.PI / 2);
+      context.closePath();
+      context.fill();
+      context.strokeStyle = 'rgba(255,255,255,0.65)';
+      context.lineWidth = 1.5;
+      context.stroke();
+      context.restore();
+    };
+
+    const drawDrain = (drain, now) => {
+      const { x, y } = drain.body.position;
+      const radius = drain.radius;
+      context.save();
+      context.translate(x, y);
+      context.shadowColor = '#5a4a86';
+      context.shadowBlur = 16;
+      context.fillStyle = 'rgba(74,58,120,0.4)';
+      context.beginPath();
+      context.arc(0, 0, radius + 3, 0, Math.PI * 2);
+      context.fill();
+      context.rotate(-now / 320);
+      context.strokeStyle = '#8f7ac2';
+      context.lineWidth = 3;
+      for (let arm = 0; arm < 3; arm += 1) {
+        context.rotate(Math.PI * 2 / 3);
+        context.beginPath();
+        for (let t = 0; t <= 1; t += 0.12) {
+          const spiral = t * radius;
+          const px = Math.cos(t * Math.PI * 2) * spiral;
+          const py = Math.sin(t * Math.PI * 2) * spiral;
+          if (t === 0) context.moveTo(px, py);
+          else context.lineTo(px, py);
+        }
+        context.stroke();
+      }
       context.restore();
     };
 
@@ -1029,6 +1217,15 @@ function RockGrassBadgeGame({ onGoBack }) {
         }
       });
 
+      // 漂移莲池：救出伙伴后传送门会左右摆动，玩家必须瞄准时机送球入池
+      if (runtime.portalBody && stage.portalDrift) {
+        runtime.portalDrift = Math.sin(now / 900) * runtime.width * 0.26;
+        Body.setPosition(runtime.portalBody, {
+          x: runtime.width / 2 + runtime.portalDrift,
+          y: 54
+        });
+      }
+
       Engine.update(engine, Math.min(delta, 25));
 
       if (runtime.ball) {
@@ -1098,8 +1295,10 @@ function RockGrassBadgeGame({ onGoBack }) {
       context.globalAlpha = 1;
 
       runtime.vortices.forEach((vortex, index) => drawVortex(vortex, index, now));
+      runtime.drains.forEach(drain => drawDrain(drain, now));
       runtime.assists.forEach(assist => drawAssist(assist, now));
       runtime.bumpers.forEach((bumper, index) => drawBumper(bumper, index, now, stage.palette[2]));
+      runtime.walls.forEach(wall => drawWall(wall));
       runtime.stars.forEach(star => {
         if (!star.active) return;
         drawStar(star.body.position.x, star.body.position.y, 10 + Math.sin(now / 180) * 1.2, '#f2c752', now / 500);
@@ -1199,7 +1398,8 @@ function RockGrassBadgeGame({ onGoBack }) {
     if (runtime.petId === 'huoshen') {
       runtime.seals.forEach((seal, index) => {
         if (seal.active && Math.hypot(seal.body.position.x - position.x, seal.body.position.y - position.y) <= 112) {
-          runtime.breakSeal(index);
+          // 烈焰爆破无视护盾，直接击碎范围内所有封印
+          runtime.breakSeal(index, { force: true });
         }
       });
       runtime.stars.forEach((star, index) => {
@@ -1301,6 +1501,12 @@ function RockGrassBadgeGame({ onGoBack }) {
             <span>三座庭院 · 三次救援</span>
             <h1>精灵弹珠救援</h1>
           </div>
+          {bestScore > 0 && (
+            <div className="pinball-best" title="历史最高分">
+              <Sparkles size={14} />
+              <b>{bestScore}</b>
+            </div>
+          )}
         </header>
 
         <main className="pinball-select-main">
@@ -1354,10 +1560,12 @@ function RockGrassBadgeGame({ onGoBack }) {
           </div>
           <span>{won ? '全部救出' : '救援记录'}</span>
           <h1>{won ? '三座庭院重新亮起来了' : '换个角度再来一次'}</h1>
+          {isNewBest && <div className="pinball-newbest">🎉 刷新最高分！</div>}
           <div className="pinball-result-stats">
             <div><strong>{resultStats.score}</strong><span>得分</span></div>
             <div><strong>{resultStats.maxCombo}</strong><span>最高连击</span></div>
             <div><strong>{resultStats.stars}</strong><span>星光</span></div>
+            <div><strong>{bestScore}</strong><span>最高分</span></div>
           </div>
           <div className="pinball-result-actions">
             <button type="button" onClick={startGame}>再次挑战</button>

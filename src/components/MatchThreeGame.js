@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './MatchThreeGame.css';
 import { getMultipleRandomImages, getRandomImage as getRandomChiikawaImage } from '../config/images'; // 导入配置
 
@@ -10,24 +10,16 @@ const MATCH_MESSAGES = [
   "继续加油！",
   "最棒了！"
 ];
-// 使用配置文件中的图片，例如获取5张不同的图片作为游戏元素
-const ELEMENT_TYPES = getMultipleRandomImages(9); // 直接获取完整的图片路径
-// 如果 ELEMENT_TYPES 为空（例如配置文件中没有图片），需要有备用方案或提示
-if (ELEMENT_TYPES.length === 0) {
-  console.warn('MatchThreeGame: 图片列表为空，请检查 src/config/images.js 和 public/images/chiikawa/ 目录');
-  // 可以填充一些默认占位符或者阻止游戏开始
-  // ELEMENT_TYPES.push('/images/chiikawa/default.png'); // 示例：添加一个默认图片
-}
+// 配置异常时回退到仓库内真实存在的角色图片，避免产生无效资源请求。
+const configuredElementTypes = getMultipleRandomImages(9);
+const ELEMENT_TYPES = configuredElementTypes.length > 0
+  ? configuredElementTypes
+  : ['/images/duiduipeng/吉伊.avif'];
 const INITIAL_MOVES = 3; // Changed from 10 to 3
 const SCORE_PER_MATCH = 10;
 
 // 生成随机元素
 const getRandomElement = () => {
-  if (ELEMENT_TYPES.length === 0) {
-    // 如果配置的图片列表为空，返回一个默认值或null
-    // 这确保了即使图片配置不正确，游戏逻辑也不会因undefined的元素类型而出错
-    return '/images/chiikawa/placeholder.png'; // 假设有一个占位符图片
-  }
   return ELEMENT_TYPES[Math.floor(Math.random() * ELEMENT_TYPES.length)];
 };
 
@@ -197,6 +189,24 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
   const [newCells, setNewCells] = useState(new Set()); // 存储新出现的单元格
   const [isShuffling, setIsShuffling] = useState(false); // 是否正在洗牌
 
+  // 记录所有挂起的定时器（消除连锁、弹窗、洗牌等），卸载时统一清理
+  const timersRef = useRef([]);
+  const scheduleTimer = useCallback((callback, delay) => {
+    const timerId = setTimeout(() => {
+      timersRef.current = timersRef.current.filter(id => id !== timerId);
+      callback();
+    }, delay);
+    timersRef.current.push(timerId);
+    return timerId;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(id => clearTimeout(id));
+      timersRef.current = [];
+    };
+  }, []);
+
   // 检查并处理消除 (仅用于玩家操作后)
   const checkAndClearMatches = useCallback((currentGrid) => {
     let newGrid = currentGrid.map(row => [...row]);
@@ -251,7 +261,7 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
       }
 
       // 延迟处理，让用户看到消除效果
-      setTimeout(() => {
+      scheduleTimer(() => {
         // 清除消除标记
         setClearingCells(new Set());
         
@@ -289,7 +299,7 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
         setGrid(filledGrid);
         
         // 递归检查新生成的面板是否还有匹配
-        setTimeout(() => {
+        scheduleTimer(() => {
           // 清除新卡片标记
           setNewCells(new Set());
           const furtherMatchesFound = checkAndClearMatches(filledGrid);
@@ -305,7 +315,7 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
       // 如果这是递归调用，则由其父调用处理 isCheckingMatches
       return false; // 本轮操作没有找到匹配
     }
-  }, [setScore, setIsCheckingMatches, getRandomElement]);
+  }, [setScore, setIsCheckingMatches, getRandomElement, scheduleTimer]);
 
   useEffect(() => {
     // 确保在棋盘稳定后（非检查匹配状态）且游戏未结束时，检查是否有可行的移动
@@ -364,14 +374,14 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
           setPopupMessage(randomMatchMessage);
           setPopupImage(getRandomChiikawaImage());
           setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 1500); // Hide popup after 1.5s
+          scheduleTimer(() => setShowPopup(false), 1500); // Hide popup after 1.5s
         } else {
           // Swap resulted in no matches, penalize move
           setMoves(prevMoves => prevMoves - 1);
           setPopupMessage("再试试！");
           setPopupImage(getRandomChiikawaImage());
           setShowPopup(true);
-          setTimeout(() => {
+          scheduleTimer(() => {
             setShowPopup(false);
             setGrid(originalGrid); // Revert the swap
             setIsCheckingMatches(false); // Checking is over
@@ -410,7 +420,7 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
     setClearingCells(allCells);
     
     // 延迟后生成新的地图
-    setTimeout(() => {
+    scheduleTimer(() => {
       const newGrid = createAndProcessInitialGrid(GRID_SIZE, getRandomElement, hasPossibleSwaps, clearInitialMatchesOnBoard);
       
       // 标记所有新单元格
@@ -426,7 +436,7 @@ function MatchThreeGame({ onGameOver, onGoBack }) { // Added onGoBack
       setGrid(newGrid);
       
       // 清除新单元格标记
-      setTimeout(() => {
+      scheduleTimer(() => {
         setNewCells(new Set());
         setIsShuffling(false);
       }, 500);

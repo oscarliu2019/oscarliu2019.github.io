@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './DuiDuiPengGame.css';
 
 // 牌的类型
@@ -57,9 +57,28 @@ const DuiDuiPengGame = ({ onGoBack }) => {
   const [isPlayerTurn, setIsPlayerTurn] = useState(false); // 是否是玩家回合
   const [drawCount, setDrawCount] = useState(0); // 抽牌次数
 
+  // 记录所有挂起的定时器，卸载时统一清理
+  const timersRef = useRef([]);
+  const scheduleTimer = (callback, delay) => {
+    const timerId = setTimeout(() => {
+      timersRef.current = timersRef.current.filter(id => id !== timerId);
+      callback();
+    }, delay);
+    timersRef.current.push(timerId);
+    return timerId;
+  };
+
   // 初始化游戏
   useEffect(() => {
     startNewGame();
+  }, []);
+
+  // 卸载时清理所有定时器
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(id => clearTimeout(id));
+      timersRef.current = [];
+    };
   }, []);
 
   const startNewGame = () => {
@@ -119,7 +138,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     }
     
     // 延迟后开始对对碰
-    setTimeout(() => {
+    scheduleTimer(() => {
       setMessage('游戏开始！点击两张相同的牌进行配对');
       setGameState('playing');
       setIsPlayerTurn(true);
@@ -163,7 +182,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     const newDeckIndex = currentDeckIndex + 1;
     
     // 延迟移除新牌标记，以便动画只播放一次
-    setTimeout(() => {
+    scheduleTimer(() => {
       setTableCards(cards => 
         cards.map(card => 
           card.uniqueId === newCard.uniqueId 
@@ -196,7 +215,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
       setDrawCount(drawCount + 1); // 增加抽牌次数
       
       // 检查翻开后是否有可配对的牌
-      setTimeout(() => {
+      scheduleTimer(() => {
         // 使用函数式更新检查最新的状态
         setTableCards(currentCards => {
           const cardCounts = {};
@@ -211,7 +230,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
           if (!hasMatches) {
             setMessage('没有可配对的牌');
             // 延迟更长时间再检查游戏状态
-            setTimeout(() => {
+            scheduleTimer(() => {
               checkGameState();
             }, 2000);
           }
@@ -250,7 +269,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
           setTableCards(updatedCards);
           
           // 等待动画完成后移除牌
-          setTimeout(() => {
+          scheduleTimer(() => {
             // 使用函数式更新，确保使用最新的状态
             setTableCards(currentCards => {
               const filteredCards = currentCards.filter(card => 
@@ -277,7 +296,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
           // 匹配失败
           setMessage('这两张牌不匹配');
           
-          setTimeout(() => {
+          scheduleTimer(() => {
             setSelectedCards([]);
             setIsProcessing(false);
           }, 1000);
@@ -304,12 +323,12 @@ const DuiDuiPengGame = ({ onGoBack }) => {
           setMessage(`没有可配对的牌，可以使用许愿机会（剩余${wishCount}次）`);
         } else if (!milkGuessUsed) {
           // 延迟更长时间再显示奶一口选项
-          setTimeout(() => {
+          scheduleTimer(() => {
             setShowMilkGuessModal(true);
           }, 2000);
         } else {
           // 延迟更长时间再结束游戏
-          setTimeout(() => {
+          scheduleTimer(() => {
             setGameState('gameOver');
             setShowGameOverModal(true);
             setMessage(`游戏结束！你总共配对了${matchCount}对牌`);
@@ -331,7 +350,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     setIsProcessing(true);
     setWishCount(wishCount - 1);
     
-    setTimeout(() => {
+    scheduleTimer(() => {
       setTableCards(currentCards => {
         const result = addNewCardToTable(currentCards, deckIndex);
         
@@ -355,7 +374,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
     setIsProcessing(true);
     setMilkGuessUsed(true);
     
-    setTimeout(() => {
+    scheduleTimer(() => {
       setTableCards(currentCards => {
         const result = addNewCardToTable(currentCards, deckIndex);
         
@@ -396,7 +415,7 @@ const DuiDuiPengGame = ({ onGoBack }) => {
   return (
     <div className="duiduipeng-game">
       <div className="game-header">
-        <button className="back-button" onClick={onGoBack}>返回</button>
+        <button className="back-button" onClick={onGoBack}>返回大厅</button>
         <h1>吉伊对对碰</h1>
         <div className="game-stats">
           <span>配对数: {matchCount}</span>
