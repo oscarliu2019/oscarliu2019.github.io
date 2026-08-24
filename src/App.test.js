@@ -32,6 +32,6 @@ describe('App', () => {
 
     expect(screen.getByText('Chiikawa的游戏屋')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /一句话侦探/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /本地海龟汤/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /海龟汤/ })).toBeInTheDocument();
   });
 });

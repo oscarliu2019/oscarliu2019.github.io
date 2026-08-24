@@ -9,6 +9,9 @@
 /coverage
 
 
+# build intermediates
+/artifacts
+
 # misc
 .DS_Store
 .env.local

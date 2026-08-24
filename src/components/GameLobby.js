@@ -14,7 +14,7 @@ const GAME_ENTRIES = [
   { id: 'messageToPig', label: '想对猪说的话', alt: '想对猪说的话 Logo', image: () => getSpecificImage('messageToPigLogo') || getRandomImage() },
   { id: 'rockGrassBadgeGame', label: '精灵弹珠救援', alt: '精灵弹珠救援 Logo', image: () => process.env.PUBLIC_URL + '/images/rock/shuiling.png' },
   { id: 'detectiveGame', label: '一句话侦探', alt: '一句话侦探 Logo', image: () => process.env.PUBLIC_URL + '/images/duiduipeng/古本.avif' },
-  { id: 'turtleSoupGame', label: '本地海龟汤', alt: '本地海龟汤 Logo', image: () => process.env.PUBLIC_URL + '/images/duiduipeng/飞鼠.avif' }
+  { id: 'turtleSoupGame', label: '海龟汤', alt: '海龟汤 Logo', image: () => process.env.PUBLIC_URL + '/images/duiduipeng/飞鼠.avif' }
 ];
 
 function GameLobby({ onStartGame }) {
