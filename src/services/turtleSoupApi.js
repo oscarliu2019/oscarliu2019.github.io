@@ -68,6 +68,10 @@ const callWithKey = async (apiKey, system, user, maxTokens) => {
 
 const isKeyExhausted = status => status === 429 || status === 402 || status === 401;
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const dailyExhausted = new Set();
+
 const parseModelJson = content => {
   const cleaned = content.replace(/```(?:json)?/gi, '').trim();
   const start = cleaned.indexOf('{');
@@ -101,19 +105,34 @@ const salvageJson = text => {
 };
 
 const requestModel = async (system, user, maxTokens) => {
-  let lastError = '请求失败';
-  for (let attempt = 0; attempt < apiKeys.length; attempt += 1) {
-    const index = (keyCursor + attempt) % apiKeys.length;
-    const response = await callWithKey(apiKeys[index], system, user, maxTokens);
-    const payload = await response.json();
-    if (response.ok) {
-      keyCursor = index;
-      return parseModelJson(payload.choices[0].message.content);
+  const isDaily = message => /per-day|per day|daily/i.test(message || '');
+  let sawRateLimit = false;
+  for (let round = 0; round < 3; round += 1) {
+    for (let attempt = 0; attempt < apiKeys.length; attempt += 1) {
+      const index = (keyCursor + attempt) % apiKeys.length;
+      if (dailyExhausted.has(index)) continue;
+      const response = await callWithKey(apiKeys[index], system, user, maxTokens);
+      const payload = await response.json();
+      if (response.ok) {
+        keyCursor = index;
+        return parseModelJson(payload.choices[0].message.content);
+      }
+      const message = payload.error?.message || payload.message || `HTTP ${response.status}`;
+      if (!isKeyExhausted(response.status)) throw new Error(message);
+      if (response.status === 429 && isDaily(message)) {
+        dailyExhausted.add(index);
+      } else {
+        sawRateLimit = true;
+      }
     }
-    lastError = payload.error?.message || payload.message || `HTTP ${response.status}`;
-    if (!isKeyExhausted(response.status)) throw new Error(lastError);
+    if (dailyExhausted.size >= apiKeys.length) break;
+    await sleep(1500 * (round + 1));
   }
-  throw new Error('今日免费额度已用完，请明天再来，或稍后重试。');
+  throw new Error(
+    sawRateLimit
+      ? '主持人有点忙，请过几秒再问一次。'
+      : '今日免费额度已用完，请明天再来。'
+  );
 };
 
 export const askTurtleSoupQuestion = (
