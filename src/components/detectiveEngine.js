@@ -4,7 +4,7 @@ export const CHARACTERS = [
   { id: 'wusaji', name: '乌萨奇', image: process.env.PUBLIC_URL + '/images/duiduipeng/乌萨奇.avif' },
   { id: 'lizi', name: '栗子', image: process.env.PUBLIC_URL + '/images/duiduipeng/栗子.avif' },
   { id: 'shifu', name: '师傅', image: process.env.PUBLIC_URL + '/images/duiduipeng/师傅.avif' },
-  { id: 'shisa', name: '师萨', image: process.env.PUBLIC_URL + '/images/duiduipeng/师萨.avif' },
+  { id: 'shisa', name: '狮萨', image: process.env.PUBLIC_URL + '/images/duiduipeng/狮萨.avif' },
   { id: 'feishu', name: '飞鼠', image: process.env.PUBLIC_URL + '/images/duiduipeng/飞鼠.avif' },
   { id: 'guben', name: '古本', image: process.env.PUBLIC_URL + '/images/duiduipeng/古本.avif' },
   { id: 'shougongkai', name: '手工铠', image: process.env.PUBLIC_URL + '/images/duiduipeng/手工铠.png' }

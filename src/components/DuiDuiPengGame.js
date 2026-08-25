@@ -8,7 +8,7 @@ const CARD_TYPES = [
   { id: 'jiyi', name: '吉伊', image: process.env.PUBLIC_URL + '/images/duiduipeng/吉伊.avif' },
   { id: 'xiaoba', name: '小八', image: process.env.PUBLIC_URL + '/images/duiduipeng/小八.avif' },
   { id: 'shifu', name: '师傅', image: process.env.PUBLIC_URL + '/images/duiduipeng/师傅.avif' },
-  { id: 'shisa', name: '师萨', image: process.env.PUBLIC_URL + '/images/duiduipeng/师萨.avif' },
+  { id: 'shisa', name: '狮萨', image: process.env.PUBLIC_URL + '/images/duiduipeng/狮萨.avif' },
   { id: 'shougongkai', name: '手工铠', image: process.env.PUBLIC_URL + '/images/duiduipeng/手工铠.png' },
   { id: 'lizi', name: '栗子', image: process.env.PUBLIC_URL + '/images/duiduipeng/栗子.avif' },
   { id: 'feishu', name: '飞鼠', image: process.env.PUBLIC_URL + '/images/duiduipeng/飞鼠.avif' }

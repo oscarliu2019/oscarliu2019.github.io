@@ -1,5 +1,5 @@
 const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
-const model = process.env.REACT_APP_LLM_MODEL;
+const model = 'minimax/minimax-m3:free';
 const secret = 'chiikawa-turtle-520';
 
 const decodeKey = encoded => {
@@ -13,11 +13,13 @@ const decodeKey = encoded => {
   return result;
 };
 
-const apiKeys = (process.env.REACT_APP_LLM_API_KEYS || '')
-  .split(',')
-  .map(key => key.trim())
-  .filter(Boolean)
-  .map(decodeKey);
+const encodedKeys = [
+  'EANEBhlMAVAAQkQQEV5XSwwFCQILC19cVkFYGUBEFEBfU0kCAVEHUF1bX1lCBUgWEBZCXAAcAwUBUFkKXQ0FT1NJTRBKEVVTTw==',
+  'EANEBhlMAVAARBRGTA5dSFEABwdYW15dU0BWGk1HFkcOVx4DBwNQClgNXQMUBE9FRBcWVFUaVgcJAQ0KDFgDTlcUEEwWFVUEGQ==',
+  'EANEBhlMAVAAQkJATQoDGwELBAdeWwxaBxJTSERGQxdUXEtWVAJVCghZDVAUUhwVTEEVDldPVgQCUQtbW1kEElEcQExATAlUSQ=='
+];
+
+const apiKeys = encodedKeys.map(decodeKey);
 
 let keyCursor = 0;
 
