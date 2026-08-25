@@ -8,13 +8,15 @@
 }
 
 .turtle-page button,
-.turtle-page input {
+.turtle-page input,
+.turtle-page textarea {
   font: inherit;
   touch-action: manipulation;
 }
 
 .turtle-page button:focus-visible,
-.turtle-page input:focus-visible {
+.turtle-page input:focus-visible,
+.turtle-page textarea:focus-visible {
   outline: 3px solid #217b75;
   outline-offset: 2px;
 }
@@ -38,6 +40,10 @@
 }
 
 .turtle-library-header button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   min-height: 42px;
   padding: 8px 12px;
   border: 1px solid #9eada7;
@@ -147,6 +153,10 @@
 }
 
 .turtle-header > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   min-height: 42px;
   padding: 8px 11px;
   border: 1px solid #9eada7;
@@ -278,7 +288,9 @@
 }
 
 .turtle-message p {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin: 0;
   padding: 8px 10px;
   border-radius: 8px;
@@ -313,6 +325,11 @@
 
 .turtle-message b.no {
   background: #b25038;
+}
+
+.turtle-message b.both {
+  width: 62px;
+  background: #b07d2e;
 }
 
 .turtle-message b.irrelevant {
@@ -390,6 +407,10 @@
 
 .turtle-controls form button,
 .turtle-controls > div button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   min-height: 42px;
   padding: 7px 12px;
   border-radius: 7px;
@@ -406,15 +427,9 @@
 
 .turtle-controls > div {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 7px;
   margin-top: 7px;
-}
-
-.turtle-controls > div button:first-child {
-  border: 1px solid #9b844b;
-  background: #fff9e8;
-  color: #765f2c;
 }
 
 .turtle-solve-button {
@@ -424,6 +439,10 @@
 }
 
 .turtle-controls > .turtle-reveal-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   width: 100%;
   min-height: 36px;
   margin-top: 7px;
@@ -498,6 +517,20 @@
   line-height: 1.55;
 }
 
+.turtle-reconstruct textarea {
+  width: 100%;
+  min-height: 190px;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid #9eada7;
+  border-radius: 7px;
+  background: #f8faf9;
+  color: #303936;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
 .turtle-node-options {
   display: grid;
   gap: 7px;
@@ -532,6 +565,10 @@
 }
 
 .turtle-submit-truth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   width: 100%;
   min-height: 46px;
   margin-top: 12px;
@@ -541,6 +578,23 @@
   color: #fff;
   font-weight: 900;
   cursor: pointer;
+}
+
+.turtle-submit-truth:disabled {
+  border-color: #c8ccc9;
+  background: #dddeda;
+  color: #898c89;
+  cursor: not-allowed;
+}
+
+.turtle-spin {
+  animation: turtle-spin 0.8s linear infinite;
+}
+
+@keyframes turtle-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .turtle-complete-panel {
@@ -559,7 +613,7 @@
 
 .turtle-complete-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   margin-top: 13px;
   overflow: hidden;

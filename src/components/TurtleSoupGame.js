@@ -1,17 +1,31 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ArrowLeft,
+  BrainCircuit,
+  Eye,
+  LoaderCircle,
+  Send,
+  Shuffle,
+  X
+} from 'lucide-react';
 import './TurtleSoupGame.css';
 import { TURTLE_SOUPS } from '../data/turtleSoups';
 import {
-  answerQuestionNode,
-  checkReconstruction,
-  getAvailableQuestionNodes,
-  matchQuestion
-} from './turtleSoupEngine';
+  askTurtleSoupQuestion,
+  evaluateTurtleSoupSolution
+} from '../services/turtleSoupApi';
 
 const VERDICT_LABELS = {
   yes: '是',
   no: '不是',
+  both: '是也不是',
   irrelevant: '无关'
+};
+
+const openingMessage = {
+  id: 'opening',
+  role: 'host',
+  text: '汤面已给出。你可以自由提问，我会根据完整真相回答“是”“不是”或“无关”。'
 };
 
 const formatTime = seconds => {
@@ -20,61 +34,31 @@ const formatTime = seconds => {
   return `${minutes}:${remaining < 10 ? '0' : ''}${remaining}`;
 };
 
-const shuffleOptions = options => {
-  const copy = [...options];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
-  }
-  return copy;
-};
-
 function TurtleSoupGame({ onGoBack }) {
   const [selectedSoupId, setSelectedSoupId] = useState(null);
   const soup = useMemo(
     () => TURTLE_SOUPS.find(item => item.id === selectedSoupId) || TURTLE_SOUPS[0],
     [selectedSoupId]
   );
-  const [messages, setMessages] = useState([
-    { id: 'opening', role: 'host', text: '汤面已给出。你可以自由提问，我只回答“是”“不是”或“无关”。' }
-  ]);
+  const [messages, setMessages] = useState([openingMessage]);
   const [question, setQuestion] = useState('');
-  const [askedIds, setAskedIds] = useState([]);
   const [revealedFactIds, setRevealedFactIds] = useState([]);
-  const [hintCount, setHintCount] = useState(0);
-  const [hintedNodeIds, setHintedNodeIds] = useState([]);
   const [showReconstruction, setShowReconstruction] = useState(false);
-  const [selectedSolutionIds, setSelectedSolutionIds] = useState([]);
+  const [solution, setSolution] = useState('');
   const [reconstructionMessage, setReconstructionMessage] = useState('');
   const [ending, setEnding] = useState(null);
   const [turns, setTurns] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const [lastNodeId, setLastNodeId] = useState(null);
-  const solutionOrder = useMemo(() => shuffleOptions([
-    ...soup.facts.map(fact => fact.id),
-    ...soup.decoyStatements.map(statement => statement.id)
-  ]), [soup]);
+  const [isLoading, setIsLoading] = useState(false);
   const startedAtRef = useRef(Date.now());
   const inputRef = useRef(null);
   const chatRef = useRef(null);
 
   const coreFacts = soup.facts.filter(fact => fact.core);
-  const allCoreRevealed = coreFacts.every(fact => revealedFactIds.includes(fact.id));
-  const progress = Math.round(
-    coreFacts.filter(fact => revealedFactIds.includes(fact.id)).length / coreFacts.length * 100
-  );
-
-  const solutionOptions = useMemo(() => {
-    const visible = [
-      ...soup.facts
-        .filter(fact => fact.core || revealedFactIds.includes(fact.id))
-        .map(fact => ({ id: fact.id, text: fact.text })),
-      ...soup.decoyStatements
-    ];
-    return visible.sort(
-      (left, right) => solutionOrder.indexOf(left.id) - solutionOrder.indexOf(right.id)
-    );
-  }, [revealedFactIds, solutionOrder, soup]);
+  const revealedCoreCount = coreFacts.filter(fact =>
+    revealedFactIds.includes(fact.id)
+  ).length;
+  const progress = Math.round(revealedCoreCount / coreFacts.length * 100);
 
   useEffect(() => {
     if (ending || !selectedSoupId) return undefined;
@@ -86,7 +70,7 @@ function TurtleSoupGame({ onGoBack }) {
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-  }, [messages]);
+  }, [messages, isLoading]);
 
   const appendMessages = (...entries) => {
     setMessages(previous => [
@@ -98,125 +82,77 @@ function TurtleSoupGame({ onGoBack }) {
     ]);
   };
 
-  const askNode = (
-    node,
-    displayQuestion = node.question,
-    includePlayerMessage = true,
-    resolvedResponse = null
-  ) => {
-    const response = resolvedResponse || answerQuestionNode(node, displayQuestion, {
-      askedIds,
-      turn: turns
-    });
-    const nextMessages = [
-      ...(includePlayerMessage ? [{ role: 'player', text: displayQuestion }] : []),
-      { role: 'host', verdict: response.verdict, text: response.reply }
-    ];
-    appendMessages(...nextMessages);
-    setAskedIds(previous => previous.includes(node.id) ? previous : [...previous, node.id]);
-    setRevealedFactIds(previous => [
-      ...new Set([...previous, ...(node.reveals || [])])
-    ]);
-    if (includePlayerMessage) setTurns(value => value + 1);
+  const mergeRevealedFacts = factIds => {
+    setRevealedFactIds(previous => [...new Set([...previous, ...factIds])]);
+  };
+
+  const submitQuestion = async event => {
+    event.preventDefault();
+    const trimmed = question.trim();
+    if (!trimmed || isLoading) return;
+
+    const playerMessage = { role: 'player', text: trimmed };
+    appendMessages(playerMessage);
     setQuestion('');
-    setLastNodeId(node.id);
+    setTurns(value => value + 1);
+    setIsLoading(true);
+
+    try {
+      const result = await askTurtleSoupQuestion(
+        soup,
+        [...messages, playerMessage],
+        trimmed,
+        revealedFactIds
+      );
+      appendMessages({
+        role: 'host',
+        verdict: result.kind === 'answer' ? result.verdict : null,
+        text: result.reply
+      });
+      mergeRevealedFacts(result.revealedFactIds);
+    } catch (error) {
+      appendMessages({ role: 'host', text: `主持人连接失败：${error.message}` });
+    }
+
+    setIsLoading(false);
     window.setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const submitQuestion = event => {
+  const submitReconstruction = async event => {
     event.preventDefault();
-    const trimmed = question.trim();
-    if (!trimmed) return;
-    const result = matchQuestion(trimmed, soup, {
-      askedIds,
-      revealedFactIds,
-      lastNodeId,
-      catalog: TURTLE_SOUPS,
-      turn: turns
-    });
-
-    if (result.type === 'answer') {
-      askNode(result.node, trimmed, true, {
-        verdict: result.verdict,
-        reply: result.reply
-      });
-      return;
-    }
-    if (result.type === 'clarify') {
-      appendMessages(
-        { role: 'player', text: trimmed },
-        { role: 'host', text: result.reply }
-      );
-      setQuestion('');
-      setTurns(value => value + 1);
-      return;
-    }
-    appendMessages(
-      { role: 'player', text: trimmed },
-      { role: 'host', verdict: result.verdict || null, text: result.reply }
-    );
-    setQuestion('');
-    setTurns(value => value + 1);
-  };
-
-  const useHint = () => {
-    if (hintCount >= 3) return;
-    const nextNode = getAvailableQuestionNodes(soup, revealedFactIds).find(node =>
-      !askedIds.includes(node.id) &&
-      !hintedNodeIds.includes(node.id) &&
-      node.reveals.some(factId => !revealedFactIds.includes(factId))
-    );
-    if (!nextNode) {
-      appendMessages({ role: 'host', text: '你已经找到了足够多的事实，可以尝试还原真相。' });
-      return;
-    }
-    appendMessages({
-      role: 'host',
-      text: `提示方向：试着问问“${nextNode.question}”`
-    });
-    setHintedNodeIds(previous => [...previous, nextNode.id]);
-    setHintCount(value => value + 1);
-  };
-
-  const toggleSolutionNode = nodeId => {
-    setSelectedSolutionIds(previous => previous.includes(nodeId)
-      ? previous.filter(id => id !== nodeId)
-      : previous.length >= soup.solutionFactIds.length
-        ? previous
-        : [...previous, nodeId]
-    );
+    if (!solution.trim() || isLoading) return;
+    setIsLoading(true);
     setReconstructionMessage('');
-  };
-
-  const submitReconstruction = () => {
-    if (selectedSolutionIds.length !== soup.solutionFactIds.length) {
-      setReconstructionMessage(`请选择 ${soup.solutionFactIds.length} 个事实节点组成真相。`);
-      return;
+    try {
+      const result = await evaluateTurtleSoupSolution(
+        soup,
+        messages,
+        solution.trim()
+      );
+      mergeRevealedFacts(result.matchedFactIds);
+      if (result.solved) {
+        setEnding('solved');
+        setShowReconstruction(false);
+      } else {
+        setReconstructionMessage(result.reply);
+      }
+    } catch (error) {
+      setReconstructionMessage(`主持人连接失败：${error.message}`);
     }
-    if (!checkReconstruction(soup, selectedSolutionIds)) {
-      setReconstructionMessage('这条因果链中混入了错误解释，再检查人物身份、时间顺序和事件因果。');
-      return;
-    }
-    setEnding('solved');
-    setShowReconstruction(false);
+    setIsLoading(false);
   };
 
   const resetSession = () => {
-    setMessages([
-      { id: 'opening', role: 'host', text: '汤面已给出。你可以自由提问，我只回答“是”“不是”或“无关”。' }
-    ]);
+    setMessages([openingMessage]);
     setQuestion('');
-    setAskedIds([]);
     setRevealedFactIds([]);
-    setHintCount(0);
-    setHintedNodeIds([]);
     setShowReconstruction(false);
-    setSelectedSolutionIds([]);
+    setSolution('');
     setReconstructionMessage('');
     setEnding(null);
     setTurns(0);
     setElapsed(0);
-    setLastNodeId(null);
+    setIsLoading(false);
     startedAtRef.current = Date.now();
   };
 
@@ -225,17 +161,16 @@ function TurtleSoupGame({ onGoBack }) {
     resetSession();
   };
 
-  const restart = () => {
-    resetSession();
-  };
-
   if (!selectedSoupId) {
     return (
       <main className="turtle-page turtle-library">
         <header className="turtle-library-header">
-          <button type="button" onClick={onGoBack}>← 返回大厅</button>
+          <button type="button" onClick={onGoBack}>
+            <ArrowLeft size={16} />
+            返回大厅
+          </button>
           <div>
-            <span>离线题库 · 共 {TURTLE_SOUPS.length} 汤</span>
+            <span>AI 主持 · 共 {TURTLE_SOUPS.length} 汤</span>
             <h1>选择一碗海龟汤</h1>
           </div>
           <button
@@ -243,6 +178,7 @@ function TurtleSoupGame({ onGoBack }) {
             className="turtle-random-button"
             onClick={() => selectSoup(TURTLE_SOUPS[Math.floor(Math.random() * TURTLE_SOUPS.length)].id)}
           >
+            <Shuffle size={16} />
             随机一题
           </button>
         </header>
@@ -273,15 +209,14 @@ function TurtleSoupGame({ onGoBack }) {
       <main className="turtle-page turtle-complete">
         <section className="turtle-complete-panel">
           <span>{solved ? '真相还原完成' : '主持人揭晓汤底'}</span>
-          <h1>{solved ? `${soup.title} · 真相还原` : '最终故事'}</h1>
+          <h1>{soup.title}</h1>
           <p>{soup.truth}</p>
           <div className="turtle-complete-stats">
             <div><b>{turns}</b><span>提问轮数</span></div>
-            <div><b>{hintCount}</b><span>使用提示</span></div>
-            <div><b>{formatTime(elapsed + hintCount * 30)}</b><span>{solved ? '结算用时' : '查看用时'}</span></div>
+            <div><b>{formatTime(elapsed)}</b><span>{solved ? '结算用时' : '查看用时'}</span></div>
           </div>
           <div className="turtle-complete-actions">
-            <button type="button" onClick={restart}>重新挑战</button>
+            <button type="button" onClick={resetSession}>重新挑战</button>
             <button type="button" onClick={() => setSelectedSoupId(null)}>选择其他汤</button>
           </div>
         </section>
@@ -292,40 +227,45 @@ function TurtleSoupGame({ onGoBack }) {
   if (showReconstruction) {
     return (
       <main className="turtle-page turtle-reconstruct-page">
-        <section className="turtle-reconstruct" aria-labelledby="turtle-reconstruct-title">
+        <form className="turtle-reconstruct" onSubmit={submitReconstruction}>
           <div className="turtle-reconstruct-header">
             <div>
               <span>最终作答</span>
-              <h1 id="turtle-reconstruct-title">
-                选择构成真相的 {soup.solutionFactIds.length} 个事实节点
-              </h1>
+              <h1>用你的话还原完整真相</h1>
             </div>
-            <button type="button" onClick={() => setShowReconstruction(false)} aria-label="返回问答">×</button>
+            <button
+              type="button"
+              onClick={() => setShowReconstruction(false)}
+              aria-label="返回问答"
+              title="返回问答"
+            >
+              <X size={20} />
+            </button>
           </div>
           <p className="turtle-reconstruct-intro">
-            选择能够共同解释汤面中所有异常细节的 {soup.solutionFactIds.length} 个核心事实。
+            说明人物身份、关键事件和因果关系，AI 主持人会判断推理是否完整。
           </p>
-          <div className="turtle-node-options">
-            {solutionOptions.map(node => {
-              const selected = selectedSolutionIds.includes(node.id);
-              return (
-                <button
-                  type="button"
-                  key={node.id}
-                  className={selected ? 'selected' : ''}
-                  aria-pressed={selected}
-                  onClick={() => toggleSolutionNode(node.id)}
-                >
-                  {node.text}
-                </button>
-              );
-            })}
-          </div>
-          {reconstructionMessage && <p className="turtle-reconstruct-message" role="status">{reconstructionMessage}</p>}
-          <button type="button" className="turtle-submit-truth" onClick={submitReconstruction}>
-            提交真相链（{selectedSolutionIds.length}/{soup.solutionFactIds.length}）
+          <textarea
+            value={solution}
+            onChange={event => setSolution(event.target.value)}
+            maxLength={800}
+            placeholder="输入你推理出的完整故事"
+            autoFocus
+          />
+          {reconstructionMessage && (
+            <p className="turtle-reconstruct-message" role="status">
+              {reconstructionMessage}
+            </p>
+          )}
+          <button
+            type="submit"
+            className="turtle-submit-truth"
+            disabled={!solution.trim() || isLoading}
+          >
+            {isLoading ? <LoaderCircle className="turtle-spin" size={18} /> : <BrainCircuit size={18} />}
+            {isLoading ? '正在判断' : '提交推理'}
           </button>
-        </section>
+        </form>
       </main>
     );
   }
@@ -333,12 +273,15 @@ function TurtleSoupGame({ onGoBack }) {
   return (
     <main className="turtle-page">
       <header className="turtle-header">
-        <button type="button" onClick={() => setSelectedSoupId(null)}>← 返回题库</button>
+        <button type="button" onClick={() => setSelectedSoupId(null)}>
+          <ArrowLeft size={16} />
+          返回题库
+        </button>
         <div>
-          <span>{soup.category} · {soup.difficulty}</span>
+          <span>{soup.category} · {soup.difficulty} · AI 主持</span>
           <h1>{soup.title}</h1>
         </div>
-        <div className="turtle-timer">{formatTime(elapsed + hintCount * 30)}</div>
+        <div className="turtle-timer">{formatTime(elapsed)}</div>
       </header>
 
       <section className="turtle-surface">
@@ -354,17 +297,25 @@ function TurtleSoupGame({ onGoBack }) {
 
       <section className="turtle-progress" aria-label={`真相探索进度 ${progress}%`}>
         <div><span style={{ width: `${progress}%` }} /></div>
-        <p>核心事实 {revealedFactIds.filter(id => soup.solutionFactIds.includes(id)).length}/{coreFacts.length}</p>
+        <p>已确认 {revealedCoreCount}/{coreFacts.length}</p>
       </section>
 
       <section ref={chatRef} className="turtle-chat" aria-label="问答记录" aria-live="polite">
         {messages.map(message => (
           <div key={message.id} className={`turtle-message ${message.role}`}>
             <span>{message.role === 'host' ? '主持人' : '你'}</span>
-            {message.verdict && <b className={message.verdict}>{VERDICT_LABELS[message.verdict]}</b>}
+            {message.verdict && (
+              <b className={message.verdict}>{VERDICT_LABELS[message.verdict]}</b>
+            )}
             {!message.verdict && <p>{message.text}</p>}
           </div>
         ))}
+        {isLoading && (
+          <div className="turtle-message host turtle-thinking">
+            <span>主持人</span>
+            <p><LoaderCircle className="turtle-spin" size={14} />正在判断</p>
+          </div>
+        )}
       </section>
 
       <section className="turtle-controls">
@@ -373,30 +324,32 @@ function TurtleSoupGame({ onGoBack }) {
             ref={inputRef}
             value={question}
             onChange={event => setQuestion(event.target.value)}
-            maxLength={80}
+            maxLength={160}
             placeholder="输入一个可以用“是/不是”回答的问题"
             aria-label="向主持人提问"
+            disabled={isLoading}
           />
-          <button type="submit" disabled={!question.trim()}>提问</button>
+          <button type="submit" disabled={!question.trim() || isLoading}>
+            <Send size={16} />
+            提问
+          </button>
         </form>
         <div>
-          <button type="button" onClick={useHint} disabled={hintCount >= 3}>
-            提示 {3 - hintCount}/3
-          </button>
           <button
             type="button"
             className="turtle-solve-button"
             onClick={() => setShowReconstruction(true)}
-            disabled={!allCoreRevealed}
+            disabled={isLoading}
           >
+            <BrainCircuit size={16} />
             还原真相
           </button>
         </div>
         <button type="button" className="turtle-reveal-button" onClick={() => setEnding('revealed')}>
+          <Eye size={15} />
           直接查看最终故事
         </button>
       </section>
-
     </main>
   );
 }
