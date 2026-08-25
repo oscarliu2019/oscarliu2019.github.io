@@ -1,16 +1,12 @@
 import classifierModel from '../data/turtleSoupModel.json';
 import {
-  hashQuestionFeature,
   normalizeQuestion,
   vectorizeQuestion
 } from './turtleSoupFeatures';
 
 const DIMENSION = classifierModel.dimension;
 const VOCABULARY = new Set(classifierModel.vocabulary);
-const YES_PREFIXES = ['是。', '对。', '没错。'];
-const NO_PREFIXES = ['不是。', '不对。', '没有。'];
 const normalize = normalizeQuestion;
-const hash = hashQuestionFeature;
 const vectorize = input =>
   vectorizeQuestion(
     input,
@@ -190,22 +186,6 @@ const isNegated = question => /不是|并非|没有|没在|不会|不能|不可�
     .replace(/有没有|是不是|是否有|是否是/g, '')
 );
 
-const stripPrefix = text => String(text || '')
-  .replace(/^(是|对|没错|不是|不对|没有|无关|并非如此)[。！!，,\s]*/, '');
-
-const answerPrefix = (verdict, question) => {
-  if (isNegated(question)) return verdict === 'yes' ? '是。' : '不是。';
-  const normalized = normalize(question);
-  if (verdict === 'yes') {
-    if (/有|存在|发生/.test(normalized)) return '有。';
-    if (/是|属于|来自|在/.test(normalized)) return '是。';
-    return YES_PREFIXES[hash(question) % YES_PREFIXES.length];
-  }
-  if (/有|存在|发生/.test(normalized)) return '没有。';
-  if (/是|属于|来自|在/.test(normalized)) return '不是。';
-  return NO_PREFIXES[hash(question) % NO_PREFIXES.length];
-};
-
 const nextQuestion = (soup, revealedFactIds, askedIds) =>
   getAvailableQuestionNodes(soup, revealedFactIds).find(
     node => !askedIds.includes(node.id)
@@ -255,10 +235,9 @@ export const answerQuestionNode = (node, question, options = {}) => {
     ? invertVerdict(baseVerdict)
     : baseVerdict;
   const repeated = (options.askedIds || []).includes(node.id);
-  const reply = stripPrefix(options.reply || node.reply);
   return {
     verdict,
-    reply: `${repeated ? '这个问题刚才已经确认过了。' : ''}${answerPrefix(verdict, question)}${reply}`,
+    reply: verdict === 'yes' ? '是' : verdict === 'no' ? '不是' : '无关',
     repeated
   };
 };
@@ -336,7 +315,7 @@ export const matchQuestion = (question, soup, options = {}) => {
       return {
         type: 'irrelevant',
         verdict: 'irrelevant',
-        reply: '这件事无法从当前故事中确认。可以换个方向调查汤面中的人物、地点或异常行为。'
+        reply: '无关'
       };
     }
     const node = getNodeById(soup, prediction.nodeId);
@@ -367,7 +346,7 @@ export const matchQuestion = (question, soup, options = {}) => {
   return {
     type: 'irrelevant',
     verdict: 'irrelevant',
-    reply: '这件事无法从当前故事中确认。可以换个方向调查汤面中的人物、地点或异常行为。'
+    reply: '无关'
   };
 };
 

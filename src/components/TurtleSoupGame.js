@@ -59,7 +59,6 @@ function TurtleSoupGame({ onGoBack }) {
   const chatRef = useRef(null);
 
   const coreFacts = soup.facts.filter(fact => fact.core);
-  const revealedFacts = soup.facts.filter(fact => revealedFactIds.includes(fact.id));
   const allCoreRevealed = coreFacts.every(fact => revealedFactIds.includes(fact.id));
   const progress = Math.round(
     coreFacts.filter(fact => revealedFactIds.includes(fact.id)).length / coreFacts.length * 100
@@ -363,22 +362,10 @@ function TurtleSoupGame({ onGoBack }) {
           <div key={message.id} className={`turtle-message ${message.role}`}>
             <span>{message.role === 'host' ? '主持人' : '你'}</span>
             {message.verdict && <b className={message.verdict}>{VERDICT_LABELS[message.verdict]}</b>}
-            <p>{message.text}</p>
+            {!message.verdict && <p>{message.text}</p>}
           </div>
         ))}
       </section>
-
-      {revealedFacts.length > 0 && (
-        <section className="turtle-facts">
-          <h2>已确认事实</h2>
-          {revealedFacts.map(fact => (
-            <div key={fact.id}>
-              <span>事实</span>
-              <p>{fact.text}</p>
-            </div>
-          ))}
-        </section>
-      )}
 
       <section className="turtle-controls">
         <form onSubmit={submitQuestion}>
