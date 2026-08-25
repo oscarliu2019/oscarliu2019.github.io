@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import './App.css';
 import LockScreen from './components/LockScreen';
 import GameLobby from './components/GameLobby';
@@ -12,9 +12,10 @@ import TwentyFourGame from './components/TwentyFourGame'; // 导入TwentyFourGam
 import MessageToPig from './components/MessageToPig'; // 导入MessageToPig组件
 import RockGrassBadgeGame from './components/RockGrassBadgeGame';
 import DetectiveGame from './components/DetectiveGame';
-import TurtleSoupGame from './components/TurtleSoupGame';
 import { getRandomImage } from './config/images'; // 导入获取随机图片的函数
 // import Modal from './components/Modal'; // 稍后会创建和使用
+
+const TurtleSoupGame = lazy(() => import('./components/TurtleSoupGame'));
 
 // 音乐列表
 const MUSIC_LIST = [
@@ -134,7 +135,11 @@ const App = () => {
       case 'detectiveGame':
         return <DetectiveGame onGoBack={handleQuizGoBack} />;
       case 'turtleSoupGame':
-        return <TurtleSoupGame onGoBack={handleQuizGoBack} />;
+        return (
+          <Suspense fallback={null}>
+            <TurtleSoupGame onGoBack={handleQuizGoBack} />
+          </Suspense>
+        );
       default:
         return <LockScreen onUnlock={handleUnlock} />;
     }
