@@ -30,10 +30,34 @@ const CASES = [
   { title: '限定果酱失踪案', item: '限量草莓果酱', emoji: '🍓' }
 ];
 
-const SUSPECT_COUNT = 5;
-const OBJECTIVE_CLUE_COUNT = 3;
 const MAX_GENERATION_ATTEMPTS = 4000;
-const MIN_PROOF_DEPTH = 4;
+
+export const DIFFICULTIES = {
+  easy: {
+    suspectCount: 4,
+    objectiveClueCount: 2,
+    minProofDepth: 2,
+    maxProofDepth: 3,
+    simpleStatementRate: 0.7,
+    simpleObjectiveRate: 0.82,
+    minCompoundCount: 0,
+    maxCompoundCount: 2,
+    minKindCount: 1,
+    maxHardOperatorCount: 1
+  },
+  hard: {
+    suspectCount: 5,
+    objectiveClueCount: 3,
+    minProofDepth: 4,
+    maxProofDepth: 5,
+    simpleStatementRate: 0.34,
+    simpleObjectiveRate: 0.55,
+    minCompoundCount: 2,
+    maxCompoundCount: 5,
+    minKindCount: 3,
+    maxHardOperatorCount: 5
+  }
+};
 
 const shuffle = array => {
   const copy = [...array];
@@ -150,9 +174,11 @@ const expressionSignature = expression => {
   return `${expression.kind}(${expressionSignature(expression.left)},${expressionSignature(expression.right)})`;
 };
 
-const createRandomExpression = (suspectIds, roomNames) => {
+const createRandomExpression = (suspectIds, roomNames, difficulty) => {
   const roll = Math.random();
-  if (roll < 0.34) return createSimpleExpression(suspectIds, roomNames);
+  if (roll < difficulty.simpleStatementRate) {
+    return createSimpleExpression(suspectIds, roomNames);
+  }
 
   const left = createSimpleExpression(suspectIds, roomNames);
   let right = createSimpleExpression(suspectIds, roomNames);
@@ -160,25 +186,36 @@ const createRandomExpression = (suspectIds, roomNames) => {
     right = createLocationAtom(suspectIds, roomNames);
   }
 
-  const kind = roll < 0.53
-    ? 'or'
-    : roll < 0.72
-      ? 'xor'
-      : roll < 0.88
-        ? 'implies'
-        : 'and';
+  const compoundRoll = Math.random();
+  const kind = difficulty === DIFFICULTIES.easy
+    ? compoundRoll < 0.45
+      ? 'or'
+      : compoundRoll < 0.8
+        ? 'and'
+        : compoundRoll < 0.9
+          ? 'xor'
+          : 'implies'
+    : compoundRoll < 0.29
+      ? 'or'
+      : compoundRoll < 0.58
+        ? 'xor'
+        : compoundRoll < 0.82
+          ? 'implies'
+          : 'and';
   return { kind, left, right };
 };
 
-const createObjectiveExpression = (suspectIds, roomNames) => {
-  if (Math.random() < 0.55) return createLocationAtom(suspectIds, roomNames);
+const createObjectiveExpression = (suspectIds, roomNames, difficulty) => {
+  if (Math.random() < difficulty.simpleObjectiveRate) {
+    return createLocationAtom(suspectIds, roomNames);
+  }
   const left = createLocationAtom(suspectIds, roomNames);
   let right = createLocationAtom(suspectIds, roomNames);
   if (expressionSignature(left) === expressionSignature(right)) {
     right = createLocationAtom(suspectIds, roomNames);
   }
   return {
-    kind: Math.random() < 0.55 ? 'or' : 'xor',
+    kind: difficulty === DIFFICULTIES.easy || Math.random() < 0.55 ? 'or' : 'xor',
     left,
     right
   };
@@ -270,10 +307,11 @@ const buildExpressionForTruth = ({
   suspectIds,
   roomNames,
   worlds,
-  usedSignatures
+  usedSignatures,
+  difficulty
 }) => {
   for (let attempt = 0; attempt < 600; attempt += 1) {
-    const expression = createRandomExpression(suspectIds, roomNames);
+    const expression = createRandomExpression(suspectIds, roomNames, difficulty);
     const signature = expressionSignature(expression);
     if (usedSignatures.has(signature) || !isInformative(expression, worlds)) continue;
     if (evaluateExpression(expression, actualLocations, culpritId) !== desiredTruth) continue;
@@ -283,10 +321,11 @@ const buildExpressionForTruth = ({
   return null;
 };
 
-export const generateCase = () => {
+export const generateCase = (difficultyId = 'easy') => {
+  const difficulty = DIFFICULTIES[difficultyId];
   for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt += 1) {
-    const suspects = shuffle(CHARACTERS).slice(0, SUSPECT_COUNT);
-    const chosenRooms = shuffle(ROOMS).slice(0, SUSPECT_COUNT);
+    const suspects = shuffle(CHARACTERS).slice(0, difficulty.suspectCount);
+    const chosenRooms = shuffle(ROOMS).slice(0, difficulty.suspectCount);
     const suspectIds = suspects.map(suspect => suspect.id);
     const roomNames = chosenRooms.map(room => room.name);
     const names = Object.fromEntries(suspects.map(suspect => [suspect.id, suspect.name]));
@@ -312,7 +351,8 @@ export const generateCase = () => {
         suspectIds,
         roomNames,
         worlds,
-        usedSignatures
+        usedSignatures,
+        difficulty
       });
       if (!expression) break;
       statements.push({
@@ -321,13 +361,13 @@ export const generateCase = () => {
         kind: expression.kind
       });
     }
-    if (statements.length !== SUSPECT_COUNT) continue;
+    if (statements.length !== difficulty.suspectCount) continue;
 
     const objectiveClues = [];
-    for (let index = 0; index < OBJECTIVE_CLUE_COUNT; index += 1) {
+    for (let index = 0; index < difficulty.objectiveClueCount; index += 1) {
       let expression = null;
       for (let clueAttempt = 0; clueAttempt < 600; clueAttempt += 1) {
-        const candidate = createObjectiveExpression(suspectIds, roomNames);
+        const candidate = createObjectiveExpression(suspectIds, roomNames, difficulty);
         const signature = expressionSignature(candidate);
         if (usedSignatures.has(signature) || !isInformative(candidate, worlds)) continue;
         if (!evaluateExpression(candidate, actualLocations, culprit.id)) continue;
@@ -342,17 +382,26 @@ export const generateCase = () => {
         text: describeExpression(expression, null, names, roomLabels)
       });
     }
-    if (objectiveClues.length !== OBJECTIVE_CLUE_COUNT) continue;
+    if (objectiveClues.length !== difficulty.objectiveClueCount) continue;
 
     const compoundCount = statements.filter(statement =>
       ['or', 'xor', 'implies', 'and'].includes(statement.kind)
     ).length;
+    const hardOperatorCount = statements.filter(statement =>
+      ['xor', 'implies'].includes(statement.kind)
+    ).length;
     const kindCount = new Set(statements.map(statement => statement.kind)).size;
-    if (compoundCount < 2 || kindCount < 3) continue;
+    if (
+      compoundCount < difficulty.minCompoundCount ||
+      compoundCount > difficulty.maxCompoundCount ||
+      kindCount < difficulty.minKindCount ||
+      hardOperatorCount > difficulty.maxHardOperatorCount
+    ) continue;
 
     const caseInfo = randomItem(CASES);
     const caseData = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      difficultyId,
       caseInfo,
       sceneRoom,
       sceneLabel: roomLabels[sceneRoom],
@@ -379,7 +428,10 @@ export const generateCase = () => {
     ) continue;
 
     const proof = findProofSets(caseData);
-    if (proof.depth < MIN_PROOF_DEPTH || proof.depth > SUSPECT_COUNT) continue;
+    if (
+      proof.depth < difficulty.minProofDepth ||
+      proof.depth > difficulty.maxProofDepth
+    ) continue;
 
     caseData.proofDepth = proof.depth;
     caseData.proofSets = proof.sets;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './DetectiveGame.css';
 import {
   generateCase,
@@ -40,11 +40,59 @@ const writeStoredNumber = (key, value) => {
 
 const statementNumber = statementId => Number(statementId.split('-')[1]);
 
+const deriveRoomStatuses = (suspects, rooms, roomMarks) => {
+  const assignments = [];
+  const assignRooms = (suspectIndex, usedRooms, locations) => {
+    if (suspectIndex === suspects.length) {
+      assignments.push({ ...locations });
+      return;
+    }
+
+    const suspect = suspects[suspectIndex];
+    for (const room of rooms) {
+      const key = `${suspect.id}:${room}`;
+      if (usedRooms.has(room) || roomMarks[key]) continue;
+      usedRooms.add(room);
+      locations[suspect.id] = room;
+      assignRooms(suspectIndex + 1, usedRooms, locations);
+      usedRooms.delete(room);
+    }
+  };
+
+  assignRooms(0, new Set(), {});
+
+  const statuses = {};
+  suspects.forEach(suspect => {
+    rooms.forEach(room => {
+      const key = `${suspect.id}:${room}`;
+      if (roomMarks[key]) {
+        statuses[key] = 'manual-eliminated';
+        return;
+      }
+      const matchingAssignments = assignments.filter(
+        locations => locations[suspect.id] === room
+      ).length;
+      if (matchingAssignments === 0 && assignments.length > 0) {
+        statuses[key] = 'inferred-eliminated';
+      } else if (matchingAssignments === assignments.length && assignments.length > 0) {
+        statuses[key] = 'confirmed';
+      } else {
+        statuses[key] = 'possible';
+      }
+    });
+  });
+
+  return statuses;
+};
+
 function DetectiveGame({ onGoBack }) {
-  const [caseData, setCaseData] = useState(() => generateCase());
+  const [difficultyId, setDifficultyId] = useState('easy');
+  const [caseData, setCaseData] = useState(() => generateCase('easy'));
   const [selectedSuspectId, setSelectedSuspectId] = useState(null);
   const [notes, setNotes] = useState({});
   const [roomMarks, setRoomMarks] = useState({});
+  const [ruledOutIds, setRuledOutIds] = useState([]);
+  const [mistakeCount, setMistakeCount] = useState(0);
   const [hintCount, setHintCount] = useState(0);
   const [hintMessage, setHintMessage] = useState('');
   const [result, setResult] = useState(null);
@@ -57,8 +105,8 @@ function DetectiveGame({ onGoBack }) {
   const nextCaseButtonRef = useRef(null);
 
   useEffect(() => {
-    setBestStreak(readStoredNumber('detectiveBestStreak', 0));
-    setBestTime(readStoredNumber('detectiveBestTime', null));
+    setBestStreak(readStoredNumber('detectiveBestStreak_easy', 0));
+    setBestTime(readStoredNumber('detectiveBestTime_easy', null));
   }, []);
 
   useEffect(() => {
@@ -73,19 +121,33 @@ function DetectiveGame({ onGoBack }) {
     if (result) nextCaseButtonRef.current?.focus();
   }, [result]);
 
-  const effectiveTime = elapsed + hintCount * 30;
+  const effectiveTime = elapsed + (difficultyId === 'hard' ? hintCount * 30 : 0);
+  const roomStatuses = useMemo(
+    () => caseData ? deriveRoomStatuses(caseData.suspects, caseData.roomNames, roomMarks) : {},
+    [caseData, roomMarks]
+  );
 
-  const startNewCase = useCallback(() => {
-    setCaseData(generateCase());
+  const loadCase = nextDifficultyId => {
+    if (nextDifficultyId !== difficultyId) {
+      setStreak(0);
+      setBestStreak(readStoredNumber(`detectiveBestStreak_${nextDifficultyId}`, 0));
+      setBestTime(readStoredNumber(`detectiveBestTime_${nextDifficultyId}`, null));
+    }
+    setDifficultyId(nextDifficultyId);
+    setCaseData(generateCase(nextDifficultyId));
     setSelectedSuspectId(null);
     setNotes({});
     setRoomMarks({});
+    setRuledOutIds([]);
+    setMistakeCount(0);
     setHintCount(0);
     setHintMessage('');
     setResult(null);
     setElapsed(0);
     startedAtRef.current = Date.now();
-  }, []);
+  };
+
+  const startNewCase = () => loadCase(difficultyId);
 
   const cycleNote = suspectId => {
     setNotes(previous => {
@@ -102,6 +164,46 @@ function DetectiveGame({ onGoBack }) {
 
   const useHint = () => {
     if (hintCount >= 2 || result) return;
+    if (difficultyId === 'easy') {
+      if (hintCount === 0) {
+        const elimination = caseData.eliminations.find(
+          item => !ruledOutIds.includes(item.suspectId)
+        );
+        if (elimination) {
+          const suspect = caseData.suspects.find(entry => entry.id === elimination.suspectId);
+          setRuledOutIds(ids => [...ids, suspect.id]);
+          setHintMessage(
+            `可以排除 ${suspect.name}：假设 TA 是犯人，证词 ${elimination.statementIds
+              .map(id => `#${statementNumber(id)}`)
+              .join('、')} 会与现场物证及地点规则产生矛盾。`
+          );
+        } else {
+          const culprit = caseData.suspects.find(suspect => suspect.id === caseData.culpritId);
+          setHintMessage(`结合已经排除的人选，答案只剩下 ${culprit.name}。`);
+        }
+      } else {
+        const partner = caseData.suspects.find(
+          suspect => suspect.id !== caseData.culpritId && !ruledOutIds.includes(suspect.id)
+        );
+        const pairIds = partner
+          ? [caseData.culpritId, partner.id]
+          : [caseData.culpritId];
+        setRuledOutIds(
+          caseData.suspects
+            .filter(suspect => !pairIds.includes(suspect.id))
+            .map(suspect => suspect.id)
+        );
+        const pair = caseData.suspects.filter(suspect => pairIds.includes(suspect.id));
+        setHintMessage(
+          pair.length === 2
+            ? `答案已经缩小到 ${pair[0].name} 和 ${pair[1].name} 之间。`
+            : `结合已经排除的人选，答案只剩下 ${pair[0].name}。`
+        );
+      }
+      setSelectedSuspectId(null);
+      setHintCount(count => count + 1);
+      return;
+    }
     if (hintCount === 0) {
       const proof = caseData.proofSets[0];
       setHintMessage(`关键提示：证词 #${statementNumber(proof[0])} 属于完整推理链。`);
@@ -114,19 +216,33 @@ function DetectiveGame({ onGoBack }) {
 
   const accuse = () => {
     if (!selectedSuspectId || result) return;
-    const usedTime = Math.floor((Date.now() - startedAtRef.current) / 1000) + hintCount * 30;
+    const usedTime = Math.floor((Date.now() - startedAtRef.current) / 1000) +
+      (difficultyId === 'hard' ? hintCount * 30 : 0);
     const correct = selectedSuspectId === caseData.culpritId;
 
+    if (!correct && difficultyId === 'easy') {
+      const accusedSuspect = caseData.suspects.find(
+        suspect => suspect.id === selectedSuspectId
+      );
+      setRuledOutIds(ids => [...new Set([...ids, selectedSuspectId])]);
+      setNotes(previous => ({ ...previous, [selectedSuspectId]: 'trusted' }));
+      setStreak(0);
+      setMistakeCount(count => count + 1);
+      setSelectedSuspectId(null);
+      setHintMessage(`${accusedSuspect.name} 可以排除，继续调查其他嫌疑人。`);
+      return;
+    }
+
     if (correct) {
-      const nextStreak = streak + 1;
+      const nextStreak = mistakeCount === 0 ? streak + 1 : 0;
       setStreak(nextStreak);
-      if (nextStreak > bestStreak) {
+      if (mistakeCount === 0 && nextStreak > bestStreak) {
         setBestStreak(nextStreak);
-        writeStoredNumber('detectiveBestStreak', nextStreak);
+        writeStoredNumber(`detectiveBestStreak_${difficultyId}`, nextStreak);
       }
-      if (bestTime === null || usedTime < bestTime) {
+      if (mistakeCount === 0 && (bestTime === null || usedTime < bestTime)) {
         setBestTime(usedTime);
-        writeStoredNumber('detectiveBestTime', usedTime);
+        writeStoredNumber(`detectiveBestTime_${difficultyId}`, usedTime);
       }
     } else {
       setStreak(0);
@@ -250,7 +366,8 @@ function DetectiveGame({ onGoBack }) {
                       })}
                     </ul>
                     <p>
-                      将这些具体证词与三条现场物证、五人地点互不重复的规则一起代入，
+                      将这些具体证词与{caseData.objectiveClues.length}条现场物证、
+                      {caseData.suspects.length}人地点互不重复的规则一起代入，
                       不存在任何合法地点安排。因此 {suspect.name} 不可能是真凶。
                     </p>
                   </details>
@@ -258,7 +375,8 @@ function DetectiveGame({ onGoBack }) {
               })}
             </div>
             <p className="detective-conclusion">
-              其余四种假设全部产生矛盾；只有假设 <b>{culprit.name}</b> 是真凶时，
+              其余{caseData.suspects.length - 1}种假设全部产生矛盾；只有假设
+              <b>{culprit.name}</b> 是真凶时，
               所有物证、地点和证词真假能够同时成立，所以答案唯一。
             </p>
           </section>
@@ -290,21 +408,46 @@ function DetectiveGame({ onGoBack }) {
           </div>
         </div>
         <div className="detective-title">
-          <span>调查档案 · 推理深度 {caseData.proofDepth}/5</span>
+          <span>
+            调查档案 · 推理深度 {caseData.proofDepth}/{difficultyId === 'easy' ? 3 : 5}
+          </span>
           <h1>{caseData.caseInfo.emoji} {caseData.caseInfo.title}</h1>
+        </div>
+        <div className="detective-difficulty" aria-label="游戏难度">
+          <button
+            type="button"
+            className={difficultyId === 'easy' ? 'active' : ''}
+            disabled={difficultyId === 'easy'}
+            onClick={() => loadCase('easy')}
+          >
+            轻松模式
+          </button>
+          <button
+            type="button"
+            className={difficultyId === 'hard' ? 'active' : ''}
+            disabled={difficultyId === 'hard'}
+            onClick={() => loadCase('hard')}
+          >
+            困难模式
+          </button>
         </div>
       </header>
 
       <div className="detective-records">
         <span>最长连胜 <b>{bestStreak}</b></span>
         <span>最快破案 <b>{bestTime === null ? '--' : formatTime(bestTime)}</b></span>
-        <span>提示惩罚 <b>+{hintCount * 30}s</b></span>
+        <span>
+          {difficultyId === 'easy'
+            ? <><b>不计罚时</b> 提示</>
+            : <>提示惩罚 <b>+{hintCount * 30}s</b></>}
+        </span>
       </div>
 
       <section className="detective-brief">
         <p>
           {caseData.caseInfo.emoji}{caseData.caseInfo.item}在
-          <b>{caseData.sceneLabel}</b>失窃。五名嫌疑人分别待在五个不同地点，
+          <b>{caseData.sceneLabel}</b>失窃。{caseData.suspects.length}名嫌疑人分别待在
+          {caseData.roomNames.length}个不同地点，
           <b>只有真凶的证词是假的</b>。
         </p>
         <div className="detective-room-list" aria-label="本案地点">
@@ -329,8 +472,12 @@ function DetectiveGame({ onGoBack }) {
         {caseData.suspects.map(suspect => {
           const selected = selectedSuspectId === suspect.id;
           const note = notes[suspect.id] || 'neutral';
+          const ruledOut = ruledOutIds.includes(suspect.id);
           return (
-            <article key={suspect.id} className={`detective-card ${selected ? 'selected' : ''}`}>
+            <article
+              key={suspect.id}
+              className={`detective-card ${selected ? 'selected' : ''} ${ruledOut ? 'ruled-out' : ''}`}
+            >
               <div className="detective-card-top">
                 <img src={suspect.image} alt="" />
                 <div>
@@ -354,9 +501,10 @@ function DetectiveGame({ onGoBack }) {
                   type="button"
                   className={`btn-suspect ${selected ? 'active' : ''}`}
                   aria-pressed={selected}
+                  disabled={ruledOut}
                   onClick={() => setSelectedSuspectId(selected ? null : suspect.id)}
                 >
-                  {selected ? '当前指认对象' : '列为嫌疑人'}
+                  {ruledOut ? '已排除' : selected ? '当前指认对象' : '列为嫌疑人'}
                 </button>
               </div>
             </article>
@@ -366,9 +514,12 @@ function DetectiveGame({ onGoBack }) {
 
       <details className="detective-notebook">
         <summary>打开推理手册：标记不可能的地点</summary>
-        <p>点格子标记“此人不在这里”。手册只做记录，不会自动泄露答案。</p>
+        <p>点格子标记“此人不在这里”，手册会自动补全由这些标记确定的地点。</p>
         <div className="detective-grid-scroll">
-          <div className="detective-logic-grid">
+          <div
+            className="detective-logic-grid"
+            style={{ '--detective-room-count': caseData.roomNames.length }}
+          >
             <div className="grid-corner">嫌疑人</div>
             {caseData.roomNames.map(room => (
               <div className="grid-room" key={room}>{caseData.roomLabels[room]}</div>
@@ -378,17 +529,21 @@ function DetectiveGame({ onGoBack }) {
                 <div className="grid-person">{suspect.name}</div>
                 {caseData.roomNames.map(room => {
                   const key = `${suspect.id}:${room}`;
-                  const eliminated = Boolean(roomMarks[key]);
+                  const status = roomStatuses[key];
+                  const eliminated = status.includes('eliminated');
                   return (
                     <button
                       type="button"
                       key={key}
-                      className={eliminated ? 'eliminated' : ''}
+                      className={eliminated ? 'eliminated' : status}
+                      disabled={status === 'confirmed' || status === 'inferred-eliminated'}
                       aria-pressed={eliminated}
-                      aria-label={`${suspect.name}${eliminated ? '不在' : '可能在'}${room}`}
+                      aria-label={`${suspect.name}${
+                        status === 'confirmed' ? '确定在' : eliminated ? '不在' : '可能在'
+                      }${room}`}
                       onClick={() => toggleRoomMark(suspect.id, room)}
                     >
-                      {eliminated ? '×' : '·'}
+                      {status === 'confirmed' ? '✓' : eliminated ? '×' : '·'}
                     </button>
                   );
                 })}
@@ -400,14 +555,15 @@ function DetectiveGame({ onGoBack }) {
 
       <section className="detective-hints">
         <button type="button" onClick={useHint} disabled={hintCount >= 2}>
-          使用提示（剩余 {2 - hintCount} 次，每次 +30 秒）
+          使用提示（剩余 {2 - hintCount} 次
+          {difficultyId === 'hard' ? '，每次 +30 秒' : '，不计罚时'}）
         </button>
         {hintMessage && <p role="status">{hintMessage}</p>}
       </section>
 
       <section className="detective-actionbar" aria-label="正式指认">
         <div>
-          <span>本案只有一次指认机会</span>
+          <span>{difficultyId === 'easy' ? '指认错误可继续调查' : '本案只有一次指认机会'}</span>
           <span>
             指认对象 <b>{selectedSuspectId
               ? caseData.suspects.find(suspect => suspect.id === selectedSuspectId)?.name
